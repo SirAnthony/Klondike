@@ -2,12 +2,12 @@
 import * as passport from 'koa-passport';
 import {BaseRouter, CheckParam, CheckAuthenticated} from './base'
 import {RenderContext} from '../middlewares'
-import {UserController, AuthToken} from '../entity'
+import {UserController} from '../entity'
 import {Oauth} from '../auth';
 import * as phonenumber from 'libphonenumber-js'
 import * as util from '../util/util'
 import * as crypto from 'crypto'
-import * as Mail from '../mail'
+import * as Mail from '../util/mail'
 import * as CError from '../../client/src/common/errors';
 
 export class AuthRouter extends BaseRouter {
@@ -60,7 +60,7 @@ export class AuthRouter extends BaseRouter {
         this.check_param(ctx, params.password.length>=6, 'password',
             'field_error_tooshort')
         this.check_param(ctx, [params.alias, params.first_name,
-            params.second_name, params.last_name].filter(Boolean).length>1,
+            params.last_name].filter(Boolean).length>1,
             'alias', 'field_error_need2')
         this.check_param(ctx, phonenumber.isValidPhoneNumber(params.phone, 'RU'),
             'phone', 'field_error_notvalid')
@@ -119,7 +119,7 @@ export class AuthRouter extends BaseRouter {
 
     @CheckParam({email: 'email'})
     async post_forgot(ctx: RenderContext){
-        const email = util.clear_email(ctx.request.body.email)
+        const email = util.clear_email((ctx.request.body as any).email)
         this.check_param(ctx, email, 'email', 'Misssing email to reset')
         const token = (await crypto.randomBytes(16)).toString('hex')
         const user = await UserController.find({email})

@@ -2,7 +2,7 @@
 import * as nunjucks from 'nunjucks'
 import * as passport from 'koa-passport'
 import * as session from 'koa-session'
-import * as koaBody from 'koa-body'
+import * as koaBody from 'koa-bodyparser'
 import * as parameter from 'koa-parameter'
 import * as KoaRouter from 'koa-router'
 import * as logger from 'koa-logger'

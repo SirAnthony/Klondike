@@ -1,7 +1,7 @@
 import * as passport from 'koa-passport'
 import {Strategy as LocalStrategy} from 'passport-local'
 import {Strategy as VKStrategy} from 'passport-vkontakte'
-import {Strategy as GoogleStrategy} from 'passport-google-oauth20'
+// import {Strategy as GoogleStrategy} from 'passport-google-oauth20'
 // import {Strategy as FacebookStrategy} from 'passport-facebook'
 import {UserController, VKProfile, AuthToken} from './entity/users';
 import {ApiError, Codes} from '../client/src/common/errors'
@@ -25,11 +25,11 @@ class Account {
             usernameField: 'email',
             passwordField: 'password'
         }, this.localStrategy))
-        passport.use(new GoogleStrategy({
+        /* passport.use(new GoogleStrategy({
              clientID: secrets.google.appid,
              clientSecret: secrets.google.secret,
              callbackURL: '/auth/oauth/google/callback'
-        }, this.googleStrategy))
+        }, this.googleStrategy)) */
         passport.use(new VKStrategy({
             clientID: secrets.vk.appid,
             clientSecret: secrets.vk.secret,

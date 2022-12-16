@@ -42,11 +42,9 @@ export class UserController extends UserDB {
 
     private constructor(data, fields=[]){
         super()
-        util.obj_copyto(data, this, `_id first_name second_name last_name
-            alias email age phone admin credit debt type tokens `+
-            fields.join(' '))
-        this.age = this.age|0
-        this.type = this.type||UserType.Base
+        util.obj_copyto(data, this, `_id first_name last_name alias
+            email phone credit type tokens `+fields.join(' '))
+        this.type = this.type||UserType.None
         return this
     }
     get identifier(): Identifier { return {_id: this._id} }
@@ -103,7 +101,6 @@ export class UserController extends UserDB {
             last_name: obj.name.familyName,
             alias: obj.username
         })
-        u.gender = obj.gender
         u.vkontakte = obj.id
         return u
     } 
