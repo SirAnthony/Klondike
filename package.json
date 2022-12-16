@@ -1,0 +1,69 @@
+{
+  "name": "klondike",
+  "version": "0.0.1",
+  "description": "klondike",
+  "main": "index.js",
+  "scripts": {
+    "fixtures": "ts-node ./fixtures.ts",
+    "test": "./node_modules/.bin/mocha -r ts-node/register ./test.ts",
+    "watch-server": "nodemon --watch 'src/**/*' --watch 'client/build/**/*' --watch 'client/src/common/**/*' --watch 'templates/**/*' -e ts,tsx,js,html --exec 'ts-node' ./src/server.ts",
+    "watch-server-inspect": "nodemon --watch 'src/**/*' --watch 'client/build/**/*' --watch 'client/src/common/**/*' --watch 'templates/**/*' -e ts,tsx,js,html --exec node --inspect -r ts-node/register ./src/server.ts",
+    "watch-inspect": "concurrently 'cd client && npm run watch-build' 'npm run watch-server-inspect'",
+    "inspect": "node --inspect -r ts-node/register ./src/server.ts",
+    "build-ts": "tsc",
+    "build-client": "(cd client && npm run build)",
+    "build": "npm run build-client && npm run build-server",
+    "start-client": "cd client && npm start",
+    "start-server": "node dist/server.js",
+    "start": "npm run build && concurrently \"npm run start-server\" \"npm run start-client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirAnthony/Klondike.git"
+  },
+  "author": "SirAnthony",
+  "license": "LARPIT",
+  "bugs": {
+    "url": "https://github.com/SirAnthony/Klondike/issues"
+  },
+  "homepage": "https://github.com/SirAnthony/Klondike#readme",
+  "dependencies": {
+    "axios": "^1.2.1",
+    "cookie": "^0.5.0",
+    "intl": "^1.2.5",
+    "koa": "^2.14.1",
+    "koa-body": "^6.0.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-logger": "^3.2.1",
+    "koa-parameter": "^3.0.1",
+    "koa-passport": "^5.0.0",
+    "koa-router": "^12.0.0",
+    "koa-session": "^6.2.0",
+    "koa-static": "^5.0.0",
+    "koa-static-server": "^1.5.2",
+    "lodash.merge": "^4.6.2",
+    "mongodb": "^4.12.1",
+    "nunjucks": "^3.2.3",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "passport-vkontakte": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.5",
+    "@types/koa-bodyparser": "^4.3.10",
+    "@types/koa-logger": "^3.1.2",
+    "@types/koa-passport": "^4.0.3",
+    "@types/koa-router": "^7.4.4",
+    "@types/koa-session": "^5.10.6",
+    "@types/koa-static": "^4.0.2",
+    "@types/lodash.merge": "^4.6.7",
+    "@types/node": "^18.11.15",
+    "@types/nunjucks": "^3.2.1",
+    "@types/passport": "^1.0.11",
+    "@types/passport-local": "^1.0.34",
+    "concurrently": "^7.6.0",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  }
+}

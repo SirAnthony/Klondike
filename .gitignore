@@ -1,0 +1,9 @@
+*.swp
+dist/*
+client/build/*
+node_modules/
+secrets.json
+secrets*.json
+client/src/secrets.json
+package-lock.json
+.DS_Store

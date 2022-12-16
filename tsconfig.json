@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2017",
+        "noImplicitAny": false,
+        "outDir": "./dist",
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "lib": ["es2015", "es6", "es2017", "esnext", "dom"],
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+              "node_modules/*",
+              "client/src/common/*"
+            ]
+          }
+    },
+    "include": [
+        "./src/**/*",
+        "./client/src/common/**/*"
+    ]
+}
