@@ -13,6 +13,7 @@ main: {prefix: '', router: MainRouter, urls: {
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/profile': {func: 'profile', methods: ['get', 'post']},
+    '/ship/:id': {func: 'ship', methods: ['get']},
 }},
 auth: {prefix: '/auth', router: AuthRouter, urls: {
     '/info': {func: 'info', methods: ['get'], json: true},

@@ -47,7 +47,7 @@ export class UserController extends UserDB {
         this.type = this.type||UserType.None
         return this
     }
-    get identifier(): Identifier { return {_id: this._id} }
+    get identifier(): Identifier { return {_id: this._id, name: this.name} }
 
     async save() {
         const data = this as UserDB

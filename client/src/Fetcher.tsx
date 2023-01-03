@@ -7,7 +7,6 @@ import * as CError from './common/errors'
 export type ErrorState = {err?: CError.ApiError}
 type ItemState = {item?: any}
 export class Fetcher<P, S> extends React.PureComponent<P & {}, S & ErrorState & ItemState> {
-    fetch_url = ''
     fetching = false
     fetches = 0
     componentDidMount() { this.fetch() }
@@ -15,13 +14,15 @@ export class Fetcher<P, S> extends React.PureComponent<P & {}, S & ErrorState & 
         if (this.fetching)
             return
         this.fetching = true
-        let data = await util.wget(this.fetch_url)
+        let data = await util.wget(this.fetchUrl, this.fetchOpt)
         this.fetching = false
         this.fetches++
         let obj: any = Object.assign({err: data.err||this.state?.err},
             this.fetchState(data.data))
         this.setState(obj)
     }
+    get fetchUrl(){ return '' }
+    get fetchOpt(){ return {} }
     fetchState(data: any){ return {item: data} }
     render(){
         const err = this.state?.err

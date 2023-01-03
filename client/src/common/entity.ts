@@ -1,6 +1,11 @@
 
 export interface Identifier {
     _id?: string
+    name: string
+}
+export class ID implements Identifier {
+    _id?: string
+    name: string
 }
 
 export const Profile = {
@@ -10,11 +15,8 @@ export const Profile = {
 }
 
 export enum UserType {None, Corporant, Captain, Mechanic, Navigator, Scientist, Guard, Master}
-export class UserID implements Identifier {
-    _id?: string
+export class User extends ID {
     alias: string
-}
-export class User extends UserID {
     first_name: string
     last_name: string
     email: string
@@ -36,27 +38,48 @@ export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas}
 export class Resource {
     type: ResourceType
 }
-
-export class Corporation extends UserID {
-    name: string
+export class Corporation extends ID {
 }
 
-export enum ItemType {Artifact, Drone}
-export class Item extends UserID {
-    name: string
+export enum ItemType {Artifact, Drone, Module}
+export class Item extends ID {
     type: ItemType
-    size: number
+    mass: number
 }
 
 export class Drone extends Item {
     movement: number
 }
 
-export class Ship extends UserID {
+export class Module extends Item {
+    energy: number
+    boosts: [{kind: string, value: number}]
+}
+
+export const ShipValues = {
+    stats: `integrity mass engine slots speed movement
+        attack defence crew`.replace(/\s+/g, ' ').split(' '),
+    desc: `name _id class port captain
+        owner`.replace(/\s+/g, ' ').split(' '),
+    mods: `size energy`.replace(/\s+/g, ' ').split(' ')
+}
+export enum ShipClass {A = 'A', B = 'B', C = 'C', D = 'D', E = 'E'}
+export class Ship extends ID {
     name: string
+    class: ShipClass
+    port: string
+    captain: ID
+    owner: ID
+    integrity: number
+    mass: number
+    engine: number
     speed: number
     movement: number
-    integrity: number
     size: number
+    attack: number
+    defence: number
+    crew: number
+    slots: number
+    modules: Module[]
     inventory: Item[]
 }

@@ -4,7 +4,7 @@
   "description": "klondike",
   "main": "index.js",
   "scripts": {
-    "fixtures": "ts-node ./fixtures.ts",
+    "fixtures": "ts-node ./fixtures/load.ts",
     "test": "./node_modules/.bin/mocha -r ts-node/register ./test.ts",
     "watch-server": "nodemon --watch 'src/**/*' --watch 'client/build/**/*' --watch 'client/src/common/**/*' --watch 'templates/**/*' -e ts,tsx,js,html --exec 'ts-node' ./src/server.ts",
     "watch-server-inspect": "nodemon --watch 'src/**/*' --watch 'client/build/**/*' --watch 'client/src/common/**/*' --watch 'templates/**/*' -e ts,tsx,js,html --exec node --inspect -r ts-node/register ./src/server.ts",
