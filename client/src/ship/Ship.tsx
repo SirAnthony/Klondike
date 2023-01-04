@@ -1,6 +1,7 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
 import {Ship as EShip, Module as EModule, ShipValues} from '../common/entity'
+import * as util from '../common/util'
 import L from './locale'
 
 type ShipProps = {
@@ -45,7 +46,7 @@ function Description(props: ShipProps){
     const ship: EShip = props.ship
     const values = ShipValues.desc.map(k=>[
       <dt>{L(`desc_${k}`)}</dt>,
-      <dd>{L(ship[k].name||ship[k])}</dd>
+      <dd>{util.get_name(ship[k])}</dd>
     ])
     return <div>
       <p>{L('description')}</p>
@@ -56,8 +57,8 @@ function Description(props: ShipProps){
 function Stats(props: ShipProps){
     const ship: EShip = props.ship
     const values = ShipValues.stats.map(k=><tr>
-      <td>{L(k)}</td>
-      <td>{L(`${k}_c`)}</td>
+      <td>{L(`stat_${k}`)}</td>
+      <td>{L(`stat_${k}_c`)}</td>
       <td>{ship[k]}</td>
     </tr>)
     return <table>

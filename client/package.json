@@ -22,14 +22,16 @@
     "@types/react-bootstrap": "^0.32.32",
     "@types/react-dom": "^18.0.10",
     "@types/react-router-dom": "^5.3.3",
+    "dotenv-cli": "^6.0.0",
     "nodemon": "^2.0.20",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:dev": "dotenv -e .env.dev react-scripts build",
     "test": "react-scripts test",
-    "watch-build": "DISABLE_ESLINT_PLUGIN=true NODE_ENV=development BABEL_ENV=development WEBPACK_ENV=development nodemon --watch 'src/**/*' -e css,ts,tsx,js,html --exec npm run build --dev --configuration=dev",
+    "watch-build": "BABEL_ENV=development nodemon --watch 'src/**/*' -e css,ts,tsx,js,html --exec npm run build:dev --dev --configuration=dev",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

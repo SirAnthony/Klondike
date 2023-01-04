@@ -41,3 +41,5 @@ export const obj_copyto = (data: any, target: any, keys?: string | string[])=>{
     keys.filter(k=>k in data).forEach(k=>target[k] = data[k])
     return target
 }
+
+export const get_name = (data: any)=>typeof data==='object' ? data.name : data

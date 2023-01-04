@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block main %}
+  <span>{{ context.err.message }}</span>
+  {% if debug.errors %}<pre>{{ context.err.stack }}</pre>{% endif %}
+{% endblock %}

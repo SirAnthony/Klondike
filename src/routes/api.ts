@@ -31,11 +31,11 @@ export class ApiRouter extends BaseRouter {
         return {done: 1, user}
     }
 
-    @CheckAuthenticated()
+    // @CheckAuthenticated()
     async get_ship(ctx: RenderContext){
-        const params: any = ctx.request.body;
+        const {id} = ctx.params;
         const {user}: {user: UserController} = ctx.state
-        const ship = ShipController.get(params.id)
+        const ship = await ShipController.get(id)
         return {ship}
     }
 

@@ -1,4 +1,7 @@
 const aliases = {
+    'site_title': 'Klondike',
+    'site_account': 'Аккаунт',
+    'site_interface_ship': 'Интерфейс корабля',
     'login_nav': tpl`Войти ${0}`,
     'login_nav_vk': 'Войти через ВКонтакте',
     'register_nav': tpl`Зарегистрироваться ${0}`,

@@ -2,7 +2,7 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as util from '../common/util'
 import * as CError from '../common/errors'
-import {ErrorMessage} from '../settlement/helpers'
+import {ErrorMessage} from '../util/errors'
 import {UserBar} from './Bar'
 import L from '../common/locale'
 

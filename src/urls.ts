@@ -12,7 +12,7 @@ main: {prefix: '', router: MainRouter, urls: {
     '/': {func: 'base', template: 'base', methods: ['get']},
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
-    '/profile': {func: 'profile', methods: ['get', 'post']},
+    '/profile': {func: 'profile', methods: ['post']},
     '/ship/:id': {func: 'ship', methods: ['get']},
 }},
 auth: {prefix: '/auth', router: AuthRouter, urls: {

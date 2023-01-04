@@ -5,6 +5,7 @@ import * as entity from '../common/entity'
 import EventEmitter from '../common/events'
 import {UserLogin, UserLoginNav} from './Login'
 import {UserRegister, UserRegisterNav} from './Register'
+import L from '../common/locale'
 
 const BarEvents = new EventEmitter()
 export function requestReload(){
@@ -47,13 +48,13 @@ export class UserBar extends F.Fetcher<UserBarProps, UserBarState> {
         const user = this.state?.item
         const {reg, login} = this.state
         return <RB.Container><RB.Navbar>
-          <RB.Navbar.Brand href="/">Челнок 2022</RB.Navbar.Brand>
+          <RB.Navbar.Brand href="/">{L('site_title')}</RB.Navbar.Brand>
           <RB.Navbar.Toggle />
           <RB.Navbar.Collapse className='justify-content-end'>
             { !user && <UserLoginNav value={login} onClick={this.toggle_login}/> }
             { !user && <UserRegisterNav value={reg} onClick={this.toggle_reg}/> }
             { user && <RB.Nav>
-              <RB.NavDropdown title={user.displayName||'Account'}>
+              <RB.NavDropdown title={user.displayName||L('site_account')}>
                 <RB.NavDropdown.Item href="/account/profile">Профиль</RB.NavDropdown.Item>
                 { user.admin && <RB.NavDropdown.Item href="/admin/main">Администрирование</RB.NavDropdown.Item> }
                 <RB.NavDropdown.Item href="/auth/logout">Выйти</RB.NavDropdown.Item>
