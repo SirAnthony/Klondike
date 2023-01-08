@@ -1,51 +1,52 @@
 import React from 'react';
 import * as RR from 'react-router-dom'
 import * as F from '../Fetcher'
-import Ship from './Ship'
+import Corporation from './Corporation'
 import List from './List'
-import {Ship as EShip, User} from '../common/entity'
+import {Corporation as ECorp, User} from '../common/entity'
 import L from './locale'
 
-type ShipDetailsState = {
+type CorpDetailsState = {
     id: string
-    ship?: EShip
+    corp?: ECorp
 }
-type ShipDetailsProps = {
+type CorpDetailsProps = {
     user: User
     params: RR.Params
 }
-class ShipDetails extends F.Fetcher<ShipDetailsProps, ShipDetailsState> {
+
+class CorpDetails extends F.Fetcher<CorpDetailsProps, CorpDetailsState> {
     constructor(props){
         super(props)
         this.state = {id: props.params.id}
     }
     get fetchUrl() {
         const {id} = this.state
-        return `/api/ship/${id}`
+        return `/api/corp/${id}`
     }
     fetchState(data: any = {}){
-        const {ship} = data
-        return {item: data, ship}
+        const {corp} = data
+        return {item: data, corp}
     }
     render(){
-        const {ship} = this.state
-        if (!ship)
+        const {corp} = this.state
+        if (!corp)
             return <div>{L('not_found')}</div>
-        return <Ship ship={ship} />
+        return <Corporation corp={corp} />
     }
 }
 
-function ShipDetailsNavigator(props: {user: User}) {
+function CorpDetailsNavigator(props: {user: User}) {
     const params = RR.useParams()
-    return <ShipDetails user={props.user} params={params} />
+    return <CorpDetails user={props.user} params={params} />
 }
 
 export function Navigator(props){
     const {user} = props
     return (<div>
       <RR.Routes>
-        <RR.Route path='/' element={<ShipDetailsNavigator user={user} />} />
-        <RR.Route path='/:id' element={<ShipDetailsNavigator user={user} />} />
+        <RR.Route path='/' element={<CorpDetailsNavigator user={user} />} />
+        <RR.Route path='/:id' element={<CorpDetailsNavigator user={user} />} />
         <RR.Route path='/all' />
       </RR.Routes>
     </div>)

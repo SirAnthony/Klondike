@@ -2,6 +2,8 @@ import {load, default as BL} from '../common/locale'
 
 load('ship', {
     'not_found': 'Корабль не найден',
+    'interface': 'Интерфейс корабля',
+    'listing': 'Список кораблей',
     'install_module': 'Установить модуль',
     'repair': 'Починить корабль',
     'stats_title': 'Характеристики',

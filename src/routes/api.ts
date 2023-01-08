@@ -1,5 +1,5 @@
 import {BaseRouter, CheckAuthenticated} from './base'
-import {UserController, ShipController} from '../entity'
+import {UserController, ShipController, CorpController} from '../entity'
 import {Profile} from '../../client/src/common/entity'
 import {RenderContext} from '../middlewares'
 import {ApiError, Codes} from '../../client/src/common/errors'
@@ -38,5 +38,26 @@ export class ApiRouter extends BaseRouter {
         const ship = await ShipController.get(id)
         return {ship}
     }
+
+    // @CheckAuthenticated()
+    async get_ship_list(ctx: RenderContext){
+        const list = await ShipController.all()
+        return {list}
+    }
+
+    // @CheckAuthenticated()
+    async get_corp(ctx: RenderContext){
+        const {id} = ctx.params;
+        const {user}: {user: UserController} = ctx.state
+        const corp = await CorpController.get(id)
+        return {corp}
+    }
+
+    // @CheckAuthenticated()
+    async get_corp_list(ctx: RenderContext){
+        const list = await CorpController.all()
+        return {list}
+    }
+
 
 }

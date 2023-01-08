@@ -14,6 +14,9 @@ main: {prefix: '', router: MainRouter, urls: {
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/profile': {func: 'profile', methods: ['post']},
     '/ship/:id': {func: 'ship', methods: ['get']},
+    '/ships/': {func: 'ship_list', methods: ['get']},
+    '/corp/:id': {func: 'corp', methods: ['get']},
+    '/corps/': {func: 'corp_list', methods: ['get']},
 }},
 auth: {prefix: '/auth', router: AuthRouter, urls: {
     '/info': {func: 'info', methods: ['get'], json: true},

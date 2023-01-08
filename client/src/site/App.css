@@ -1,0 +1,164 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.left {
+    text-align: left;
+}
+
+.menu-container {
+    background-color: #006363;
+    border: solid #0ff 2px;
+    border-radius: 10px;
+}
+
+.menu-box {
+    margin: 25px 0;
+    padding: 10px !important;
+    color: #fff;
+    font-size: 10pt;
+    background-color: #007f7f;
+    padding: 0 5px;
+    border: solid #0ff 1px;
+    border-radius: 10px;
+}
+
+.menu-box table {
+    width: 100%;
+}
+
+.menu-box th {
+    font-size: 10pt;
+    border-bottom: solid #0ff 1px;
+    border-right: solid #0ff 1px;
+}
+
+.menu-box td {
+    padding: 0 5px;
+    border-right: solid #0ff 1px;
+}
+
+.menu-box td.left {
+    padding-left: 20px;
+}
+
+.menu-box td:last-child, .menu-box th:last-child {
+    border-right: none;
+    width: 85px;
+}
+
+.menu-box-head {
+    padding: 10px;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.menu-box-row-desc {
+    padding-left: 25px !important;
+    text-align: left;
+    width: 140px
+}
+
+.menu-box-col-clear {
+    max-width: 360px;
+}
+
+.menu-box-clear {
+    max-width: 250px;
+}
+
+.menu-box-clear div.row {
+    padding: 5px;
+}
+
+.menu-box-clear div img {
+    width: 250px;
+    height: 250px;
+    margin: 20px 0px;
+}
+
+.menu-control {
+    text-align: left;
+    height: 30px;
+    background-color: #0ff;
+    padding-top: 2px;
+    border-radius: 3px;
+}
+
+.menu-control div:last-child {
+    width: 30px;
+    padding: 0;
+}
+
+.menu-list-row, .menu-list-title {
+    padding: 8px;
+    color: #fff;
+}
+
+.menu-list-title {
+    border-bottom: 1px solid #0ff;
+}
+
+.menu-list-row:hover {
+    background-color: #008f8f;
+}
+
+.menu-list-row a:hover {
+    text-decoration: underline;
+}
+
+button.btn {
+    width: 160px;
+    font-size: 10pt;
+    color: #fff;
+    border-radius: 5px;
+}
+
+button.btn-primary {
+    border: solid #0ff 1px;
+    background-color: #007f7f;
+}
+
+button.btn-close {
+    color: #0094ff;
+    padding: 2px;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #000;
+    /*background-color: #000;*/
+}

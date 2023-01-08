@@ -8,7 +8,7 @@ class CorporationDB extends Corporation {
     updated: Date
 }
 
-export class CorporationController extends CorporationDB {
+export class CorpController extends CorporationDB {
     private static DB = new Entity<CorporationDB>('corps')
     protected constructor(data, fields=[]){
         super()
@@ -21,27 +21,27 @@ export class CorporationController extends CorporationDB {
         const data = this as CorporationDB
         data.created = data.created || new Date()
         data.updated = new Date()
-        return await CorporationController.DB.save(data)
+        return await CorpController.DB.save(data)
     }
 
-    static async get(data: CorporationController | CorporationDB | Corporation | ObjectId | string, fields?){
-        if (data instanceof CorporationController)
+    static async get(data: CorpController | CorporationDB | Corporation | ObjectId | string, fields?){
+        if (data instanceof CorpController)
             return data
         if (data instanceof ObjectId || typeof data == 'string')
-            data = await CorporationController.DB.get(data)
-        return new CorporationController(data, fields)
+            data = await CorpController.DB.get(data)
+        return new CorpController(data, fields)
     }
 
-    static async find(data, fields?) : Promise<CorporationController> {
-        const ret = await CorporationController.DB.find(data)
+    static async find(data, fields?) : Promise<CorpController> {
+        const ret = await CorpController.DB.find(data)
         if (ret)
-            return new CorporationController(ret, fields)
+            return new CorpController(ret, fields)
     }
 
-    static async all(filter = {}) : Promise<CorporationController[]> {
-        const items = await CorporationController.DB.list(filter), ret = []
-        for (let user of items)
-            ret.push(await CorporationController.get(user))
+    static async all(filter = {}) : Promise<CorpController[]> {
+        const items = await CorpController.DB.list(filter), ret = []
+        for (let item of items)
+            ret.push(await CorpController.get(item))
         return ret
     }
 }
