@@ -7,6 +7,7 @@ load('site', {
     'interface_ship_list': 'Список кораблей',
     'interface_corp': 'Интерфейс корпорации',
     'interface_corp_list': 'Список корпораций',
+    'interface_map': 'Космическая карта',
 })
 
 export default function L(str: string, ...args): string {

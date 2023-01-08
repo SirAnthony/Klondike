@@ -1,4 +1,9 @@
 
+export interface Pos {
+    col: number
+    row: number
+}
+
 export interface Identifier {
     _id?: string
     name: string
@@ -82,4 +87,20 @@ export class Ship extends ID {
     slots: number
     modules: Module[]
     inventory: Item[]
+}
+
+export type PlanetZone = {
+    center: Pos
+    radius: number
+}
+export type PlanetItem = {
+    pos: Pos
+    type: ResourceType
+    amount: number
+    owner?: ID
+}
+export class Planet extends ID {
+    zones: PlanetZone[]
+    resources: PlanetItem[]
+    ships: Ship[]
 }

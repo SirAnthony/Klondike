@@ -5,7 +5,6 @@ load('corp', {
     'interface': 'Интерфейс корпорации',
     'listing': 'Список корпораций',
     'desc_name': 'Название',
-
 })
 
 export default function L(str: string, ...args): string {

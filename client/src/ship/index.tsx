@@ -23,7 +23,7 @@ class ShipDetails extends F.Fetcher<ShipDetailsProps, ShipDetailsState> {
         const {id} = this.state
         return `/api/ship/${id}`
     }
-    fetchState(data: any = {}){
+    fetchState(data: any){
         const {ship} = data
         return {item: data, ship}
     }
