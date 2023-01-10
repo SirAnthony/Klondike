@@ -1,12 +1,11 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Corporation, User} from '../common/entity'
-import * as F from '../Fetcher'
-import * as util from '../common/util'
-import {ControlBar} from '../util/controls'
+import {List as UList} from '../util/controls'
+import {ErrorMessage} from '../util/errors'
 import L from './locale'
 
-function ShipRow(params: {corp: Corporation}) {
+function CorpRow(params: {corp: Corporation}) {
     const {corp} = params
     return <RB.Row className="menu-list-row">
       <RB.Col><img src={`/static/corp/${corp._id}.png`} /></RB.Col>
@@ -14,35 +13,21 @@ function ShipRow(params: {corp: Corporation}) {
     </RB.Row>
 }
 
-type ShipListState = {
+type CorpListState = {
     list?: Corporation[]
 }
-type ShipListProps = {
+type CorpListProps = {
     user: User
 }
-export default class List extends F.Fetcher<ShipListProps, ShipListState> {
-    constructor(props){
-        super(props)
-        this.state = {}
-    }
+export default class List extends UList<CorpListProps, CorpListState> {
+    L = L
     get fetchUrl() { return `/api/corps/` }
-    fetchState(data: any){
-        const {list} = data
-        return {item: data, list}
-    }
-    render(){
+    body(){
         const {list} = this.state
-        if (!list)
-            return <div>{L('not_found')}</div>
-        const rows = list.map(l=><ShipRow key={`corp_list_${l._id}`} corp={l} />)
-        return <RB.Container className="menu-container">
-          <ControlBar title={L('listing')} />
-          <RB.Row key={'corp_list_title'} className="menu-list-title">
-            <RB.Col></RB.Col>
-            <RB.Col>{L('desc_name')}</RB.Col>
-          </RB.Row>
-          {rows}
-        </RB.Container>
+        const rows = list.map(l=><CorpRow key={`corp_list_${l._id}`} corp={l} />)
+        return [<RB.Row key={'corp_list_title'} className="menu-list-title">
+          <RB.Col></RB.Col>
+          <RB.Col>{L('desc_name')}</RB.Col>
+        </RB.Row>, ...rows]
     }
 }
-

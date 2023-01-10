@@ -93,7 +93,7 @@ function ShipInfo(props: ShipProps){
 function ShipControls(props: ShipProps){
     return <RB.Container>
       <RB.Row><RB.Col>
-        <img src={`/static/ships/${props.ship._id}.png`} alt="ship" />
+        <img src={`/static/img/ships/${props.ship.img}.png`} alt="ship" />
       </RB.Col></RB.Row>
       <RB.Row><RB.Col>
         <RB.Button>{L('install_module')}</RB.Button>

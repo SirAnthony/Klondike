@@ -1,5 +1,5 @@
 import {Entity} from './base';
-import {Identifier, Ship} from '../../client/src/common/entity'
+import {Identifier, PlanetShip, Ship} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
 
@@ -14,10 +14,15 @@ export class ShipController extends ShipDB {
         super()
         util.obj_copyto(data, this, `_id name class port captain
             owner integrity mass engine speed movement size attack
-            defence crew slots modules inventory`+fields.join(' '))
+            defence crew slots modules inventory img`+fields.join(' '))
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
+
+    get PlanetShip(): PlanetShip {
+        return {_id: this._id, name: this.name, class: this.class,
+            img: this.img, pos: this.location.pos}
+    }
 
     async save() {
         const data = this as ShipDB

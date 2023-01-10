@@ -6,7 +6,7 @@ import {UserProfile} from '../user/Profile'
 import * as entity from '../common/entity'
 import {Navigator as ShipNavigator, ListNavigator as ShipListNavigator} from '../ship'
 import {Navigator as CorpNavigator, ListNavigator as CorpListNavigator} from '../corp'
-import {Navigator as MapNavigator} from '../map'
+import {Navigator as MapNavigator, ListNavigator as PlanetListNavigator} from '../map'
 import L from './locale'
 import './App.css';
 
@@ -20,6 +20,7 @@ function BasicNavigator(props){
           <RB.NavLink href="/corp/">{L('interface_corp')}</RB.NavLink>
           <RB.NavLink href="/corps/">{L('interface_corp_list')}</RB.NavLink>
           <RB.NavLink href="/map/">{L('interface_map')}</RB.NavLink>
+          <RB.NavLink href="/planets/">{L('interface_planet_list')}</RB.NavLink>
         </RB.Col>
       </RB.Row>
     </RB.Container>
@@ -35,11 +36,13 @@ function App() {
     </RB.Container>
     <RR.Routes>
       <RR.Route path='/' element={<BasicNavigator user={user} />} />
-      <RR.Route path='/map' element={<MapNavigator user={user} />} />
       <RR.Route path='/ship/*' element={<ShipNavigator user={user} />} />
       <RR.Route path='/ships/' element={<ShipListNavigator user={user} />} />
       <RR.Route path='/corp/*' element={<CorpNavigator user={user} />} />
       <RR.Route path='/corps/' element={<CorpListNavigator user={user} />} />
+      <RR.Route path='/map/*' element={<MapNavigator user={user} />} />
+      <RR.Route path='/planet/*' element={<MapNavigator user={user} />} />
+      <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
       <RR.Route path='/account/profile' element={<UserProfile user={user} />} />
     </RR.Routes>
   </RR.BrowserRouter>

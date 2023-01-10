@@ -1,5 +1,5 @@
 import {Corporation} from '../client/src/common/entity'
-import {CorporationController} from '../src/entity/index'
+import {CorpController} from '../src/entity/index'
 
 export enum CorpAlias {AP = 'AP', R = 'R', WY = 'WY', USC = 'USC', EF = 'EF'}
 export class CorpFixture extends Corporation {
@@ -23,7 +23,7 @@ const corps: CorpFixture[] = [{
     alias: CorpAlias.EF,
 },]
 
-class CorpControllerFixture extends CorporationController {
+class CorpControllerFixture extends CorpController {
     constructor(data: Corporation) {
         super(data)
     }
@@ -33,7 +33,7 @@ export const Fixtures = corps
 
 export default async function load() {
     for (let corp of corps) {
-        const prev = await CorporationController.find({name: corp.name})
+        const prev = await CorpController.find({name: corp.name})
         if (prev) {
             for (let k in corp) {
                 if (k == 'alias')

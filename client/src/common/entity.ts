@@ -87,11 +87,24 @@ export class Ship extends ID {
     slots: number
     modules: Module[]
     inventory: Item[]
+    location?: Identifier & {pos: Pos}
+    img?: string
 }
 
+export type PlanetShip = {
+    _id: string
+    name: string
+    class: ShipClass
+    img: string
+    pos: Pos
+}
+
+export enum PlanetType { Frost = 'frost', FrostSat = 'frostsat',
+    Jungle = 'jungle', Molten = 'molten', Rocky = 'rocky' }
 export type PlanetZone = {
     center: Pos
     radius: number
+    img?: string
 }
 export type PlanetItem = {
     pos: Pos
@@ -102,5 +115,6 @@ export type PlanetItem = {
 export class Planet extends ID {
     zones: PlanetZone[]
     resources: PlanetItem[]
-    ships: Ship[]
+    type: PlanetType
+    ships?: PlanetShip[]
 }

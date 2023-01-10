@@ -1,5 +1,5 @@
 import {Corporation, Ship, ShipClass} from '../client/src/common/entity'
-import {ShipController, CorporationController} from '../src/entity/index'
+import {ShipController, CorpController} from '../src/entity/index'
 import {CorpAlias, Fixtures as CorpFixtures} from './corps'
 
 class ShipFixture extends Ship {
@@ -267,9 +267,10 @@ class ShipControllerFixture extends ShipController {
 
 export default async function load() {
     const corps: {[name: string]: Corporation} = {}
+    let counter = 0;
     for (let ship of ships) {
         let corp = corps[ship.owner.name] || (
-            corps[ship.owner.name] = await CorporationController.find({
+            corps[ship.owner.name] = await CorpController.find({
                 name: CorpFixtures.find(f=>f.alias==ship.owner.name)?.name}))
         ship.owner = {_id: corp._id, name: corp.name}
         const prev = await ShipController.find({name: ship.name})
@@ -278,6 +279,7 @@ export default async function load() {
                 prev[k] = ship[k]
         }
         const s = prev || new ShipControllerFixture(ship)
+        s.img = '' + ++counter
         await s.save()
     }
 }

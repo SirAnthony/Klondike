@@ -37,6 +37,10 @@
   }
 }
 
+.error {
+    color: #f00;
+}
+
 .left {
     text-align: left;
 }
@@ -130,6 +134,11 @@
     color: #fff;
 }
 
+.menu-list-row img {
+    width: 30px;
+    height: 30px;
+}
+
 .menu-list-title {
     border-bottom: 1px solid #0ff;
 }
@@ -143,6 +152,7 @@
 }
 
 .map {
+    overflow: hidden;
     background-color: #bbb;
 }
 

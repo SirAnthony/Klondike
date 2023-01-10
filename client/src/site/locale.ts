@@ -8,6 +8,7 @@ load('site', {
     'interface_corp': 'Интерфейс корпорации',
     'interface_corp_list': 'Список корпораций',
     'interface_map': 'Космическая карта',
+    'interface_planet_list': 'Список планет',
 })
 
 export default function L(str: string, ...args): string {
