@@ -1,3 +1,4 @@
+
 const aliases = {
     'login_nav': tpl`Войти ${0}`,
     'login_nav_vk': 'Войти через ВКонтакте',
@@ -63,6 +64,7 @@ export function tpl(strings, ...keys) {
     });
 }
 
+export function isDefined(key) { return key in aliases }
 export function load(type, values) {
     for (let key in values)
         aliases[`${type}_${key}`] = values[key]

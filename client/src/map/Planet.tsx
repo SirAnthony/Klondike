@@ -4,6 +4,7 @@ import * as F from '../Fetcher'
 import {Planet as CPlanet, PlanetZone, User} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
+import {UILayer} from './UI'
 import {Pos} from './util'
 import defines from '../common/defines'
 import L from './locale'
@@ -56,11 +57,12 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         const {planet} = this.state
         if (!planet)
             return <div>{L('not_found')}</div>
-        const {radius, countw, counth} = defines.map
-        const width = radius*countw*2+1, height=radius*(counth*3/2+0.5)+1
+        const date = new Date()
+        const {width, height} = defines.map.size
         return <Stage width={width} height={height} className="map">
           <Planet planet={planet} width={width} height={height} />
           <HexLayer />
+          <UILayer width={width} height={height} date={date} />
         </Stage>
     }
 }

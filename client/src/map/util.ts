@@ -28,8 +28,27 @@ export class Pos implements CPos {
     }
     get canvas(): Point {
         const {radius} = defines.map
-        const x = radius * (1 + Math.sqrt(3) * (this.col + 0.5*(this.row&1)))
+        const x = radius * (1 + Math.sqrt(3) * (this.col + 0.5*(this.row&1)))-1
         const y = radius * (1 + 3/2 * this.row)
         return {x, y}
     }
 }
+
+type FontStyle = {
+    fontStyle?: string,
+    fontSize?: number,
+    fontFamily?: string
+}
+
+function canvasFont(font: FontStyle){
+    const {fontStyle = 'normal', fontSize = 10, fontFamily = 'Arial'} = font
+    return `${fontStyle} ${fontSize}px ${fontFamily}`
+}
+export function textWidth(text, font: FontStyle) {
+    const canvas = textWidth.canvas;
+    const context = canvas.getContext("2d");
+    context.font = canvasFont(font);
+    return context.measureText(text).width;
+}
+// re-use canvas object for better performance
+textWidth.canvas = document.createElement("canvas")
