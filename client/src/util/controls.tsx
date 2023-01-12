@@ -5,11 +5,11 @@ import {CloseButton} from './buttons'
 import {ErrorMessage} from './errors'
 import * as F from '../Fetcher'
 
-export function ControlBar(props: {title?: string}){
-    const {title = ''} = props
+export function ControlBar(props: {title?: string, onClose?: ()=>void}){
+    const {title = '', onClose} = props
     return <RB.Row className="menu-control">
       <RB.Col>{title}</RB.Col>
-      <RB.Col sm={1}><CloseButton /></RB.Col>
+      <RB.Col sm={1}><CloseButton onClose={onClose} /></RB.Col>
     </RB.Row>
 }
 

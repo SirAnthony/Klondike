@@ -1,9 +1,7 @@
 import React from 'react'
-import * as RR from 'react-router-dom'
 import * as RB from 'react-bootstrap'
 import {Ship as EShip, Module as EModule, ShipValues} from '../common/entity'
 import * as util from '../common/util'
-import {ControlBar} from '../util/controls'
 import L from './locale'
 
 type ShipProps = {
@@ -105,15 +103,10 @@ function ShipControls(props: ShipProps){
 }
 
 export default function Ship(props: ShipProps){
-    const nav = RR.useNavigate()
-    const close = ()=>nav('/')
-    return (<RB.Container className="menu-container">
-      <ControlBar title={L('interface')} />
-      <RB.Row>
-        <RB.Col className="menu-box-clear" sm={3}>
-          <ShipControls {...props} />
-        </RB.Col>
-        <RB.Col sm={9}><ShipInfo {...props} /></RB.Col>
-      </RB.Row>
-    </RB.Container>)
+    return <RB.Row>
+      <RB.Col className="menu-box-clear" sm={3}>
+        <ShipControls {...props} />
+      </RB.Col>
+      <RB.Col sm={9}><ShipInfo {...props} /></RB.Col>
+    </RB.Row>
 }

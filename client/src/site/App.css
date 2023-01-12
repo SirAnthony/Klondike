@@ -46,8 +46,8 @@
 }
 
 .menu-container {
-    background-color: #006363;
-    border: solid #0ff 2px;
+    background-color: var(--color-ui-box-hover);
+    border: solid var(--color-ui-border) 2px;
     border-radius: 10px;
 }
 
@@ -56,9 +56,9 @@
     padding: 10px !important;
     color: #fff;
     font-size: 10pt;
-    background-color: #007f7f;
+    background-color: var(--color-ui-box);
     padding: 0 5px;
-    border: solid #0ff 1px;
+    border: solid var(--color-ui-border) 1px;
     border-radius: 10px;
 }
 
@@ -68,13 +68,13 @@
 
 .menu-box th {
     font-size: 10pt;
-    border-bottom: solid #0ff 1px;
-    border-right: solid #0ff 1px;
+    border-bottom: solid var(--color-ui-border) 1px;
+    border-right: solid var(--color-ui-border) 1px;
 }
 
 .menu-box td {
     padding: 0 5px;
-    border-right: solid #0ff 1px;
+    border-right: solid var(--color-ui-border) 1px;
 }
 
 .menu-box td.left {
@@ -119,7 +119,7 @@
 .menu-control {
     text-align: left;
     height: 30px;
-    background-color: #0ff;
+    background-color: var(--color-ui-border);
     padding-top: 2px;
     border-radius: 3px;
 }
@@ -140,7 +140,7 @@
 }
 
 .menu-list-title {
-    border-bottom: 1px solid #0ff;
+    border-bottom: 1px solid var(--color-ui-border);
 }
 
 .menu-list-row:hover {
@@ -149,6 +149,26 @@
 
 .menu-list-row a:hover {
     text-decoration: underline;
+}
+
+.menu-absolute.container {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 0px;
+    left: 0px;
+    width: var(--map-width);
+    max-width: var(--map-width);
+    height: var(--map-height);
+    max-height: var(--map-height);
+}
+
+.map-container.container {
+    position: relative;
+    margin-right: 0px;
+    margin-left: 0px;
+    padding-right: 0px;
+    padding-left: 0px;
 }
 
 .map {
@@ -163,8 +183,8 @@ button.btn {
 }
 
 button.btn-primary {
-    border: solid #0ff 1px;
-    background-color: #007f7f;
+    border: solid var(--color-ui-border) 1px;
+    background-color: var(--color-ui-box);
 }
 
 button.btn-close {

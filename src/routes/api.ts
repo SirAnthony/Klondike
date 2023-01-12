@@ -3,6 +3,7 @@ import {UserController, ShipController, CorpController} from '../entity'
 import {PlanetController} from '../entity'
 import {Profile, UserType} from '../../client/src/common/entity'
 import {RenderContext} from '../middlewares'
+import * as server_util from '../util/server'
 import {ApiError, Codes} from '../../client/src/common/errors'
 import {ObjectId} from 'mongodb';
 
@@ -83,7 +84,7 @@ export class ApiRouter extends BaseRouter {
         const planet = await PlanetController.get(id)
         const ships = await ShipController.all({'location._id': new ObjectId(id)})
         planet.ships = ships.map(s=>s.PlanetShip)
-        return {planet}
+        return {planet, date: server_util.currentDate()}
     }
 
     @CheckRole(UserType.Navigator)

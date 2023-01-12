@@ -7,14 +7,15 @@ function Hexagon(props: {pos: Pos}){
     const [fill, setFill] = React.useState(false)
     const {pos} = props
     const point = pos.canvas
-    const {radius, colors} = defines.map
+    const {radius} = defines.map
+    const {color} = defines.styles
     const {x, y} = point
     const text = <Text text={`${pos.col}:${pos.row}`} fontSize={12}
         fill={'#0f0'} x={x-radius/2} y={y-radius/4} />
     return <Group>
       <RegularPolygon sides={6} radius={radius} x={x} y={y} 
       onMouseLeave={()=>setFill(false)} onMouseOver={()=>setFill(true)}
-      stroke={colors.hex_border} fill={fill ? colors.hex_fill : undefined}
+      stroke={color.hex_border} fill={fill ? color.hex_fill : undefined}
       strokeWidth={1} />
       {fill && text}
     </Group>

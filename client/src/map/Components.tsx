@@ -10,7 +10,7 @@ export function Button(props: Konva.RectConfig & Konva.TextConfig){
     const {x, y, width, height, text} = props
     const {fontSize = 14} = props
     const [hover, setHover] = React.useState(false)
-    const {colors} = defines
+    const {color} = defines.styles
     const styles = _.pick(props, 'fontSize', 'fontStyle', 'fontFamily')
     const str = text ? LR(text) : null
     const twidth = text ? textWidth(str, styles) : 0
@@ -21,10 +21,10 @@ export function Button(props: Konva.RectConfig & Konva.TextConfig){
     }
     return <Group>
       <Rect {...controls} x={x} y={y} width={width} height={height}
-        stroke={colors.ui_border} cornerRadius={5}
-        fill={hover ? colors.ui_box_hover : colors.ui_box} />
+        stroke={color.ui_border} cornerRadius={5}
+        fill={hover ? color.ui_box_hover : color.ui_box} />
       {text && <Text {...controls} {...styles} text={str}
         x={x+width/2-twidth/2} y={y+height/2-fontSize/4}
-        fill={colors.ui_text} align={'center'} />}
+        fill={color.ui_text} align={'center'} />}
     </Group>
 }

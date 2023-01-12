@@ -72,3 +72,16 @@ export function clear_email(email: string){
     username = username.replace(/\./g, '').split('+')[0]
     return `${username}@${domain}`
 }
+
+export function flatten_object_dash(obj, prefix=''){
+    let ret = {}
+    for (let k in obj){
+        const param = (prefix ? `${prefix}-${k}` : k).replace(/_/g, '-')
+        const val = obj[k]
+        if (typeof val==='object')
+            ret = Object.assign(ret, flatten_object_dash(val, param))
+        else
+            ret[param] = val
+    }
+    return ret
+}

@@ -1,0 +1,5 @@
+:root {
+{% for key, val in context.styles %}
+    --{{key}}: {{val}};
+{% endfor %}
+}
