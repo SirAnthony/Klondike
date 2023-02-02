@@ -10,11 +10,9 @@ class ShipDB extends Ship {
 
 export class ShipController extends ShipDB {
     private static DB = new Entity<ShipDB>('ships')
-    protected constructor(data, fields=[]){
+    protected constructor(data, fields?){
         super()
-        util.obj_copyto(data, this, `_id name class port captain
-            owner integrity mass engine speed movement size attack
-            defence crew slots modules inventory img`+fields.join(' '))
+        util.obj_copyto(data, this, fields)
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }

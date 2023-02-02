@@ -1,44 +1,13 @@
 import React from 'react';
 import * as RR from 'react-router-dom'
-import * as F from '../Fetcher'
-import Corporation from './Corporation'
+import CorpDetails from './Corporation'
 import List from './List'
-import {Corporation as ECorp, User} from '../common/entity'
-import L from './locale'
-
-type CorpDetailsState = {
-    id: string
-    corp?: ECorp
-}
-type CorpDetailsProps = {
-    user: User
-    params: RR.Params
-}
-
-class CorpDetails extends F.Fetcher<CorpDetailsProps, CorpDetailsState> {
-    constructor(props){
-        super(props)
-        this.state = {id: props.params.id}
-    }
-    get fetchUrl() {
-        const {id} = this.state
-        return `/api/corp/${id}`
-    }
-    fetchState(data: any = {}){
-        const {corp} = data
-        return {item: data, corp}
-    }
-    render(){
-        const {corp} = this.state
-        if (!corp)
-            return <div>{L('not_found')}</div>
-        return <Corporation corp={corp} />
-    }
-}
+import {User} from '../common/entity'
 
 function CorpDetailsNavigator(props: {user: User}) {
     const params = RR.useParams()
-    return <CorpDetails user={props.user} params={params} />
+    const {id} = params
+    return <CorpDetails user={props.user} id={id} />
 }
 
 export function Navigator(props){

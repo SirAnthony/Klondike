@@ -1,4 +1,4 @@
-import {Corporation, Ship, ShipClass} from '../client/src/common/entity'
+import {Corporation, Ship, ShipClass, ItemType} from '../client/src/common/entity'
 import {ShipController, CorpController} from '../src/entity/index'
 import {CorpAlias, Fixtures as CorpFixtures} from './corps'
 
@@ -6,6 +6,7 @@ class ShipFixture extends Ship {
 }
 
 const ships: ShipFixture[] = [{
+    type: ItemType.Ship,
     name: 'Солнечная виверна',
     class: ShipClass.D,
     port: '',
@@ -22,8 +23,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Красная королева',
     class: ShipClass.D,
     port: '',
@@ -40,8 +45,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'нет 3',
     class: ShipClass.D,
     port: '',
@@ -58,8 +67,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: [] 
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Милость богини Кали',
     class: ShipClass.D,
     port: '',
@@ -76,8 +89,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: [] 
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Мустанг',
     class: ShipClass.D,
     port: '',
@@ -94,8 +111,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'нет 6',
     class: ShipClass.D,
     port: '',
@@ -112,8 +133,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Бойкот',
     class: ShipClass.D,
     port: '',
@@ -130,8 +155,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'нет 8',
     class: ShipClass.D,
     port: '',
@@ -148,8 +177,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Sanctuary',
     class: ShipClass.D,
     port: '',
@@ -166,8 +199,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Honeybadger',
     class: ShipClass.D,
     port: '',
@@ -184,8 +221,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Черная Птица',
     class: ShipClass.D,
     port: '',
@@ -202,8 +243,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'нет 12',
     class: ShipClass.D,
     port: '',
@@ -220,8 +265,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'Корабль 13',
     class: ShipClass.D,
     port: '',
@@ -238,8 +287,12 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 }, {
+    type: ItemType.Ship,
     name: 'ZX326 "Валера"',
     class: ShipClass.D,
     port: '',
@@ -256,7 +309,10 @@ const ships: ShipFixture[] = [{
     crew: 3,
     slots: 4,
     modules: [],
-    inventory: []
+    inventory: [],
+    price: 20000,
+    round_cost: 20000,
+    location: null,
 },]
 
 class ShipControllerFixture extends ShipController {

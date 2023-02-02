@@ -10,9 +10,9 @@ class CorporationDB extends Corporation {
 
 export class CorpController extends CorporationDB {
     private static DB = new Entity<CorporationDB>('corps')
-    protected constructor(data, fields=[]){
+    protected constructor(data, fields?){
         super()
-        util.obj_copyto(data, this, `_id name`+fields.join(' '))
+        util.obj_copyto(data, this, fields)
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }

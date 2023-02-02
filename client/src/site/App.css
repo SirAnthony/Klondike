@@ -102,6 +102,10 @@
     max-width: 360px;
 }
 
+.row > .menu-box-col {
+    max-width: 300px;
+}
+
 .menu-box-clear {
     max-width: 250px;
 }

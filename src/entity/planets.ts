@@ -10,9 +10,9 @@ class PlanetDB extends Planet {
 
 export class PlanetController extends PlanetDB {
     private static DB = new Entity<PlanetDB>('planets')
-    protected constructor(data, fields=[]){
+    protected constructor(data, fields?){
         super()
-        util.obj_copyto(data, this, `_id name type zones resources`+fields.join(' '))
+        util.obj_copyto(data, this, fields)
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }

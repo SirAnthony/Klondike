@@ -20,5 +20,10 @@ export default {
         size: {width: 1366, height: 768},
         radius: 25,
     },
-    date: new Date('06.05.2523')
+    price: {
+        res: {
+            // Resource prices per type
+        }
+    },
+    date: new Date('06.05.2523'),
 }

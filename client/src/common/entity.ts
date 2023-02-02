@@ -1,7 +1,12 @@
+import defines from "./defines"
 
 export interface Pos {
     col: number
     row: number
+}
+export type Location = Identifier & {
+    system: string
+    pos: Pos
 }
 
 export interface Identifier {
@@ -39,26 +44,61 @@ export class User extends ID {
     }
 }
 
-export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas}
-export class Resource {
-    type: ResourceType
-}
-export class Corporation extends ID {
+export class CorporationRequest {
+    resource: ResourceType
+    required: number
+    filled: number
 }
 
-export enum ItemType {Artifact, Drone, Module}
+export class Corporation extends ID {
+    credit: number
+    requests: CorporationRequest[]
+    items: Item[]
+}
+
+export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
 export class Item extends ID {
     type: ItemType
-    mass: number
+    owner: ID
+    location: Location | null
 }
 
-export class Drone extends Item {
-    movement: number
+export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas, Particle}
+export class Resource extends Item {
+    type = ItemType.Resource
+    kind: ResourceType
+    value: number
+    price: number
+    data: string
+    get cost(){
+        return this.value * defines.price.res[this.kind] }
+}
+
+export class Coordinates extends Item {
+    type = ItemType.Coordinates
+    planet: ID
+    price: number
+    info: string
+    data: Location
 }
 
 export class Module extends Item {
+    type = ItemType.Module
+    mass: number
     energy: number
     boosts: [{kind: string, value: number}]
+}
+
+export class Patent extends Item {
+    type = ItemType.Patent
+    data: string
+}
+
+export enum ArtifactType {Bio, Enginering, Anomaly}
+export class Artifact extends Item {
+    type = ItemType.Artifact
+    kind: ArtifactType
+    description: string
 }
 
 export const ShipValues = {
@@ -69,12 +109,14 @@ export const ShipValues = {
     mods: `size energy`.replace(/\s+/g, ' ').split(' ')
 }
 export enum ShipClass {A = 'A', B = 'B', C = 'C', D = 'D', E = 'E'}
-export class Ship extends ID {
+export class Ship extends Item {
+    type = ItemType.Ship
     name: string
     class: ShipClass
     port: string
     captain: ID
-    owner: ID
+    price: number
+    round_cost: number
     integrity: number
     mass: number
     engine: number
@@ -87,7 +129,6 @@ export class Ship extends ID {
     slots: number
     modules: Module[]
     inventory: Item[]
-    location?: Identifier & {pos: Pos}
     img?: string
 }
 
@@ -106,15 +147,10 @@ export type PlanetZone = {
     radius: number
     img?: string
 }
-export type PlanetItem = {
-    pos: Pos
-    type: ResourceType
-    amount: number
-    owner?: ID
-}
+
 export class Planet extends ID {
     zones: PlanetZone[]
-    resources: PlanetItem[]
+    resources: Item[]
     type: PlanetType
     ships?: PlanetShip[]
 }

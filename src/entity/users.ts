@@ -40,7 +40,7 @@ export type VKProfile = {
 export class UserController extends UserDB {
     private static DB = new Entity<UserDB>('users')
 
-    private constructor(data, fields=[]){
+    protected constructor(data, fields=[]){
         super()
         util.obj_copyto(data, this, `_id first_name last_name alias
             email phone credit type tokens `+fields.join(' '))

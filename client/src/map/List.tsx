@@ -8,7 +8,7 @@ import L from './locale'
 function PlanetRow(params: {planet: Planet}) {
     const {planet} = params
     const resources = planet.resources.map(f=>
-        `${L('res_'+f.type)}: ${f.amount}`+(f.owner ? `(${util.get_name(f.owner)})` : '')).join(', ')
+        `${L('res_'+f.type)}: `+(f.owner ? `(${util.get_name(f.owner)})` : '')).join(', ')
     const ships = planet.ships?.map(f=>
         <RB.NavLink href={`/ship/${f._id}`}>{util.get_name(f)}</RB.NavLink>)
     return <RB.Row className="menu-list-row">

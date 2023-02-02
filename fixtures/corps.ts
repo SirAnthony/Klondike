@@ -8,18 +8,33 @@ export class CorpFixture extends Corporation {
 
 const corps: CorpFixture[] = [{
     name: 'Amalgam Pharmaceuticals',
+    credit: 25000,
+    requests: [],
+    items: [],
     alias: CorpAlias.AP,
 }, {
     name: 'Rakuza',
+    credit: 25000,
+    requests: [],
+    items: [],
     alias: CorpAlias.R,
 }, {
     name: 'Wayne-Yuanti',
+    credit: 25000,
+    requests: [],
+    items: [],
     alias: CorpAlias.WY,
 }, {
     name: 'Union Spacecraft Corporation, USC',
+    credit: 25000,
+    requests: [],
+    items: [],
     alias: CorpAlias.USC,
 }, {
     name: 'Земная федерация',
+    credit: 25000,
+    requests: [],
+    items: [],
     alias: CorpAlias.EF,
 },]
 
