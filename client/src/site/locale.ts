@@ -1,6 +1,6 @@
 import {load, default as BL} from '../common/locale'
-
-load('site', {
+const mod = 'site'
+load(mod, {
     'title': 'Klondike',
     'account': 'Аккаунт',
     'interface_ship': 'Интерфейс корабля',
@@ -12,5 +12,5 @@ load('site', {
 })
 
 export default function L(str: string, ...args): string {
-    return BL(`site_${str}`, ...args)
+    return BL(`${mod}_${str}`, ...args)
 }

@@ -5,7 +5,7 @@ import * as entity from '../common/entity'
 import EventEmitter from '../common/events'
 import {UserLogin, UserLoginNav} from './Login'
 import {UserRegister, UserRegisterNav} from './Register'
-import L from '../common/locale'
+import {default as L, LR} from './locale'
 
 const BarEvents = new EventEmitter()
 export function requestReload(){
@@ -22,7 +22,8 @@ type UserBarProps = {
 }
 
 export class UserBar extends F.Fetcher<UserBarProps, UserBarState> {
-    fetch_url = '/auth/info'
+    L = L
+    get fetchUrl(){ return '/auth/info' }
     constructor(props){
         super(props)
         this.state = {reg: false, login: false}
@@ -48,21 +49,21 @@ export class UserBar extends F.Fetcher<UserBarProps, UserBarState> {
         const user = this.state?.item
         const {reg, login} = this.state
         return <RB.Container><RB.Navbar>
-          <RB.Navbar.Brand href="/">{L('site_title')}</RB.Navbar.Brand>
+          <RB.Navbar.Brand href="/">{LR('site_title')}</RB.Navbar.Brand>
           <RB.Navbar.Toggle />
           <RB.Navbar.Collapse className='justify-content-end'>
             { !user && <UserLoginNav value={login} onClick={this.toggle_login}/> }
-            { !user && <UserRegisterNav value={reg} onClick={this.toggle_reg}/> }
+            { false && !user && <UserRegisterNav value={reg} onClick={this.toggle_reg}/> }
             { user && <RB.Nav>
-              <RB.NavDropdown title={user.displayName||L('site_account')}>
-                <RB.NavDropdown.Item href="/account/profile">Профиль</RB.NavDropdown.Item>
-                { user.admin && <RB.NavDropdown.Item href="/admin/main">Администрирование</RB.NavDropdown.Item> }
-                <RB.NavDropdown.Item href="/auth/logout">Выйти</RB.NavDropdown.Item>
+              <RB.NavDropdown title={user.displayName||LR('site_account')}>
+                <RB.NavDropdown.Item href="/account/profile">{this.L('profile')}</RB.NavDropdown.Item>
+                { user.admin && <RB.NavDropdown.Item href="/admin/">{this.L('button_admin')}</RB.NavDropdown.Item> }
+                <RB.NavDropdown.Item href="/auth/logout">{this.L('button_logout')}</RB.NavDropdown.Item>
               </RB.NavDropdown>
             </RB.Nav> }
           </RB.Navbar.Collapse>
         </RB.Navbar><RB.Row>
-          { !user && reg && !login && <UserRegister parent={this} />}
+          { false && !user && reg && !login && <UserRegister parent={this} />}
           { !user && login && !reg && <UserLogin parent={this} />}
         </RB.Row></RB.Container>
     }

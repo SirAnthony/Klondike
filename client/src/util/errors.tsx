@@ -3,8 +3,14 @@ import * as util from '../common/util'
 import * as CError from '../common/errors'
 import L from '../common/locale'
 
-export function ErrorMessage(props: {field: CError.ApiStackError | CError.ApiStackError[], className?: string}){
-    const field: CError.ApiStackError | CError.ApiStackError[] = props.field
+type ErrorMessageProps = {
+    field?: CError.ApiStackError | CError.ApiStackError[]
+    message?: string
+    className?: string
+}
+
+export function ErrorMessage(props: ErrorMessageProps){
+    const field = props.field || new CError.ClientError(props.message || 'error_unknown')
     if (!field)
         return null
     if (Array.isArray(field)) {

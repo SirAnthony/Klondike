@@ -13,56 +13,48 @@ export class UserFixture extends User {
 
 const users: User[] = [new UserFixture({
     name: 'Master',
-    email: 'master@klondike',
     alias: 'Master',
     first_name: 'Mas',
     last_name: 'ter',
     type: UserType.Master,
 }), new UserFixture({
     name: 'Captain',
-    email: 'captain@klondike',
     alias: 'Cpt',
     first_name: 'Captain',
     last_name: 'Brave',
     type: UserType.Captain,
 }), new UserFixture({
     name: 'Corporant',
-    email: 'corporant@klondike',
     alias: 'Corp',
     first_name: 'Rat',
     last_name: 'Fisher',
     type: UserType.Corporant,
 }), new UserFixture({
     name: 'Guard',
-    email: 'guard@klondike',
     alias: 'Steely',
     first_name: 'Iron',
     last_name: 'Brow',
     type: UserType.Guard,
 }), new UserFixture({
     name: 'Mechanic',
-    email: 'mechanic@klondike',
     alias: 'Mech',
     first_name: 'Peter',
     last_name: 'Moons',
     type: UserType.Mechanic,
 }), new UserFixture({
     name: 'Navigator',
-    email: 'navigator@klondike',
     alias: 'Baldy',
     first_name: 'Blue',
     last_name: 'Eyes',
     type: UserType.Navigator,
 }), new UserFixture({
     name: 'Scientist',
-    email: 'scientist@klondike',
-    alias: 'Master',
+    alias: 'Bighead',
     first_name: 'Gordon',
     last_name: 'Bondman',
     type: UserType.Scientist,
 }), new UserFixture({
     name: 'Nobody',
-    email: 'nobody@klondike',
     alias: 'Nobody',
     first_name: 'John',
     last_name: 'Doe',
@@ -78,13 +70,15 @@ class UserControllerFixture extends UserController {
 export const Fixtures = users
 
 export default async function load() {
-    for (let planet of users) {
-        const prev = await UserController.find({name: planet.name})
+    for (let user of users) {
+        const prev = await UserController.find({name: user.name})
         if (prev) {
-            for (let k in planet)
-                prev[k] = planet[k]
+            for (let k in user)
+                prev[k] = user[k]
         }
-        const s = prev || new UserControllerFixture(planet)
+        const s = prev || new UserControllerFixture(user)
+        s.email = s.name.toLowerCase().replace(/[^\w]+/g, '')+'@klondike.fed'
+        s.password = await UserController.hash_password(s.email)
         await s.save()
     }
 }

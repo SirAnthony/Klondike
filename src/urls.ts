@@ -19,6 +19,7 @@ api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/corps/': {func: 'corp_list', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},
     '/planets/': {func: 'planet_list', methods: ['get']},
+    '/users/': {func: 'users_list', methods: ['get']},
 }},
 auth: {prefix: '/auth', router: AuthRouter, urls: {
     '/info': {func: 'info', methods: ['get'], json: true},

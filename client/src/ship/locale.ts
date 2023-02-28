@@ -1,6 +1,6 @@
 import {load, default as BL} from '../common/locale'
-
-load('ship', {
+const mod = 'ship'
+load(mod, {
     'not_found': 'Корабль не найден',
     'interface': 'Интерфейс корабля',
     'listing': 'Список кораблей',
@@ -45,5 +45,5 @@ load('ship', {
 })
 
 export default function L(str: string, ...args): string {
-    return BL(`ship_${str}`, ...args)
+    return BL(`${mod}_${str}`, ...args)
 }

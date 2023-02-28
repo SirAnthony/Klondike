@@ -13,6 +13,30 @@ export function ControlBar(props: {title?: string, onClose?: ()=>void}){
     </RB.Row>
 }
 
+export class Menu<P, S> extends React.PureComponent<P, S & F.ErrorState> {
+    L: (string)=>string
+    constructor(props){
+        super(props)
+        this.state = {} as any
+    }
+    body(): JSX.Element[] {
+        return []
+    }
+    content(){
+        const {err} = this.state
+        if (err)
+            return [<ErrorMessage field={err} />]
+        return this.body()
+    }
+    render(){
+        const body = this.content()
+        return <RB.Container className="menu-container">
+          <ControlBar title={this.L('interface')} />
+          {body}
+        </RB.Container>
+    }
+}
+
 type ListState = {list?: any[]}
 export class List<P, S> extends F.Fetcher<P, S & ListState> {
     L: (string)=>string

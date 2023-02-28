@@ -4,7 +4,7 @@ import * as util from '../common/util'
 import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
 import {UserBar} from './Bar'
-import L from '../common/locale'
+import L from './locale'
 
 type UserLoginProps = {
     parent: UserBar
@@ -23,9 +23,9 @@ export function UserLoginNav(props: {value: Boolean, onClick: (val: Boolean)=>vo
     return <RB.Container>
       <RB.Row>
         <RB.Col xl={4} md={5}>
-          <a href="/auth/oauth/vk">
+          { false && <a href="/auth/oauth/vk">
             <button className='vk_flat_button wauth_auth'>{L('login_nav_vk')}</button>
-          </a>
+          </a> }
         </RB.Col>
         <RB.Col>
           <RB.Nav.Item className='nowrap' onClick={click}>{nav_text}</RB.Nav.Item>

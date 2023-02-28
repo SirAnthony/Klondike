@@ -1,6 +1,6 @@
 import {load, isDefined, default as BL} from '../common/locale'
-
-load('map', {
+const mod = 'map'
+load(mod, {
     'listing': 'Cписок планет',
     'not_found': 'Карта не найдена',
     'desc_name': 'Имя',
@@ -17,11 +17,11 @@ load('map', {
 })
 
 export function LR(str: string, ...args): string {
-    if (isDefined(`map_${str}`))
-        return L(str, ...args)
-    return str
+    if (isDefined(str))
+        return BL(str, ...args)
+    return L(str, ...args)
 }
 
 export default function L(str: string, ...args): string {
-    return BL(`map_${str}`, ...args)
+    return BL(`${mod}_${str}`, ...args)
 }

@@ -4,7 +4,7 @@ import * as util from '../common/util'
 import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
 import {UserBar} from './Bar'
-import L from '../common/locale'
+import L from './locale'
 
 type UserRegisterProps = {
     parent: UserBar

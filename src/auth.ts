@@ -52,7 +52,7 @@ class Account {
 
     async localStrategy(email: string, password: string, done) {
         email = util.clear_email(email)
-        const user = await UserController.find({email}, ['password'])
+        const user = await UserController.find({email})
         if (!user || !(await user.check_pass(password)))
             return done(new Error('login_error_invalid'))
         delete user.password

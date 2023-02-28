@@ -1,6 +1,6 @@
 import {load, isDefined, tpl, default as BL} from '../common/locale'
-
-load('corp', {
+const mod = 'corp'
+load(mod, {
     'not_found': 'Корпорация не найдена',
     'interface': 'Интерфейс корпорации',
     'listing': 'Список корпораций',
@@ -13,11 +13,11 @@ load('corp', {
 })
 
 export function LR(str: string, ...args): string {
-    if (isDefined(`map_${str}`))
+    if (isDefined(`${mod}_${str}`))
         return L(str, ...args)
     return str
 }
 
 export default function L(str: string, ...args): string {
-    return BL(`corp_${str}`, ...args)
+    return BL(`${mod}_${str}`, ...args)
 }

@@ -4,9 +4,10 @@ import * as RB from 'react-bootstrap'
 import {UserBar} from '../user/Bar'
 import {UserProfile} from '../user/Profile'
 import * as entity from '../common/entity'
-import {Navigator as ShipNavigator, ListNavigator as ShipListNavigator} from '../ship'
-import {Navigator as CorpNavigator, ListNavigator as CorpListNavigator} from '../corp'
+import {Navigator as ShipNavigator} from '../ship'
+import {Navigator as CorpNavigator} from '../corp'
 import {Navigator as MapNavigator, ListNavigator as PlanetListNavigator} from '../map'
+import {Navigator as AdminNavigator} from '../admin'
 import L from './locale'
 import './App.css';
 
@@ -29,6 +30,7 @@ function BasicNavigator(props){
 function App() {
   const [user, setUser] = React.useState(null)
   const onUserUpdate = (u: entity.User)=>{ setUser(u) }
+  const is_admin = user && (user as entity.User).admin
   return (<div className="App">
   <RR.BrowserRouter>
     <RB.Container className="app-head">
@@ -37,13 +39,12 @@ function App() {
     <RR.Routes>
       <RR.Route path='/' element={<BasicNavigator user={user} />} />
       <RR.Route path='/ship/*' element={<ShipNavigator user={user} />} />
-      <RR.Route path='/ships/' element={<ShipListNavigator user={user} />} />
       <RR.Route path='/corp/*' element={<CorpNavigator user={user} />} />
-      <RR.Route path='/corps/' element={<CorpListNavigator user={user} />} />
       <RR.Route path='/map/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planet/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
       <RR.Route path='/account/profile' element={<UserProfile user={user} />} />
+      { is_admin && <RR.Route path='/admin/*' element={<AdminNavigator user={user} />} />}
     </RR.Routes>
   </RR.BrowserRouter>
   </div>);

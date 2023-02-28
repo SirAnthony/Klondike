@@ -1,7 +1,7 @@
 import {BaseRouter, CheckAuthenticated} from './base'
 import {UserController, ShipController, CorpController} from '../entity'
 import {PlanetController} from '../entity'
-import {Profile, UserType} from '../../client/src/common/entity'
+import {Profile, User, UserType} from '../../client/src/common/entity'
 import {RenderContext} from '../middlewares'
 import * as server_util from '../util/server'
 import {ApiError, Codes} from '../../client/src/common/errors'
@@ -90,6 +90,12 @@ export class ApiRouter extends BaseRouter {
     @CheckRole(UserType.Navigator)
     async get_planet_list(ctx: RenderContext){
         const list = await PlanetController.all()
+        return {list}
+    }
+
+    @CheckRole(UserType.Master)
+    async get_users_list(ctx: RenderContext){
+        const list = await UserController.all()
         return {list}
     }
 }

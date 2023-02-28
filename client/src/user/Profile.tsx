@@ -4,7 +4,7 @@ import * as util from '../common/util'
 import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
 import {User, Profile} from '../common/entity'
-import L from '../common/locale'
+import L from './locale'
 import EventEmitter from '../common/events'
 
 const ProfileEvents = new EventEmitter()
