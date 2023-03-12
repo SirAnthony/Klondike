@@ -1,5 +1,5 @@
 import {Corporation} from '../client/src/common/entity'
-import {CorpController} from '../src/entity/index'
+import {CorpController} from '../src/entity'
 
 export enum CorpAlias {AP = 'AP', R = 'R', WY = 'WY', USC = 'USC', EF = 'EF'}
 export class CorpFixture extends Corporation {

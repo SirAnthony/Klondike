@@ -8,7 +8,7 @@ class PlanetDB extends Planet {
     updated: Date
 }
 
-export class PlanetController extends PlanetDB {
+export class Controller extends PlanetDB {
     private static DB = new Entity<PlanetDB>('planets')
     protected constructor(data, fields?){
         super()
@@ -21,27 +21,27 @@ export class PlanetController extends PlanetDB {
         const data = this as PlanetDB
         data.created = data.created || new Date()
         data.updated = new Date()
-        return await PlanetController.DB.save(data)
+        return await Controller.DB.save(data)
     }
 
-    static async get(data: PlanetController | PlanetDB | Planet | ObjectId | string, fields?){
-        if (data instanceof PlanetController)
+    static async get(data: Controller | PlanetDB | Planet | ObjectId | string, fields?){
+        if (data instanceof Controller)
             return data
         if (data instanceof ObjectId || typeof data == 'string')
-            data = await PlanetController.DB.get(data)
-        return new PlanetController(data, fields)
+            data = await Controller.DB.get(data)
+        return new Controller(data, fields)
     }
 
-    static async find(data, fields?) : Promise<PlanetController> {
-        const ret = await PlanetController.DB.find(data)
+    static async find(data, fields?) : Promise<Controller> {
+        const ret = await Controller.DB.find(data)
         if (ret)
-            return new PlanetController(ret, fields)
+            return new Controller(ret, fields)
     }
 
-    static async all(filter = {}) : Promise<PlanetController[]> {
-        const items = await PlanetController.DB.list(filter), ret = []
+    static async all(filter = {}) : Promise<Controller[]> {
+        const items = await Controller.DB.list(filter), ret = []
         for (let item of items)
-            ret.push(await PlanetController.get(item))
+            ret.push(await Controller.get(item))
         return ret
     }
 }

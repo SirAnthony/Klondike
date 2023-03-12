@@ -1,27 +1,10 @@
-import {BaseRouter, CheckAuthenticated} from './base'
-import {UserController, ShipController, CorpController} from '../entity'
-import {PlanetController} from '../entity'
-import {Profile, User, UserType} from '../../client/src/common/entity'
-import {RenderContext} from '../middlewares'
-import * as server_util from '../util/server'
-import {ApiError, Codes} from '../../client/src/common/errors'
+import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
+import {UserController, ShipController, ItemController} from '../../entity'
+import {PlanetController} from '../../entity'
+import {Profile, UserType} from '../../../client/src/common/entity'
+import {RenderContext} from '../../middlewares'
+import * as server_util from '../../util/server'
 import {ObjectId} from 'mongodb';
-
-export function CheckRole(roles: UserType[] | UserType){
-    return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
-        return {...descriptor, value: async function check(ctx: RenderContext){
-            // if (!ctx.isAuthenticated())
-            //    throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
-            // const types = Array.isArray(roles) ? roles : [roles]
-            // if (!types.includes(UserType.Master))
-            //     types.push(UserType.Master)
-            // const {user}: {user: UserController} = ctx.state
-            // if (types.length && !types.includes(user.type))
-            //     throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
-            return descriptor.value.apply(this, arguments)
-        }}
-    }
-}
 
 export class ApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -60,20 +43,6 @@ export class ApiRouter extends BaseRouter {
     @CheckRole(UserType.Corporant)
     async get_ship_list(ctx: RenderContext){
         const list = await ShipController.all()
-        return {list}
-    }
-
-    @CheckRole(UserType.Corporant)
-    async get_corp(ctx: RenderContext){
-        const {id} = ctx.params;
-        const {user}: {user: UserController} = ctx.state
-        const corp = await CorpController.get(id)
-        return {corp}
-    }
-
-    @CheckRole(UserType.Master)
-    async get_corp_list(ctx: RenderContext){
-        const list = await CorpController.all()
         return {list}
     }
 

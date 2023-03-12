@@ -5,6 +5,7 @@ import {User} from '../common/entity'
 import {Menu as UMenu, List as UList} from '../util/controls' 
 import {ListNavigator as ShipListNavigator} from '../ship'
 import {ListNavigator as CorpListNavigator} from '../corp'
+import {ListNavigator as ResourcesNavigator} from './Resources'
 import {ListNavigator as UserListNavigator} from '../user/List'
 import L from './locale'
 
@@ -28,10 +29,6 @@ class OrdersNavigator extends UList<ListProps, ListState> {
 
 }
 
-class ResourcesNavigator extends UList<ListProps, ListState> {
-    
-}
-
 export function Navigator(props) {
     const {user} = props
     return (<div>
@@ -39,9 +36,9 @@ export function Navigator(props) {
         <RR.Route path='/' element={<ListNavigator user={user} />} />
         <RR.Route path='/orders' element={<OrdersNavigator user={user} />} />
         <RR.Route path='/resources' element={<ResourcesNavigator user={user} />} />
-        <RR.Route path='/ships/' element={<ShipListNavigator user={user} />} />
-        <RR.Route path='/corps/' element={<CorpListNavigator user={user} />} />
-        <RR.Route path='/users/' element={<UserListNavigator user={user} />} />
+        <RR.Route path='/ships' element={<ShipListNavigator user={user} />} />
+        <RR.Route path='/corps' element={<CorpListNavigator user={user} />} />
+        <RR.Route path='/users' element={<UserListNavigator user={user} />} />
       </RR.Routes>
     </div>)
 }

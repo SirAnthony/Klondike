@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as Koa from 'koa'
 import * as middlewares from './middlewares'
-import * as urls from './urls'
+import * as urls from './routes/urls'
 import config from './config'
 import merge = require('lodash.merge')
 import {Server} from 'http';

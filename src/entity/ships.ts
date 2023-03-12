@@ -8,7 +8,7 @@ class ShipDB extends Ship {
     updated: Date
 }
 
-export class ShipController extends ShipDB {
+export class Controller extends ShipDB {
     private static DB = new Entity<ShipDB>('ships')
     protected constructor(data, fields?){
         super()
@@ -26,27 +26,27 @@ export class ShipController extends ShipDB {
         const data = this as ShipDB
         data.created = data.created || new Date()
         data.updated = new Date()
-        return await ShipController.DB.save(data)
+        return await Controller.DB.save(data)
     }
 
-    static async get(data: ShipController | ShipDB | Ship | ObjectId | string, fields?){
-        if (data instanceof ShipController)
+    static async get(data: Controller | ShipDB | Ship | ObjectId | string, fields?){
+        if (data instanceof Controller)
             return data
         if (data instanceof ObjectId || typeof data == 'string')
-            data = await ShipController.DB.get(data)
-        return new ShipController(data, fields)
+            data = await Controller.DB.get(data)
+        return new Controller(data, fields)
     }
 
-    static async find(data, fields?) : Promise<ShipController> {
-        const ret = await ShipController.DB.find(data)
+    static async find(data, fields?) : Promise<Controller> {
+        const ret = await Controller.DB.find(data)
         if (ret)
-            return new ShipController(ret, fields)
+            return new Controller(ret, fields)
     }
 
-    static async all(filter = {}) : Promise<ShipController[]> {
-        const items = await ShipController.DB.list(filter), ret = []
+    static async all(filter = {}) : Promise<Controller[]> {
+        const items = await Controller.DB.list(filter), ret = []
         for (let user of items)
-            ret.push(await ShipController.get(user))
+            ret.push(await Controller.get(user))
         return ret
     }
 }

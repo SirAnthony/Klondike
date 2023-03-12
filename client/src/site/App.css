@@ -204,14 +204,14 @@ button.btn-close {
     /*background-color: #000;*/
 }
 
-input.form-control {
+input.form-control, select.form-select {
     color: var(--color-ui-text);
     border: solid var(--color-ui-border) 1px;
     background-color: var(--color-ui-input);
     font-size: 10pt;
 }
 
-input.form-control:focus {
+input.form-control:focus, select.form-select:focus {
     color: var(--color-ui-text);
     background-color: var(--color-ui-input-focus);
 }

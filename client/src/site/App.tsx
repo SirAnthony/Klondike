@@ -45,6 +45,7 @@ function App() {
       <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
       <RR.Route path='/account/profile' element={<UserProfile user={user} />} />
       { is_admin && <RR.Route path='/admin/*' element={<AdminNavigator user={user} />} />}
+      { is_admin && <RR.Route path='/admin/' element={<AdminNavigator user={user} />} />}
     </RR.Routes>
   </RR.BrowserRouter>
   </div>);

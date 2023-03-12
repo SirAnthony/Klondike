@@ -28,6 +28,25 @@ const aliases = {
     'reset_password_sent': 'Письмо с инструкциями отправлено',
     'error_account_retrive': 'Аккаунт создан, но авторизация не удалась, '+
         'обновите страницу и войдите',
+    'resource_0': 'Минералы',
+    'resource_1': 'Энергия',
+    'resource_2': 'Сплавы',
+    'resource_3': 'Кристаллы',
+    'resource_4': 'Газ',
+    'resource_5': 'Частицы',
+    'res_desc_id': 'SSC-ID',
+    'res_desc_type': 'Тип ресурса',
+    'res_desc_name': 'Название',
+    'res_desc_volume': 'Объем',
+    'res_desc_price': 'Цена',
+    'res_desc_actions': 'Действия',
+    'item_desc_type': 'Тип',
+    'item_type_0': 'Ресурс',
+    'item_type_1': 'Координаты',
+    'item_type_2': 'Корабль',
+    'item_type_3': 'Модуль',
+    'item_type_4': 'Патент',
+    'item_type_5': 'Артефакт',
 }
 
 export function extend(obj: {string: string | ((...values: any[])=>string)}) {

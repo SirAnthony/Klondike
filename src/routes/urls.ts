@@ -1,9 +1,10 @@
 
-import {MainRouter, AuthRouter, ApiRouter, AdminRouter} from './routes'
-import {RenderContext} from './middlewares'
+import {MainRouter, AuthRouter, AdminRouter} from '.'
+import {ApiRouter, CorpApiRouter, AdminApiRouter} from './api'
+import {RenderContext} from '../middlewares'
 import {Environment} from 'nunjucks'
-import * as date from '../client/src/common/date'
-import config from './config'
+import * as date from '../../client/src/common/date'
+import config from '../config'
 import * as intl from 'intl'
 global.Intl = intl
 
@@ -11,12 +12,21 @@ export const urls = {
 main: {prefix: '', router: MainRouter, urls: {
     '/': {func: 'base', template: 'base', methods: ['get']},
 }},
+corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: {
+    '/items': {func: 'items', methods: ['get']},
+    '/items/:id': {func: 'items', methods: ['get']},
+    '/prices': {func: 'prices', methods: ['get']},
+    '/list': {func: 'list', methods: ['get']},
+    '/:id': {func: 'corp', methods: ['get']},
+}},
+admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {json: true}, urls: {
+    '/item/create': {func: 'item_change', methods: ['post']},
+    '/items/': {func: 'items_list', methods: ['get']},
+}},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/profile': {func: 'profile', methods: ['post']},
     '/ship/:id': {func: 'ship', methods: ['get']},
     '/ships/': {func: 'ship_list', methods: ['get']},
-    '/corp/:id': {func: 'corp', methods: ['get']},
-    '/corps/': {func: 'corp_list', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},
     '/planets/': {func: 'planet_list', methods: ['get']},
     '/users/': {func: 'users_list', methods: ['get']},

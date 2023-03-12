@@ -1,5 +1,5 @@
 export * from './main'
 export * from './auth'
-export * from './api'
+export * from './api/base'
 export * from './admin'
 export * from './base'

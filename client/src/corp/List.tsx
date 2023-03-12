@@ -21,7 +21,7 @@ type CorpListProps = {
 }
 export default class List extends UList<CorpListProps, CorpListState> {
     L = L
-    get fetchUrl() { return `/api/corps/` }
+    get fetchUrl() { return `/api/corp/` }
     body(){
         const {list} = this.state
         const rows = list.map(l=><CorpRow key={`corp_list_${l._id}`} corp={l} />)

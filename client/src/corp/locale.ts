@@ -10,12 +10,13 @@ load(mod, {
     'order': tpl`Текущий заказ на цикл ${0}`,
     'plan': tpl`Выполнение плана: ${0}%`,
     'market_prices': 'Рыночные цены',
+    'res_cur': 'Собственность',
 })
 
 export function LR(str: string, ...args): string {
-    if (isDefined(`${mod}_${str}`))
-        return L(str, ...args)
-    return str
+    if (isDefined(str))
+        return BL(str, ...args)
+    return L(str, ...args)
 }
 
 export default function L(str: string, ...args): string {

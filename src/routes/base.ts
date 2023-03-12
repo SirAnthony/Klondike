@@ -1,13 +1,15 @@
 
-import * as CError from '../../client/src/common/errors'
 import * as KoaRouter from 'koa-router'
 import {RenderContext} from '../middlewares'
+import {UserType} from '../../client/src/common/entity'
+import {UserController} from '../entity'
+import {ApiError, Codes} from '../../client/src/common/errors'
 
 export function CheckAuthenticated(){
     return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
         return {...descriptor, value: async function check(ctx: RenderContext){
             if (!ctx.isAuthenticated())
-               throw new CError.ApiError(CError.Codes.NO_LOGIN, 'Should be authentificated')
+               throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
             return descriptor.value.apply(this, arguments)
         }}
     }
@@ -19,9 +21,25 @@ export function CheckParam(rules={}){
             try { ctx.verifyParams(rules) }
             catch(e) {
                 if (e.code == 'INVALID_PARAM')
-                    e.code = CError.Codes.INCORRECT_PARAM
-                throw CError.ApiError.from(e)
+                    e.code = Codes.INCORRECT_PARAM
+                throw ApiError.from(e)
             }
+            return descriptor.value.apply(this, arguments)
+        }}
+    }
+}
+
+export function CheckRole(roles: UserType[] | UserType){
+    return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
+        return {...descriptor, value: async function check(ctx: RenderContext){
+            if (!ctx.isAuthenticated())
+               throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
+            const types = Array.isArray(roles) ? roles : [roles]
+            if (!types.includes(UserType.Master))
+                types.push(UserType.Master)
+            const {user}: {user: UserController} = ctx.state
+            if (types.length && !types.includes(user.type))
+                throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}
     }
@@ -58,14 +76,14 @@ export class BaseRouter {
             const args: any[] = [uri, async (ctx: RenderContext, next)=>{
                 try {
                     if (need_admin && (!ctx.isAuthenticated() || !ctx.state.user.admin))
-                        throw new CError.ApiError(CError.Codes.NOT_ADMIN, 'Permission denied') 
+                        throw new ApiError(Codes.NOT_ADMIN, 'Permission denied') 
                     const ret = await this[name](ctx, next);
                     if (json)
                         return await ctx.json(ret)
                     if (!no_render)
                         await ctx.render(opt.template, ret)
                 } catch(e) {
-                    const err = CError.ApiError.from(e), {status} = err
+                    const err = ApiError.from(e), {status} = err
                     if (json) {
                         ctx.status = status
                         return await ctx.json({err, status})
@@ -85,8 +103,8 @@ export class BaseRouter {
     check_param(ctx, check, field, message){
         if (check)
             return
-        const code = CError.Codes.INCORRECT_PARAM
-        return ctx.throw(new CError.ApiError(code, 'field_error_invalid',
+        const code = Codes.INCORRECT_PARAM
+        return ctx.throw(new ApiError(code, 'field_error_invalid',
             [{code, field, message}]))
     }
 }

@@ -3,7 +3,7 @@ import {Strategy as LocalStrategy} from 'passport-local'
 import {Strategy as VKStrategy} from 'passport-vkontakte'
 // import {Strategy as GoogleStrategy} from 'passport-google-oauth20'
 // import {Strategy as FacebookStrategy} from 'passport-facebook'
-import {UserController, VKProfile, AuthToken} from './entity/users';
+import {Controller as UserController, VKProfile, AuthToken} from './entity/users';
 import {ApiError, Codes} from '../client/src/common/errors'
 import * as secrets from '../secrets.tokens.json'
 import * as util from './util/util'

@@ -67,7 +67,7 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         const {id} = this.state
         return `/api/planet/${id}`
     }
-    fetchState(data: any){
+    fetchState(data: any = {}){
         const {planet, ship, date} = data
         return {item: data, planet, ship, date: new Date(date)}
     }

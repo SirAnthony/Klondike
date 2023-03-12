@@ -1,6 +1,7 @@
 import {load, tpl, isDefined, default as BL} from '../common/locale'
 const mod = 'user'
 load(mod, {
+    'listing': 'Список пользователей',
     'profile': 'Профиль',
     'login_nav': tpl`Войти ${0}`,
     'login_nav_vk': 'Войти через ВКонтакте',
@@ -20,6 +21,18 @@ load(mod, {
     'field_confirm': 'Повторите пароль',
     'reset_password': 'Сбросить пароль',
     'error_restricted': 'Нет доступа',
+    'desc_name': 'Имя',
+    'desc_alias': 'Имя',
+    'desc_role': 'Роль',
+    'desc_phone': 'Телефон',
+    'desc_user_type_0': 'Нет',
+    'desc_user_type_1': 'Корпорант',
+    'desc_user_type_2': 'Капитан',
+    'desc_user_type_3': 'Механик',
+    'desc_user_type_4': 'Навигатор',
+    'desc_user_type_5': 'Ученый',
+    'desc_user_type_6': 'Охранник',
+    'desc_user_type_7': 'Мастер',
 })
 
 export function LR(str: string, ...args): string {

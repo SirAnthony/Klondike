@@ -10,10 +10,12 @@ load(mod, {
     'link_ships': 'Корабли',
     'link_corps': 'Корпорации',
     'link_users': 'Пользователи',
+    'res_create': 'Создать ресурс',
+    'res_btn_create': 'Создать',
 })
 
 export function LR(str: string, ...args): string {
-    if (isDefined(`${mod}_${str}`))
+    if (isDefined(str))
         return BL(str, ...args)
     return L(str, ...args)
 }

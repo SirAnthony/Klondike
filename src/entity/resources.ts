@@ -1,15 +1,15 @@
 import {Entity} from './base';
-import {Identifier, Corporation} from '../../client/src/common/entity'
+import {Identifier, Resource} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
 
-class CorporationDB extends Corporation {
+class ResourceDB extends Resource {
     created: Date
     updated: Date
 }
 
-export class Controller extends CorporationDB {
-    private static DB = new Entity<CorporationDB>('corps')
+export class Controller extends ResourceDB {
+    private static DB = new Entity<ResourceDB>('resources')
     protected constructor(data, fields?){
         super()
         util.obj_copyto(data, this, fields)
@@ -18,13 +18,13 @@ export class Controller extends CorporationDB {
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
 
     async save() {
-        const data = this as CorporationDB
+        const data = this as ResourceDB
         data.created = data.created || new Date()
         data.updated = new Date()
         return await Controller.DB.save(data)
     }
 
-    static async get(data: Controller | CorporationDB | Corporation | ObjectId | string, fields?){
+    static async get(data: Controller | ResourceDB | Resource | ObjectId | string, fields?){
         if (data instanceof Controller)
             return data
         if (data instanceof ObjectId || typeof data == 'string')

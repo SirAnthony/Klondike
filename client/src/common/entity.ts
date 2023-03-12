@@ -53,22 +53,30 @@ export class CorporationRequest {
 export class Corporation extends ID {
     credit: number
     requests: CorporationRequest[]
-    items: Item[]
 }
 
 export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
+export enum MarketType {None, PublicSale, PrivateSale, Protected}
 export class Item extends ID {
     type: ItemType
-    owner: ID
+    owner: ID | null
     location: Location | null
+    price: number
+    market: {
+        type: MarketType
+        code?: String
+    }
 }
 
 export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas, Particle}
+export const ResourceMultiper = {
+    [ResourceType.Mineral]: 100,
+    [ResourceType.Energy]: 100,
+}
 export class Resource extends Item {
     type = ItemType.Resource
     kind: ResourceType
     value: number
-    price: number
     data: string
     get cost(){
         return this.value * defines.price.res[this.kind] }
@@ -77,7 +85,6 @@ export class Resource extends Item {
 export class Coordinates extends Item {
     type = ItemType.Coordinates
     planet: ID
-    price: number
     info: string
     data: Location
 }

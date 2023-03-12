@@ -2,20 +2,24 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {Corporation as ECorp, CorporationRequest as ECorpReq, User} from '../common/entity'
+import {Item as EItem, Resource as EResource} from '../common/entity'
+import {ResourceType} from '../common/entity'
 import * as util from '../common/util'
 import {ControlBar} from '../util/controls'
-import L from './locale'
+import {ItemRow, ItemRowDesc} from '../util/Item'
+import {default as L, LR} from './locale'
 
 type CorpProps = {
     corp: ECorp
     cycle: number
+    user: User
 }
 
 function Request(props: {req: ECorpReq}){
     const {req} = props
     return <RB.Container>
       <RB.Row>
-        <RB.Col>{L(`material_${req.resource}`)}</RB.Col>
+        <RB.Col>{LR(`resource_${req.resource}`)}</RB.Col>
         <RB.Col>{req.required}</RB.Col>
         <RB.Col>{req.resource}</RB.Col>
       </RB.Row>
@@ -61,15 +65,84 @@ export function Corporation(props: CorpProps){
       </RB.Row>
       <RB.Row>
         <RB.Col className='menu-box menu-box-col'>
-          <RB.Container>
-            <RB.Row className='menu-list-title'>
-              <RB.Col>{L('market_prices')}</RB.Col>
-            </RB.Row>
-          </RB.Container>
+          <PriceDetails {...props} />
         </RB.Col>
-        <RB.Col className='menu-box'></RB.Col>
+        <RB.Col className='menu-box'>
+          <ItemDetails {...props} />
+        </RB.Col>
       </RB.Row>
     </RB.Container>)
+}
+
+type ItemDetailsState = {
+    items?: EItem[]
+}
+
+type ItemDetailsProps = {
+    corp: ECorp
+    user: User
+}
+
+export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
+    constructor(props){
+        super(props)
+        this.state = {}
+    }
+    get fetchUrl() { 
+        const {corp} = this.props
+        return `/api/corp/items/${corp._id}`
+    }
+    fetchState(data: any = {}){
+        const {prices} = data
+        return {item: data, prices}
+    }
+    rows(){
+        const {items = []} = this.state
+        const rows = items.map(i=><ItemRow key={`item_row_${i._id}`} item={i} {...this.props}/>)
+        return rows
+    }
+    render(){
+        return <RB.Container>
+          <RB.Row className='menu-list-title'>
+            <RB.Col>{L('res_cur')}</RB.Col>
+          </RB.Row>
+          <ItemRowDesc />
+          {this.rows()}
+        </RB.Container>
+    }
+}
+
+type PriceDetailsState = {
+    prices?: {ResourceType: number}
+}
+
+type PriceDetailsProps = {
+    user: User
+}
+
+export class PriceDetails extends F.Fetcher<PriceDetailsProps, PriceDetailsState> {
+    constructor(props){
+        super(props)
+        this.state = {}
+    }
+    get fetchUrl() { return '/api/corp/prices' }
+    fetchState(data: any = {}){
+        const {prices} = data
+        return {item: data, prices}
+    }
+    render(){
+        const {prices = {}} = this.state
+        const items = Object.keys(prices).map(k=><RB.Row key={`market_res_${k}`}>
+          <RB.Col>{LR(`resource_${k}`)}</RB.Col>
+          <RB.Col>{prices[k]}</RB.Col>
+        </RB.Row>)
+        return <RB.Container>
+          <RB.Row className='menu-list-title'>
+            <RB.Col>{L('market_prices')}</RB.Col>
+          </RB.Row>
+          {items}
+        </RB.Container>
+    }
 }
 
 type CorpDetailsState = {
@@ -81,6 +154,7 @@ type CorpDetailsProp = {
     id?: string
     onClose?: ()=>void
 }
+
 
 export default class CorpDetails extends F.Fetcher<CorpDetailsProp, CorpDetailsState> {
     constructor(props){
@@ -99,7 +173,7 @@ export default class CorpDetails extends F.Fetcher<CorpDetailsProp, CorpDetailsS
         const {corp} = this.state
         return <RB.Container className="menu-container">
           <ControlBar title={L('interface')} onClose={this.props.onClose} />
-          {corp ? <Corporation corp={corp} cycle={1} /> : <div>{L('not_found')}</div>}
+          {corp ? <Corporation corp={corp} cycle={1} user={this.props.user} /> : <div>{L('not_found')}</div>}
         </RB.Container>
     }
 }

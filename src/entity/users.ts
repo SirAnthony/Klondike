@@ -37,7 +37,7 @@ export type VKProfile = {
     username: string
 }
 
-export class UserController extends UserDB {
+export class Controller extends UserDB {
     private static DB = new Entity<UserDB>('users')
 
     protected constructor(data, fields?){
@@ -52,7 +52,7 @@ export class UserController extends UserDB {
         const data = this as UserDB
         data.created = data.created || new Date()
         data.updated = new Date()
-        return await UserController.DB.save(data)
+        return await Controller.DB.save(data)
     }
 
     static async hash_password(password){
@@ -66,35 +66,35 @@ export class UserController extends UserDB {
 
     // Encrypts password
     static async fromObj(obj: any){
-        const u = new UserController(obj)
-        u.password = await UserController.hash_password(obj.password)
+        const u = new Controller(obj)
+        u.password = await Controller.hash_password(obj.password)
         return u
     }
 
-    static async get(data: UserController | UserDB | User | ObjectId | string, fields?){
-        if (data instanceof UserController)
+    static async get(data: Controller | UserDB | User | ObjectId | string, fields?){
+        if (data instanceof Controller)
             return data
         if (data instanceof ObjectId || typeof data == 'string')
-            data = await UserController.DB.get(data)
-        return new UserController(data, fields)
+            data = await Controller.DB.get(data)
+        return new Controller(data, fields)
     }
 
-    static async find(data, fields?) : Promise<UserController> {
-        const ret = await UserController.DB.find(data)
+    static async find(data, fields?) : Promise<Controller> {
+        const ret = await Controller.DB.find(data)
         if (ret)
-            return new UserController(ret, fields)
+            return new Controller(ret, fields)
     }
 
-    static async all(filter = {}) : Promise<UserController[]> {
-        const items = await UserController.DB.list(filter), ret = []
+    static async all(filter = {}) : Promise<Controller[]> {
+        const items = await Controller.DB.list(filter), ret = []
         for (let user of items)
-            ret.push(await UserController.get(user))
+            ret.push(await Controller.get(user))
         return ret
     }
 
     static fromVK(obj: VKProfile){
         const email = sutil.clear_email(obj.emails[0].value)
-        const u = new UserController({
+        const u = new Controller({
             email, 
             first_name: obj.name.givenName,
             last_name: obj.name.familyName,

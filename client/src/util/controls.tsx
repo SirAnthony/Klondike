@@ -5,16 +5,17 @@ import {CloseButton} from './buttons'
 import {ErrorMessage} from './errors'
 import * as F from '../Fetcher'
 
-export function ControlBar(props: {title?: string, onClose?: ()=>void}){
-    const {title = '', onClose} = props
+export function ControlBar(props: {title?: string, closeTo?: string, onClose?: ()=>void}){
+    const {title = '', onClose, closeTo} = props
     return <RB.Row className="menu-control">
       <RB.Col>{title}</RB.Col>
-      <RB.Col sm={1}><CloseButton onClose={onClose} /></RB.Col>
+      <RB.Col sm={1}><CloseButton onClose={onClose} to={closeTo} /></RB.Col>
     </RB.Row>
 }
 
 export class Menu<P, S> extends React.PureComponent<P, S & F.ErrorState> {
     L: (string)=>string
+    get closeLink() { return undefined }
     constructor(props){
         super(props)
         this.state = {} as any
@@ -31,7 +32,7 @@ export class Menu<P, S> extends React.PureComponent<P, S & F.ErrorState> {
     render(){
         const body = this.content()
         return <RB.Container className="menu-container">
-          <ControlBar title={this.L('interface')} />
+          <ControlBar title={this.L('interface')} closeTo={this.closeLink} />
           {body}
         </RB.Container>
     }
@@ -40,6 +41,7 @@ export class Menu<P, S> extends React.PureComponent<P, S & F.ErrorState> {
 type ListState = {list?: any[]}
 export class List<P, S> extends F.Fetcher<P, S & ListState> {
     L: (string)=>string
+    get closeLink() { return undefined }
     constructor(props){
         super(props)
         this.state = {} as any
@@ -56,13 +58,13 @@ export class List<P, S> extends F.Fetcher<P, S & ListState> {
         if (err)
             return [<ErrorMessage field={err} />]
         if (!list)
-            return [<div>{this.L('not_found')}</div>]
+            return [<div key={'list_empty'}>{this.L('not_found')}</div>]
         return this.body()
     }
     render(){
         const body = this.content()
         return <RB.Container className="menu-container">
-          <ControlBar title={this.L('listing')} />
+          <ControlBar title={this.L('listing')} closeTo={this.closeLink} />
           {body}
         </RB.Container>
     }
