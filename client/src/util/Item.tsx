@@ -49,13 +49,13 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
     }
     btn_buy(){
         const {owner, item} = this.props
-        if (owner || item.market.type != MarketType.PublicSale)
+        if (owner)
             return null
         return <RB.Button onClick={this.do_buy}>{L('act_buy')}</RB.Button>
     }
     btn_sell(){
         const {owner, item} = this.props
-        if (!owner || item.market.type != MarketType.None)
+        if (!owner)
             return null
         return <RB.Button onClick={this.do_sell}>{L('act_sell')}</RB.Button>
     }
@@ -69,12 +69,11 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
         const {admin, item} = this.props
         if (!admin)
             return null
-        const type = item.market.type == MarketType.Protected
         return <RB.Button onClick={this.do_lock}>{L(`act_lock`)}</RB.Button>
     }
     item_type(){
         const {item} = this.props
-        const {type} = item.market
+        const {type} = {type: 'buy'} // item.market
         return <span>{L(`act_item_market_${type}`)}</span>
     }
     render() {
@@ -92,13 +91,14 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
 export function ItemRow(props: ItemProps & {item: EItem}){
     const {item, admin, owner} = props
     const res = item as EResource
+    const type = 'buy' // item.market.type
     return <RB.Row className={props.className}>
       <RB.Col>{item._id}</RB.Col>
       <RB.Col>{L(`res_type_${item.type}`)}</RB.Col>
       <RB.Col>{res.kind ? L(`res_kind_${res.kind}`) : '-'}</RB.Col>
       <RB.Col>{res.value || 1}</RB.Col>
       <RB.Col>{item.price}</RB.Col>
-      {admin && <RB.Col>{L(`res_market_type_${item.market.type}`)}</RB.Col>}
+      {admin && <RB.Col>{L(`res_market_type_${type}`)}</RB.Col>}
       <ItemActions {...props} />
     </RB.Row>
 }

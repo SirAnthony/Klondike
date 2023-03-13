@@ -27,6 +27,7 @@ api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/profile': {func: 'profile', methods: ['post']},
     '/ship/:id': {func: 'ship', methods: ['get']},
     '/ships/': {func: 'ship_list', methods: ['get']},
+    '/planet/list': {func: 'planet_list_short', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},
     '/planets/': {func: 'planet_list', methods: ['get']},
     '/users/': {func: 'users_list', methods: ['get']},

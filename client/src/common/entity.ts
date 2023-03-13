@@ -62,10 +62,6 @@ export class Item extends ID {
     owner: ID | null
     location: Location | null
     price: number
-    market: {
-        type: MarketType
-        code?: String
-    }
 }
 
 export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas, Particle}
@@ -98,6 +94,7 @@ export class Module extends Item {
 
 export class Patent extends Item {
     type = ItemType.Patent
+    owners: ID[]
     data: string
 }
 
@@ -157,7 +154,10 @@ export type PlanetZone = {
 
 export class Planet extends ID {
     zones: PlanetZone[]
-    resources: Item[]
     type: PlanetType
+}
+
+export class PlanetInfo extends Planet {
+    items?: Item[]
     ships?: PlanetShip[]
 }

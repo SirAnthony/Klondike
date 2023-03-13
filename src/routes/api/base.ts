@@ -1,7 +1,7 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, ItemController} from '../../entity'
 import {PlanetController} from '../../entity'
-import {Profile, UserType} from '../../../client/src/common/entity'
+import {PlanetInfo, Profile, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
 import {ObjectId} from 'mongodb';
@@ -50,7 +50,7 @@ export class ApiRouter extends BaseRouter {
     async get_planet(ctx: RenderContext){
         const {id} = ctx.params;
         const {user}: {user: UserController} = ctx.state
-        const planet = await PlanetController.get(id)
+        const planet: PlanetInfo = await PlanetController.get(id)
         const ships = await ShipController.all({'location._id': new ObjectId(id)})
         planet.ships = ships.map(s=>s.PlanetShip)
         return {planet, date: server_util.currentDate()}
@@ -58,7 +58,18 @@ export class ApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Navigator)
     async get_planet_list(ctx: RenderContext){
-        const list = await PlanetController.all()
+        const list: PlanetInfo[] = await PlanetController.all()
+        for (let p of list) {
+            p.items = await ItemController.all({'location._id': p._id})
+            // p.ships = await ShipController.all({'location._id': p._id})
+        }
+        return {list}
+    }
+
+    @CheckRole(UserType.Navigator)
+    async get_planet_list_short(ctx: RenderContext){
+        const planets = await PlanetController.all()
+        const list = planets.map(p=>({_id: p._id, name: p.name}))
         return {list}
     }
 

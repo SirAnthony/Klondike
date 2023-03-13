@@ -28,6 +28,8 @@ const aliases = {
     'reset_password_sent': 'Письмо с инструкциями отправлено',
     'error_account_retrive': 'Аккаунт создан, но авторизация не удалась, '+
         'обновите страницу и войдите',
+    'item_owner': 'Владелец',
+    'item_location': 'Расположение',
     'resource_0': 'Минералы',
     'resource_1': 'Энергия',
     'resource_2': 'Сплавы',
@@ -47,6 +49,7 @@ const aliases = {
     'item_type_3': 'Модуль',
     'item_type_4': 'Патент',
     'item_type_5': 'Артефакт',
+    'loc_desc_coord': 'Координаты (x:y)',
 }
 
 export function extend(obj: {string: string | ((...values: any[])=>string)}) {
