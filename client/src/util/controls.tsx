@@ -53,16 +53,12 @@ export class List<P, S> extends F.Fetcher<P, S & ListState> {
     body(): JSX.Element[] {
         return []
     }
-    content(){
-        const {list, err} = this.state
-        if (err)
-            return [<ErrorMessage field={err} />]
-        if (!list)
-            return [<div key={'list_empty'}>{this.L('not_found')}</div>]
-        return this.body()
-    }
     render(){
-        const body = this.content()
+        const {list, err} = this.state
+        const body = list ? this.body() :
+            [<div key={'list_empty'}>{this.L('not_found')}</div>]
+        if (err)
+            body.unshift(<ErrorMessage field={err} />)
         return <RB.Container className="menu-container">
           <ControlBar title={this.L('listing')} closeTo={this.closeLink} />
           {body}

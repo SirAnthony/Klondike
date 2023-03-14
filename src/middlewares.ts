@@ -95,7 +95,7 @@ const allow_origin = (ctx: KoaRouter.RouterContext, next)=>{
     ctx.set('Access-Control-Expose-Headers', 'Content-Length, Date, ETag');
     ctx.set('Access-Control-Allow-Credentials', 'true');
     if (ctx.method=='OPTIONS') {
-        ctx.set('Access-Control-Allow-Methods', 'HEAD, GET, OPTIONS');
+        ctx.set('Access-Control-Allow-Methods', 'HEAD, GET, POST, OPTIONS');
         ctx.set('Access-Control-Allow-Headers', 'Content-Type, '+
             'X-Requested-With, Origin, Accept, Range, Cache-Control');
         ctx.set('Access-Control-Max-Age', '600');

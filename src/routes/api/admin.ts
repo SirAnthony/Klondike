@@ -1,5 +1,5 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, CorpController} from '../../entity'
+import {UserController, CorpController, PlanetController} from '../../entity'
 import {ResourceController, ItemController} from '../../entity'
 import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
@@ -25,8 +25,12 @@ export class AdminApiRouter extends BaseRouter {
         const params: any = ctx.request.body
         const {data = {}} = params
         let item = await ItemController.get(_id)
-        for (let k of data)
+        for (let k in data)
             item[k] = data[k]
+        if (data.owner)
+            item.owner = (await CorpController.get(data.owner._id)).identifier
+        if (data.location)
+            item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
         await item.save()
     }
 }

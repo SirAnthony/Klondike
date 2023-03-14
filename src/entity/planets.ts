@@ -1,5 +1,5 @@
 import {Entity} from './base';
-import {Identifier, Planet} from '../../client/src/common/entity'
+import {Identifier, Planet, Location, Pos} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
 
@@ -16,6 +16,8 @@ export class Controller extends PlanetDB {
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
+    location(pos: Pos): Location {
+        return {_id: this._id, name: this.name, pos, system: this.system} }
 
     async save() {
         const data = this as PlanetDB

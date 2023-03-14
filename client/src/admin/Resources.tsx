@@ -50,14 +50,14 @@ function ResourceInput(props: {onCreate: (item: Item)=>void}){
         <option key={`resource_type_${k}`}  value={+k}>{LR(`resource_${k}`)}</option>)
     resTypeOptions.unshift(<option key='res_type_none' value={-1}
         disabled={true}>{LR('res_desc_type')}</option>)
-    const [volume, setVolume] = React.useState(null)
+    const [volume, setVolume] = React.useState(undefined)
     const onVolumeChange = ({target: {value}})=>setVolume(+value)
-    const [price, setPrice] = React.useState(null)
+    const [price, setPrice] = React.useState(undefined)
     const onPriceChange = ({target: {value}})=>setPrice(+value)
     const [owner, setOwner] = React.useState('')
-    const [location, setLocation] = React.useState(null)
+    const [location, setLocation] = React.useState(undefined)
     const [coord, setCoord] = React.useState('')
-    const onCoordChange = ({target: value})=>setCoord(value)
+    const onCoordChange = ({target: {value}})=>setCoord(value)
     const onCreate = ()=>{
         const pos = coord?.split(':')
         const loc = pos?.length!=2 ? null : {name: '', system: '',
@@ -113,15 +113,17 @@ class List extends UList<ListProps, ListState> {
         catch (err){
             return this.setState({err: new ClientError(`not implemented: ${err}`)})
         }
-        const res = await util.wget('/api/item/create', {method: 'POST', data})
+        const res = await util.wget('/api/admin/item/create', {method: 'POST',
+            data: {data}})
         if (res.err)
             return void this.setState({err: res.err})
+        this.setState({err: null})
         this.fetch()
     }
     // Resource
     check_item_0(item: Item){
         const res = new Resource()
-        for (let k of Object.keys(Resource))
+        for (let k of Object.keys(item))
             res[k] = item[k]
         return res
     }

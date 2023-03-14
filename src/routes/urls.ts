@@ -19,7 +19,7 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},
-admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {json: true}, urls: {
+admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
     '/item/create': {func: 'item_change', methods: ['post']},
     '/items/': {func: 'items_list', methods: ['get']},
 }},
