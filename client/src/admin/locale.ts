@@ -11,7 +11,7 @@ load(mod, {
     'link_corps': 'Корпорации',
     'link_users': 'Пользователи',
     'res_create': 'Создать ресурс',
-    'res_btn_create': 'Создать',
+    'item_create': 'Создать сущность',
 })
 
 export function LR(str: string, ...args): string {

@@ -49,10 +49,18 @@
     white-space: nowrap;
 }
 
-.menu-container {
+.wrap-anywhere {
+    overflow-wrap: break-word;
+}
+
+.menu-container, .menu-container-full {
     background-color: var(--color-ui-box-hover);
     border: solid var(--color-ui-border) 2px;
     border-radius: 10px;
+}
+
+div.menu-container-full {
+    max-width: 100%;
 }
 
 .menu-box {

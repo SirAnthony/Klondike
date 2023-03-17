@@ -1,9 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, User} from '../common/entity'
+import {Corporation, User, Item} from '../common/entity'
 import {List as UList} from '../util/controls'
-import {ErrorMessage} from '../util/errors'
-import L from './locale'
+import {Select as USelect} from '../util/select'
+import {default as L, LR} from './locale'
 
 function CorpRow(params: {corp: Corporation}) {
     const {corp} = params
@@ -29,5 +29,14 @@ export default class List extends UList<CorpListProps, CorpListState> {
           <RB.Col></RB.Col>
           <RB.Col>{L('desc_name')}</RB.Col>
         </RB.Row>, ...rows]
+    }
+}
+
+
+export class Select extends USelect<{}, {}> {
+    L = LR
+    get fetchUrl(){ return '/api/corp/list' }
+    getOptions(list: Item[]){
+        return list.reduce((p, v)=>Object.assign(p, {[v._id]: v.name}), {}) || []
     }
 }

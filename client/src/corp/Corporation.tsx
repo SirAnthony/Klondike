@@ -19,7 +19,7 @@ function Request(props: {req: ECorpReq}){
     const {req} = props
     return <RB.Container>
       <RB.Row>
-        <RB.Col>{LR(`resource_${req.resource}`)}</RB.Col>
+        <RB.Col>{LR(`res_kind_${req.resource}`)}</RB.Col>
         <RB.Col>{req.required}</RB.Col>
         <RB.Col>{req.resource}</RB.Col>
       </RB.Row>
@@ -98,7 +98,8 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     }
     rows(){
         const {items = []} = this.state
-        const rows = items.map(i=><ItemRow key={`item_row_${i._id}`} item={i} {...this.props}/>)
+        const rows = items.map(i=><ItemRow onReload={()=>this.fetch()}
+            key={`item_row_${i._id}`} item={i} {...this.props}/>)
         return rows
     }
     render(){
@@ -106,7 +107,7 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
           <RB.Row className='menu-list-title'>
             <RB.Col>{L('res_cur')}</RB.Col>
           </RB.Row>
-          <ItemRowDesc />
+          <ItemRowDesc {...this.props} />
           {this.rows()}
         </RB.Container>
     }

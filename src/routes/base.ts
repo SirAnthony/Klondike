@@ -65,7 +65,6 @@ export class BaseRouter {
     }
     protected add(uri: string, func: string, opt: any = {}){
         const methods = opt.methods||['get', 'post']
-        const {no_render} = opt
         for (let m of methods){
             const name = `${m}_${func}`
             if (!this[name])
@@ -80,7 +79,7 @@ export class BaseRouter {
                     const ret = await this[name](ctx, next);
                     if (json)
                         return await ctx.json(ret)
-                    if (!no_render)
+                    if (!opt.no_render)
                         await ctx.render(opt.template, ret)
                 } catch(e) {
                     const err = ApiError.from(e), {status} = err

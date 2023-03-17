@@ -21,6 +21,7 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
 }},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
     '/item/create': {func: 'item_change', methods: ['post']},
+    '/item/delete/:id': {func: 'item', methods: ['delete']},
     '/items/': {func: 'items_list', methods: ['get']},
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {

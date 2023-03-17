@@ -1,9 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Planet, PlanetInfo, User} from '../common/entity'
+import {PlanetInfo, User, Item} from '../common/entity'
 import {List as UList} from '../util/controls'
+import {Select as USelect} from '../util/select'
 import * as util from '../common/util'
-import L from './locale'
+import {default as L, LR} from './locale'
 
 function PlanetRow(params: {planet: PlanetInfo}) {
     const {planet} = params
@@ -40,5 +41,13 @@ export default class List extends UList<PlanetListProps, PlanetListState> {
           <RB.Col>{L('desc_resources')}</RB.Col>
           <RB.Col>{L('desc_ships')}</RB.Col>
         </RB.Row>, ...rows] 
+    }
+}
+
+export class Select extends USelect<{}, {}> {
+    L = LR
+    get fetchUrl(){ return '/api/planet/list' }
+    getOptions(list: Item[]){
+        return list?.reduce((p, v)=>Object.assign(p, {[v._id]: v.name}), {}) || []
     }
 }

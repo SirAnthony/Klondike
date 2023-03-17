@@ -24,6 +24,9 @@ export class Controller extends ItemDB {
         return await Controller.DB.save(data)
     }
 
+    async delete() {
+        return await Controller.DB.delete(this) }
+
     static async get(data: Controller | ItemDB | Item | ObjectId | string, fields?){
         if (data instanceof Controller)
             return data

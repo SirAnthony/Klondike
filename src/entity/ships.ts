@@ -18,7 +18,7 @@ export class Controller extends ShipDB {
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
 
     get PlanetShip(): PlanetShip {
-        return {_id: this._id, name: this.name, class: this.class,
+        return {_id: this._id, name: this.name, class: this.kind,
             img: this.img, pos: this.location.pos}
     }
 

@@ -21,10 +21,10 @@ export class AdminApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Master)
     async post_item_change(ctx: RenderContext){
-        const {_id} = ctx.params
+        const {id} = ctx.params
         const params: any = ctx.request.body
         const {data = {}} = params
-        let item = await ItemController.get(_id)
+        let item = await ItemController.get(id)
         for (let k in data)
             item[k] = data[k]
         if (data.owner)
@@ -32,5 +32,14 @@ export class AdminApiRouter extends BaseRouter {
         if (data.location)
             item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
         await item.save()
+    }
+
+    @CheckRole(UserType.Master)
+    async delete_item(ctx: RenderContext){
+        const {id} = ctx.params
+        let item = await ItemController.get(id)
+        if (!item)
+            throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
+        return await item.delete()
     }
 }

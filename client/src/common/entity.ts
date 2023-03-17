@@ -56,12 +56,31 @@ export class Corporation extends ID {
 }
 
 export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
-export enum MarketType {None, PublicSale, PrivateSale, Protected}
+export enum MarketType {None, Sale, Protected}
 export class Item extends ID {
     type: ItemType
     owner: ID | null
     location: Location | null
     price: number
+    market?: {
+        type: MarketType
+        price: number
+        code: string
+    }
+    get keys(){ 
+        return '_id name type owner location price market'.split(' ') }
+    get class(){
+        switch (this.type){
+            case ItemType.Resource: return Resource;
+            case ItemType.Coordinates: return Coordinates;
+            case ItemType.Ship: return Ship;
+            case ItemType.Module: return Module;
+            case ItemType.Patent: return Patent;
+            case ItemType.Artifact: return Artifact;
+        }
+        // unreachable
+        throw new Error('Undefined type')
+    }
 }
 
 export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas, Particle}
@@ -76,13 +95,16 @@ export class Resource extends Item {
     data: string
     get cost(){
         return this.value * defines.price.res[this.kind] }
+    get keys(){
+        return super.keys.concat('kind value data'.split(' ')) }
 }
 
 export class Coordinates extends Item {
     type = ItemType.Coordinates
-    planet: ID
     info: string
     data: Location
+    get keys(){
+        return super.keys.concat('info data'.split(' ')) }
 }
 
 export class Module extends Item {
@@ -90,12 +112,16 @@ export class Module extends Item {
     mass: number
     energy: number
     boosts: [{kind: string, value: number}]
+    get keys(){
+        return super.keys.concat('mass energy boosts'.split(' ')) }
 }
 
 export class Patent extends Item {
     type = ItemType.Patent
     owners: ID[]
     data: string
+    get keys(){
+        return super.keys.concat('owners data'.split(' ')) }
 }
 
 export enum ArtifactType {Bio, Enginering, Anomaly}
@@ -103,23 +129,23 @@ export class Artifact extends Item {
     type = ItemType.Artifact
     kind: ArtifactType
     description: string
+    get keys(){
+        return super.keys.concat('kind description'.split(' ')) }
 }
 
 export const ShipValues = {
     stats: `integrity mass engine slots speed movement
         attack defence crew`.replace(/\s+/g, ' ').split(' '),
-    desc: `name _id class port captain
+    desc: `name _id kind port captain
         owner`.replace(/\s+/g, ' ').split(' '),
     mods: `size energy`.replace(/\s+/g, ' ').split(' ')
 }
 export enum ShipClass {A = 'A', B = 'B', C = 'C', D = 'D', E = 'E'}
 export class Ship extends Item {
     type = ItemType.Ship
-    name: string
-    class: ShipClass
+    kind: ShipClass
     port: string
     captain: ID
-    price: number
     round_cost: number
     integrity: number
     mass: number
@@ -134,6 +160,11 @@ export class Ship extends Item {
     modules: Module[]
     inventory: Item[]
     img?: string
+    get keys(){
+        return super.keys.concat('kind port captain round_cost '+
+            'integrity mass engine speed movement size attack defence '+
+            'crew modules inventory img'.split(' '))
+    }
 }
 
 export type PlanetShip = {

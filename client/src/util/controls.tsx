@@ -42,6 +42,7 @@ type ListState = {list?: any[]}
 export class List<P, S> extends F.Fetcher<P, S & ListState> {
     L: (string)=>string
     get closeLink() { return undefined }
+    get containerClass() { return 'menu-container' }
     constructor(props){
         super(props)
         this.state = {} as any
@@ -59,7 +60,7 @@ export class List<P, S> extends F.Fetcher<P, S & ListState> {
             [<div key={'list_empty'}>{this.L('not_found')}</div>]
         if (err)
             body.unshift(<ErrorMessage field={err} />)
-        return <RB.Container className="menu-container">
+        return <RB.Container className={this.containerClass}>
           <ControlBar title={this.L('listing')} closeTo={this.closeLink} />
           {body}
         </RB.Container>
