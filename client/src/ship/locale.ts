@@ -32,7 +32,7 @@ load(mod, {
     'description': 'Общая информация',
     'desc_name': 'Название',
     'desc__id': 'SSC ID',
-    'desc_class': 'Класс корабля',
+    'desc_kind': 'Класс корабля',
     'desc_port': 'Порт приписки',
     'desc_captain': 'Капитан',
     'desc_owner': 'Владелец корабля',

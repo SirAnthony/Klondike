@@ -2,10 +2,11 @@ import React from 'react';
 import * as RR from 'react-router-dom'
 import * as RB from 'react-bootstrap'
 import {User} from '../common/entity'
-import {Menu as UMenu, List as UList} from '../util/controls' 
+import {Menu as UMenu} from '../util/controls' 
 import {ListNavigator as ShipListNavigator} from '../ship'
 import {ListNavigator as CorpListNavigator} from '../corp'
-import {ListNavigator as ResourcesNavigator} from './Resources'
+import {ListNavigator as ItemsNavigator} from './Items'
+import {ListNavigator as OrdersNavigator} from './Orders'
 import {ListNavigator as UserListNavigator} from '../user/List'
 import L from './locale'
 
@@ -25,17 +26,13 @@ class ListNavigator extends UMenu<ListProps, ListState> {
     }
 }
 
-class OrdersNavigator extends UList<ListProps, ListState> {
-
-}
-
 export function Navigator(props) {
     const {user} = props
     return (<div>
       <RR.Routes>
         <RR.Route path='/' element={<ListNavigator user={user} />} />
         <RR.Route path='/orders' element={<OrdersNavigator user={user} />} />
-        <RR.Route path='/resources' element={<ResourcesNavigator user={user} />} />
+        <RR.Route path='/resources' element={<ItemsNavigator user={user} />} />
         <RR.Route path='/ships' element={<ShipListNavigator user={user} />} />
         <RR.Route path='/corps' element={<CorpListNavigator user={user} />} />
         <RR.Route path='/users' element={<UserListNavigator user={user} />} />

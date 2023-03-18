@@ -17,36 +17,37 @@ const resources: ResFixture[] = [new ResFixture({
     type: ItemType.Resource,
     kind: ResourceType.Alloy,
     price: 200,
-    data: '',
+    data: 'Durable metals forged for spacefaring tech.',
 }), new ResFixture({
     name: 'Crystal',
     type: ItemType.Resource,
     kind: ResourceType.Crystal,
     price: 200,
-    data: '',
+    data: 'Prismatic gems, imbued with cosmic energy',
 }), new ResFixture({
     name: 'Energy',
     type: ItemType.Resource,
     kind: ResourceType.Energy,
     price: 30,
+    data: 'Electromagnetic power, harnessed for propulsion',
 }), new ResFixture({
     name: 'Gas',
     type: ItemType.Resource,
     kind: ResourceType.Gas,
     price: 200,
-    data: '',
+    data: 'Rarefied substances harvested for industrial use',
 }), new ResFixture({
     name: 'Mineral',
     type: ItemType.Resource,
     kind: ResourceType.Mineral,
     price: 200,
-    data: '',
+    data: 'Hardened minerals mined for construction materials',
 }), new ResFixture({
     name: 'Particle',
     type: ItemType.Resource,
     kind: ResourceType.Particle,
     price: 200,
-    data: '',
+    data: 'Subatomic matter, critical for hyperspace travel',
 }),]
 
 class ResControllerFixture extends ResourceController {

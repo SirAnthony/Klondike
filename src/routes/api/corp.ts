@@ -1,7 +1,7 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController} from '../../entity'
-import {ResourceController, ItemController} from '../../entity'
-import {Item, ItemType, UserType, Resource} from '../../../client/src/common/entity'
+import {ResourceController, OrderController, ItemController} from '../../entity'
+import {Item, ItemType, UserType, Resource, Order} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
@@ -44,6 +44,16 @@ export class CorpApiRouter extends BaseRouter {
         for (let item of resources)
             prices[item.kind] = (prices[item.kind]+item.price)/2
         return {prices}
+    }
+
+    @CheckRole(UserType.Corporant)
+    async get_orders(ctx: RenderContext){
+        const {id} = ctx.params;
+        if (!id)
+            throw 'Self-items not implemented'
+        const corp = await CorpController.get(id)
+        const orders = await OrderController.all({'assignee._id': corp._id})
+        return {orders}
     }
 
     @CheckRole(UserType.Master)

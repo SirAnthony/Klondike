@@ -1,6 +1,7 @@
 import * as mongodb from '../util/mongodb'
 import {ObjectId} from 'mongodb';
 import {Identifier} from '../../client/src/common/entity'
+import * as util from '../../client/src/common/util'
 
 export class Entity<T> {
     name: string
@@ -70,5 +71,55 @@ export class Entity<T> {
         if (!_id)
             throw 'Cannot delete entry without id'
         return await mongodb.remove(this.db, {_id})
+    }
+}
+
+type DBState = {
+    created: Date
+    updated: Date
+} & Identifier
+type Constructor = new (...args: any[]) => {} & Identifier;
+export function MakeController<TBase extends Constructor>(Base: TBase, db: string){
+    type DBBase = DBState & TBase
+    return class Controller extends Base {
+        private static DB = new Entity<DBBase>(db)
+        protected constructor(...args: any[]){
+            const [data, fields] = args
+            super()
+            util.obj_copyto(data, this, fields)
+            return this
+        }
+        get identifier(): Identifier {
+            const data = (this as unknown) as DBBase
+            return {_id: data._id, name: data.name}
+         }
+    
+        async save() {
+            const data = (this as unknown) as DBBase
+            data.created = data.created || new Date()
+            data.updated = new Date()
+            return await Controller.DB.save(data)
+        }
+    
+        static async get(data: Controller | DBBase | TBase | ObjectId | string, fields?) : Promise<Controller>{
+            if (data instanceof Controller)
+                return data as Controller
+            if (data instanceof ObjectId || typeof data == 'string')
+                data = await Controller.DB.get(data)
+            return new Controller(data, fields)
+        }
+    
+        static async find(data, fields?) : Promise<Controller> {
+            const ret = await Controller.DB.find(data)
+            if (ret)
+                return new Controller(ret, fields)
+        }
+    
+        static async all(filter = {}) : Promise<Controller[]> {
+            const items = await Controller.DB.list(filter), ret = []
+            for (let item of items)
+                ret.push(await Controller.get(item))
+            return ret
+        }
     }
 }

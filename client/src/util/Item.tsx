@@ -1,6 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item as EItem, MarketType, Resource as EResource, User} from '../common/entity'
+import {Item as EItem, MarketType, Resource, User} from '../common/entity'
+import {ResourceType} from '../common/entity'
 import * as util from '../common/util'
 import L from '../common/locale'
 
@@ -119,7 +120,7 @@ function Location(props: ItemProps) {
 
 export function ItemRow(props: ItemProps){
     const {item, user} = props
-    const res = item as EResource
+    const res = item as Resource
     const has = n=>props.fields?.includes(n)
     const lyt = column_layout(props.fields)
     return <RB.Row className={props.className}>
@@ -137,3 +138,20 @@ export function ItemRow(props: ItemProps){
       <ItemActions {...props} layout={lyt.actions} />
     </RB.Row>
 }
+
+export function ResourceSelect(props: {value: number, onChange: (type: ResourceType)=>void}){
+    const [kind, setKind] = React.useState(props.value)
+    const options = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=>
+        <option key={`kind_${k}`}  value={+k}>{L(`res_kind_${k}`)}</option>)
+    const onChange = ({target: {value}})=>{
+        setKind(+value)
+        props.onChange(+value)
+    }
+    return <RB.FormSelect value={kind} onChange={onChange}>
+      <option key='res_type_none' value={-1} disabled={true}>
+        {L('res_desc_kind')}
+      </option>
+      {options}
+    </RB.FormSelect>
+}
+

@@ -1,9 +1,8 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, ResourceType, User} from '../common/entity'
+import {Order, User} from '../common/entity'
 import {List as UList} from '../util/controls'
-import {Select as USelect} from '../util/select'
-import {ItemRow, ItemRowDesc} from '../util/Item'
+import {OrderRow, OrderRowDesc, OrderRowNew} from '../util/Order'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 
@@ -20,15 +19,11 @@ export function ListNavigator(props: {user: User}){
     return <List user={user} />
 }
 
-function OrderInput(props: {onCreate: (item: Item)=>void}){
-    return <RB.Row></RB.Row>
-}
-
 class List extends UList<ListProps, ListState> {
     L = L
-    get fetchUrl() { return `/api/admin/items/` }
+    get fetchUrl() { return `/api/admin/orders/` }
     get containerClass() { return 'menu-container-full' }
-    async createItem(item: Item){
+    async createItem(item: Order){
         let data = new item.class()
         for (let k of data.keys)
             data[k] = item[k]
@@ -39,18 +34,12 @@ class List extends UList<ListProps, ListState> {
         this.setState({err: null})
         this.fetch()
     }
-    newOrder(){
-        return <RB.Container>
-          <OrderInput onCreate={(item: Item)=>this.createItem(item)} />
-        </RB.Container>
-    }
     body(){
         const {list} = this.state
-        const fields = ['kind', 'owner', 'location', 'data']
-        const rows = list.map(l=><ItemRow className='menu-list-row' onReload={()=>this.fetch()}
-          key={`item_list_${l._id}`} item={l} fields={fields} user={this.props.user} />)
-        return [this.newOrder(),
-          <ItemRowDesc className='menu-list-title' fields={fields} user={this.props.user} />,
+        const rows = list.map(l=><OrderRow order={l} className='menu-list-row'
+            key={`order_list_${l._id}`} onReload={()=>this.fetch()} />)
+        return [<OrderRowNew onCreate={o=>this.createItem(o)} className='menu-list-row' />,
+          <OrderRowDesc className='menu-list-title' />,
           ...rows]
     }
 }

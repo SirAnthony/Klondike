@@ -1,6 +1,6 @@
 
 import {MainRouter, AuthRouter, AdminRouter} from '.'
-import {ApiRouter, CorpApiRouter, AdminApiRouter} from './api'
+import {ApiRouter, CorpApiRouter, AdminApiRouter, ShipApiRouer} from './api'
 import {RenderContext} from '../middlewares'
 import {Environment} from 'nunjucks'
 import * as date from '../../client/src/common/date'
@@ -16,18 +16,26 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/items': {func: 'items', methods: ['get']},
     '/items/:id': {func: 'items', methods: ['get']},
     '/prices': {func: 'prices', methods: ['get']},
+    '/orders': {func: 'orders', methods: ['get']},
+    '/orders/:id': {func: 'orders', methods: ['get']},
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},
+ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
+    '/list': {func: 'list', methods: ['get']},
+    '/:id': {func: 'ship', methods: ['get']},
+}},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
+    '/resource/:id': {func: 'resource_change', methods: ['post']},
     '/item/create': {func: 'item_change', methods: ['post']},
     '/item/delete/:id': {func: 'item', methods: ['delete']},
     '/items/': {func: 'items_list', methods: ['get']},
+    '/order/create': {func: 'order_change', methods: ['post']},
+    '/order/delete/:id': {func: 'order', methods: ['delete']},
+    '/orders/': {func: 'orders_list', methods: ['get']},
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/profile': {func: 'profile', methods: ['post']},
-    '/ship/:id': {func: 'ship', methods: ['get']},
-    '/ships/': {func: 'ship_list', methods: ['get']},
     '/planet/list': {func: 'planet_list_short', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},
     '/planets/': {func: 'planet_list', methods: ['get']},

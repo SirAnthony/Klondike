@@ -44,15 +44,24 @@ export class User extends ID {
     }
 }
 
-export class CorporationRequest {
-    resource: ResourceType
-    required: number
-    filled: number
+export class Order extends ID {
+    requests: {
+        kind: ResourceType
+        required: number
+        filled: number
+    }[]
+    cycle: number
+    assignee: ID
+    get plan(){ return this.requests.reduce((p, r)=>
+        p+r.filled/(r.required||1), 1)/(this.requests.length||1)
+    }
+    get keys(){ return 'requests cycle assignee'.split(' ') }
+    get class(){ return Order }
+
 }
 
 export class Corporation extends ID {
     credit: number
-    requests: CorporationRequest[]
 }
 
 export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}

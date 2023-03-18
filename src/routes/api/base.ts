@@ -32,20 +32,6 @@ export class ApiRouter extends BaseRouter {
         return {done: 1, user}
     }
 
-    @CheckRole([UserType.Mechanic, UserType.Captain, UserType.Corporant, UserType.Navigator])
-    async get_ship(ctx: RenderContext){
-        const {id} = ctx.params;
-        const {user}: {user: UserController} = ctx.state
-        const ship = await ShipController.get(id)
-        return {ship}
-    }
-
-    @CheckRole(UserType.Corporant)
-    async get_ship_list(ctx: RenderContext){
-        const list = await ShipController.all()
-        return {list}
-    }
-
     @CheckRole(UserType.Navigator)
     async get_planet(ctx: RenderContext){
         const {id} = ctx.params;

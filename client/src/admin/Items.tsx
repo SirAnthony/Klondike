@@ -1,16 +1,16 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, ResourceType, User} from '../common/entity'
+import {Item, ItemType, Resource, ResourceType, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
-import {ItemRow, ItemRowDesc} from '../util/Item'
+import {ItemRow, ItemRowDesc, ResourceSelect} from '../util/Item'
 import {Select as CSelect} from '../corp/List'
 import {Select as PSelect} from '../map/List'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 
 type ListState = {
-
+    resources: Resource[]
 }
 type ListProps = {
     user: User
@@ -21,7 +21,7 @@ export function ListNavigator(props: {user: User}){
     return <List user={user} />
 }
 
-function ResourceInput(props: {onCreate: (item: Item)=>void}){
+function ItemInput(props: {onCreate: (item: Item)=>void}){
     const [type, setType] = React.useState(-1)
     const onTypeChange = ({target: {value}})=>setType(+value)
     const typeOptions = Object.keys(ItemType).filter(k=>
@@ -30,11 +30,6 @@ function ResourceInput(props: {onCreate: (item: Item)=>void}){
     typeOptions.unshift(<option key='item_type_none' value={-1}
         disabled={true}>{LR('item_desc_type')}</option>)
     const [kind, setKind] = React.useState(-1)
-    const onResTypeChange = ({target: {value}})=>setKind(+value)
-    const resTypeOptions = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=>
-        <option key={`kind_${k}`}  value={+k}>{LR(`res_kind_${k}`)}</option>)
-    resTypeOptions.unshift(<option key='res_type_none' value={-1}
-        disabled={true}>{LR('res_desc_kind')}</option>)
     const [value, setValue] = React.useState(undefined)
     const onValueChange = ({target: {value}})=>setValue(+value)
     const [price, setPrice] = React.useState(undefined)
@@ -54,25 +49,24 @@ function ResourceInput(props: {onCreate: (item: Item)=>void}){
             _id: location, pos: {col: +pos[0], row: +pos[1]}}
         props.onCreate(item)
     }
+    const row_size = type==ItemType.Resource ? 2 : 3
     return <RB.InputGroup><RB.Row className='menu-list-row'>
-      <RB.Col sm={2}>{L('item_create')}</RB.Col>
-      <RB.Col sm={2}>
+      <RB.Col sm={row_size}>{L('item_create')}</RB.Col>
+      <RB.Col sm={row_size}>
         <RB.FormSelect value={type} onChange={onTypeChange}>
           {typeOptions}
         </RB.FormSelect>
       </RB.Col>
-      { type==ItemType.Resource && <RB.Col sm={2}>
-        <RB.FormSelect value={kind} onChange={onResTypeChange}>
-          {resTypeOptions}
-        </RB.FormSelect>
+      { type==ItemType.Resource && <RB.Col sm={row_size}>
+        <ResourceSelect value={kind} onChange={(type)=>setKind(type)} />
       </RB.Col>}
-      { type==ItemType.Resource && <RB.Col sm={2}>
+      { type==ItemType.Resource && <RB.Col sm={row_size}>
         <RB.FormControl placeholder={LR('res_desc_value')} value={value} onChange={onValueChange} />
       </RB.Col>}
-      <RB.Col sm={2}>
+      <RB.Col sm={row_size}>
         <RB.FormControl placeholder={LR('item_desc_price')} value={price} onChange={onPriceChange} />
       </RB.Col>
-      <RB.Col sm={2}>
+      <RB.Col sm={row_size}>
         <RB.Button onClick={onCreate}>{LR('act_create')}</RB.Button>
       </RB.Col>
     </RB.Row>
@@ -94,9 +88,37 @@ function ResourceInput(props: {onCreate: (item: Item)=>void}){
     </RB.Row></RB.InputGroup>
 }
 
+type ResourceFields = {_id: string, data: string, price: number}
+function ResourceInput(props: {res: Resource, onChange: (res: ResourceFields)=>void}){
+    const {res} = props
+    const [textData, setTextData] = React.useState(res.data)
+    const [price, setPrice] = React.useState(res.price)
+    const onChange = ()=>props.onChange({_id: res._id, data: textData, price})
+    return <RB.Row className='menu-list-row'><RB.InputGroup>
+      <RB.Col>{LR(`res_kind_${res.kind}`)}</RB.Col>
+      <RB.Col sm={1}>{LR('item_desc_price')}</RB.Col>
+      <RB.Col>
+        <RB.FormControl placeholder={LR('item_desc_price')} value={price}
+          onChange={({target: {value}})=>setPrice(+value)} />
+      </RB.Col>
+      <RB.Col sm={1}>{LR('item_desc_data')}</RB.Col>
+      <RB.Col>
+        <RB.FormControl as='textarea' rows={1} placeholder={LR('item_desc_data')}
+          value={textData} onChange={({target: {value}})=>setTextData(value)} />
+      </RB.Col>
+      <RB.Col>
+        <RB.Button onClick={onChange}>{LR('act_change')}</RB.Button>
+      </RB.Col>
+    </RB.InputGroup></RB.Row>
+}
+
 class List extends UList<ListProps, ListState> {
     L = L
     get fetchUrl() { return `/api/admin/items/` }
+    fetchState(data: any = {}){
+        const {list, resources} = data
+        return {item: data, list, resources}
+    }
     get containerClass() { return 'menu-container-full' }
     async createItem(item: Item){
         let data = new item.class()
@@ -109,9 +131,24 @@ class List extends UList<ListProps, ListState> {
         this.setState({err: null})
         this.fetch()
     }
-    newResource(){
+    async changeResource(data: ResourceFields){
+        const res = await util.wget(`/api/admin/resource/${data._id}`,
+            {method: 'POST', data})
+        if (res.err)
+            return void this.setState({err: res.err})
+        this.setState({err: null})
+        this.fetch()
+    }
+    resources(){
+        const rows = this.state.resources?.map(r=><ResourceInput res={r}
+          onChange={(data)=>this.changeResource(data)} />)
         return <RB.Container>
-          <ResourceInput onCreate={(item: Item)=>this.createItem(item)} />
+            {rows}
+        </RB.Container>
+    }
+    newItem(){
+        return <RB.Container>
+          <ItemInput onCreate={(item: Item)=>this.createItem(item)} />
         </RB.Container>
     }
     body(){
@@ -119,7 +156,7 @@ class List extends UList<ListProps, ListState> {
         const fields = ['kind', 'owner', 'location', 'data']
         const rows = list.map(l=><ItemRow className='menu-list-row' onReload={()=>this.fetch()}
           key={`item_list_${l._id}`} item={l} fields={fields} user={this.props.user} />)
-        return [this.newResource(),
+        return [this.resources(), this.newItem(),
           <ItemRowDesc className='menu-list-title' fields={fields} user={this.props.user} />,
           ...rows]
     }

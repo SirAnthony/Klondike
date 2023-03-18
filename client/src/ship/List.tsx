@@ -24,7 +24,7 @@ type ShipListProps = {
 }
 export default class List extends UList<ShipListProps, ShipListState> {
     L = L
-    get fetchUrl() { return `/api/ships/` }
+    get fetchUrl() { return `/api/ship/list` }
     body(){
         const {list} = this.state
         const rows = list.map(l=><ShipRow key={`ship_list_${l._id}`} ship={l} />)

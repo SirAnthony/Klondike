@@ -1,6 +1,6 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController} from '../../entity'
-import {ResourceController, ItemController} from '../../entity'
+import {OrderController, ItemController, ResourceController} from '../../entity'
 import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
@@ -16,7 +16,8 @@ export class AdminApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async get_items_list(ctx: RenderContext){
         const list = await ItemController.all()
-        return {list}
+        const resources = await ResourceController.all()
+        return {list, resources}
     }
 
     @CheckRole(UserType.Master)
@@ -41,5 +42,44 @@ export class AdminApiRouter extends BaseRouter {
         if (!item)
             throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
         return await item.delete()
+    }
+
+    @CheckRole(UserType.Master)
+    async post_resource_change(ctx: RenderContext){
+        const {id} = ctx.params
+        const params: any = ctx.request.body
+        const {data = {}} = params
+        let item = await ResourceController.get(id)
+        for (let k in data)
+            item[k] = data[k]
+        await item.save()
+    }
+
+    @CheckRole(UserType.Master)
+    async get_orders_list(ctx: RenderContext){
+        const list = await OrderController.all()
+        return {list}
+    }
+
+    @CheckRole(UserType.Master)
+    async post_order_change(ctx: RenderContext){
+        const {id} = ctx.params
+        const params: any = ctx.request.body
+        const {data = {}} = params
+        let item = await OrderController.get(id)
+        for (let k in data)
+            item[k] = data[k]
+        if (data.assignee?._id)
+            item.assignee = (await CorpController.get(data.assignee._id)).identifier
+        await item.save()
+    }
+
+    @CheckRole(UserType.Master)
+    async delete_order(ctx: RenderContext){
+        const {id} = ctx.params
+        let order = await OrderController.get(id)
+        if (!order)
+            throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
+        return await order.delete()
     }
 }

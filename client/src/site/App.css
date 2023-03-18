@@ -167,6 +167,12 @@ div.menu-container-full {
     text-decoration: underline;
 }
 
+.menu-list-row > div.input-group > div,
+    .menu-list-row > div,
+    .menu-list-title > div {
+    align-self: center;
+}
+
 .menu-absolute.container {
     position: absolute;
     display: flex;
@@ -212,18 +218,19 @@ button.btn-close {
     /*background-color: #000;*/
 }
 
-input.form-control, select.form-select {
+input.form-control, select.form-select, textarea.form-control {
     color: var(--color-ui-text);
     border: solid var(--color-ui-border) 1px;
     background-color: var(--color-ui-input);
     font-size: 10pt;
 }
 
-input.form-control:focus, select.form-select:focus {
+input.form-control:focus, select.form-select:focus,
+    textarea.form-control:focus {
     color: var(--color-ui-text);
     background-color: var(--color-ui-input-focus);
 }
 
-input.form-control::placeholder {
+input.form-control::placeholder, textarea.form-control::placeholder {
     color: var(--color-ui-text-shade);
 }
