@@ -194,6 +194,7 @@ export type PlanetZone = {
 
 export class Planet extends ID {
     system: string
+    data: string
     zones: PlanetZone[]
     type: PlanetType
 }
