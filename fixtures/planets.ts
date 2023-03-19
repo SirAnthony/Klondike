@@ -5,30 +5,35 @@ export class PlanetFixture extends Planet {
 }
 
 const planets: PlanetFixture[] = [{
-    name: 'Planet 1',
+    name: 'Glaciem',
     type: PlanetType.Frost,
     zones: [{center: {col: 16, row: 10}, radius: 8}],
-    resources: [],
+    data: 'Desolate ice planet, perpetually frozen in sub-zero temperatures with treacherous crevasses and ice storms',
+    system: '',
 }, {
-    name: 'Planet 2',
+    name: 'Cryosia',
     type: PlanetType.FrostSat,
     zones: [{center: {col: 5, row: 5}, radius: 3}, {center: {col: 10, row: 12}, radius: 7}],
-    resources: [],
+    data: 'Frozen wasteland, surrounded by a small, barren satellite with frigid temperatures and scarce resources',
+    system: '',
 }, {
-    name: 'Planet 3',
+    name: 'Infernus',
     type: PlanetType.Molten,
     zones: [{center: {col: 16, row: 9}, radius: 8}],
-    resources: [],
+    data: 'Fiery inferno, its surface covered in molten lava with unbearable temperatures that require protective gear to survive',
+    system: '',
 }, {
-    name: 'Planet 4',
+    name: 'Verdantia',
     type: PlanetType.Jungle,
     zones: [{center: {col: 16, row: 10}, radius: 8}],
-    resources: [],
+    data: 'Lush, tropical planet with dense jungles, teeming with exotic flora and fauna.',
+    system: '',
 }, {
-    name: 'Planet 5',
+    name: 'Aether',
     type: PlanetType.Rocky,
     zones: [{center: {col: 16, row: 10}, radius: 8}],
-    resources: [],
+    data: 'lifeless world, a barren rock floating in space with a thin, tenuous atmosphere',
+    system: '',
 },]
 
 class PlanetControllerFixture extends PlanetController {
