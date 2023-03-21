@@ -44,6 +44,8 @@ export function OrderRow(props: RowProps){
 }
 
 function OrderReq(req: ResourceRow) {
+    if (!req)
+        return [null]
     return [
       <RB.Col sm={4}>{L(`res_kind_${req.kind}`)}</RB.Col>,
       <RB.Col sm={1}>{req.required}</RB.Col>,
