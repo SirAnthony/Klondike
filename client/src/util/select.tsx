@@ -53,3 +53,18 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
         </RB.FormSelect>
     }
 }
+
+export function TypedSelect<T>(T: T, key: string){
+    return class TypedSelect extends Select<{exclude?: number[]}, {}> {
+        L = L
+        async fetch(){
+            const list = Object.keys(T).filter(k=>
+                !isNaN(+k) && !this.props.exclude?.includes(+(k)))
+            this.setState(this.fetchState({list}))
+        }
+        getOptions(list: T[]){
+            return list.reduce((p, v)=>
+                Object.assign(p, {[v as string]: L(`${key}_${v}`)}), {}) || []
+        }
+    }
+}

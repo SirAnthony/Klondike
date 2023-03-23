@@ -71,15 +71,17 @@ export class Item extends ID {
     owner: ID | null
     location: Location | null
     price: number
+    data: string
     market?: {
         type: MarketType
         price: number
         code: string
     }
     get keys(){ 
-        return '_id name type owner location price market'.split(' ') }
-    get class(){
-        switch (this.type){
+        return '_id name type owner location price data market'.split(' ') }
+    get class(){ return Item.class(this.type) }
+    static class(type: ItemType) {
+        switch (type){
             case ItemType.Resource: return Resource;
             case ItemType.Coordinates: return Coordinates;
             case ItemType.Ship: return Ship;
@@ -101,19 +103,17 @@ export class Resource extends Item {
     type = ItemType.Resource
     kind: ResourceType
     value: number
-    data: string
     get cost(){
         return this.value * defines.price.res[this.kind] }
     get keys(){
-        return super.keys.concat('kind value data'.split(' ')) }
+        return super.keys.concat('kind value'.split(' ')) }
 }
 
 export class Coordinates extends Item {
     type = ItemType.Coordinates
-    info: string
-    data: Location
+    target: Location 
     get keys(){
-        return super.keys.concat('info data'.split(' ')) }
+        return super.keys.concat('target'.split(' ')) }
 }
 
 export class Module extends Item {
@@ -125,19 +125,26 @@ export class Module extends Item {
         return super.keys.concat('mass energy boosts'.split(' ')) }
 }
 
+export enum PatentType {Bio, Enginering, Planet}
+export enum PatentWeight {Minimal, Basic, Premium} 
 export class Patent extends Item {
     type = ItemType.Patent
+    kind: PatentType
+    weight: PatentWeight
     owners: ID[]
-    data: string
+    resourceCost: {kind: ResourceType, value: number}[]
     get keys(){
-        return super.keys.concat('owners data'.split(' ')) }
+        return super.keys.concat('kind weight owners resourceCost'.split(' '))
+            .filter(k=>['location', 'owner'].includes(k))
+    }
+    get fullOwnership(){ return this.owners.length > 1 }
+    get shares(){ return 1/(this.owners.length||1) }
 }
 
 export enum ArtifactType {Bio, Enginering, Anomaly}
 export class Artifact extends Item {
     type = ItemType.Artifact
     kind: ArtifactType
-    description: string
     get keys(){
         return super.keys.concat('kind description'.split(' ')) }
 }

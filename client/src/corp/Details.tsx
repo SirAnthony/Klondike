@@ -43,8 +43,8 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
         </RB.Row>
     }
    render(){
-        const orders = this.state.orders?.map(order=>
-            <OrderRowCompact order={order} />)
+        const orders = this.state.orders?.map(order=><OrderRowCompact
+            key={`order_row_compact_${order._id}`} order={order} />)
         return <RB.Container>
           {this.planInfo()}
           {orders}
@@ -69,8 +69,8 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         return `/api/corp/items/${corp._id}`
     }
     fetchState(data: any = {}){
-        const {prices} = data
-        return {item: data, prices}
+        const {items} = data
+        return {item: data, items}
     }
     rows(fields?: string[]){
         const {items = []} = this.state

@@ -1,7 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item as EItem, MarketType, Resource, User} from '../common/entity'
-import {ResourceType} from '../common/entity'
+import {Item, ItemType, MarketType, User} from '../common/entity'
+import {ID, Location} from '../common/entity'
+import {Resource, ResourceType} from '../common/entity'
+import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, MultiOwnerSelect} from './inputs'
+import {LocationSelect, OwnerSelect} from './inputs'
 import * as util from '../common/util'
 import L from '../common/locale'
 
@@ -23,7 +26,7 @@ type ItemRowProps = {
 }
 
 type ItemProps = {
-    item: EItem
+    item: Item
     layout?: number
     onReload: ()=>void
 } & ItemRowProps
@@ -139,19 +142,164 @@ export function ItemRow(props: ItemProps){
     </RB.Row>
 }
 
-export function ResourceSelect(props: {value: number, onChange: (type: ResourceType)=>void}){
-    const [kind, setKind] = React.useState(props.value)
-    const options = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=>
-        <option key={`kind_${k}`}  value={+k}>{L(`res_kind_${k}`)}</option>)
-    const onChange = ({target: {value}})=>{
-        setKind(+value)
-        props.onChange(+value)
+
+
+type ItemRowNewProps = {
+    onCreate: (item: Item)=>void
+}
+type ItemRowNewState = {
+    type: ItemType
+    owner?: ID
+    location?: Location
+    price?: number
+    kind: number
+    value?: number
+    data?: string
+    mass?: number
+    weight?: number
+    energy?: number
+    target?: Location
+    resourceCost?: {kind: ResourceType, value: number}[]
+    boosts?: {kind: string, value: number}[]
+    owners?: ID[]    
+}
+export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
+    constructor(props){
+        super(props)
+        this.state = {type: -1, kind: -1}
     }
-    return <RB.FormSelect value={kind} onChange={onChange}>
-      <option key='res_type_none' value={-1} disabled={true}>
-        {L('res_desc_kind')}
-      </option>
-      {options}
-    </RB.FormSelect>
+    create() {
+        const item = new (Item.class(this.state.type))()
+        for (let k of item.keys)
+            item[k] = this.state[k]
+        this.props.onCreate(item)
+    }
+    get row_size(){
+        return [ItemType.Resource, ItemType.Patent]
+            .includes(this.state.type) ? 2 : 3
+    }
+    hasField(name: string){
+        const {type} = this.state
+        switch (type){
+            case ItemType.Patent:
+                return !['location', 'price', 'owner'].includes(name)
+        }
+        return true
+    }
+    // resource
+    fields_0(){
+        const row_size = this.row_size
+        const {kind, value} = this.state
+        const kindChange = type=>this.setState({kind: type})
+        const valChange = ({target: {value}})=>this.setState({value: +value})
+        return [<RB.Col sm={row_size}>
+          <ResourceSelect value={kind} onChange={kindChange} optName='res_desc_kind' />
+        </RB.Col>,
+        <RB.Col sm={row_size}>
+          <RB.FormControl placeholder={L('res_desc_value')} value={value}
+            onChange={valChange} />
+        </RB.Col>]
+    }
+    // coordinates
+    fields_1(){
+
+    }
+    // ship
+    fields_2(){
+        throw new Error('cannot create ships')
+    }
+    // module
+    fields_3(){
+        const row_size = this.row_size
+        const {mass, energy} = this.state
+        const massChange = ({target: {value}})=>this.setState({mass: +value})
+        const energyChange = ({target: {value}})=>this.setState({energy: +value})
+        return [<RB.Col sm={row_size}>
+          <RB.FormControl placeholder={L('res_desc_mass')} value={mass}
+            onChange={massChange} />
+        </RB.Col>, <RB.Col sm={row_size}>
+          <RB.FormControl placeholder={L('res_desc_energy')} value={energy}
+            onChange={energyChange} />
+        </RB.Col>]
+    }
+    // patent
+    fields_4(){
+        const row_size = this.row_size
+        const {kind, weight} = this.state
+        const kindChange = type=>this.setState({kind: type})
+        const weightChange = ({target: {value}})=>this.setState({weight: +value})
+        return [<RB.Col sm={row_size}>
+          <PatentTypeSelect value={kind} onChange={kindChange}
+            optName='patent_desc_kind' />
+        </RB.Col>,
+        <RB.Col sm={row_size}>
+          <PatentWeightSelect value={weight} onChange={weightChange}
+            optName='patent_desc_weight' />
+        </RB.Col>]
+    }
+    rows_4(){
+        const {owners} = this.state
+        const ownersChange = (owners: ID[])=>this.setState({owners})
+        return [<RB.Row>
+            <MultiOwnerSelect value={owners} onChange={ownersChange} />
+        </RB.Row>,<RB.Row>
+
+        </RB.Row>]
+    }
+    // artifact
+    fields_5(){
+
+    }
+    fields_top(){
+        const {type, price} = this.state
+        const row_size = this.row_size, fkey = `fields_${type}`
+        const top_fields = this[fkey] ? this[fkey]() : []
+        const typeChange = ({target: {value}})=>this.setState({type: +value})
+        const priceChange = ({target: {value}})=>this.setState({price: +value})
+        return <RB.Row className='menu-list-row'>
+          <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
+          <RB.Col sm={row_size}>
+            <TypeSelect value={type} onChange={typeChange} optName='item_desc_type'
+              exclude={[ItemType.Ship]}/>
+          </RB.Col>
+          {top_fields}
+         <RB.Col sm={row_size}>
+            <RB.FormControl placeholder={L('item_desc_price')} value={price} onChange={priceChange} />
+          </RB.Col>
+          <RB.Col sm={row_size}>
+            <RB.Button onClick={()=>this.create()}>{L('act_create')}</RB.Button>
+          </RB.Col>
+        </RB.Row>
+    }
+    fields_bottom(){
+        const {type, data, owner, location} = this.state
+        const fkey = `fields_${type}_b`, btm_fields = this[fkey] ? this[fkey]() : []
+        const dataChange = ({target: {value}})=>this.setState({data: value})
+        const ownerChange = owner=>this.setState({owner})
+        const locChange = location=>this.setState({location})
+        return <RB.Row className='menu-list-row'>
+          <RB.Col sm={4}>
+            <RB.FormControl as='textarea' rows={3} placeholder={L('item_desc_data')}
+              value={data} onChange={dataChange} />
+          </RB.Col>
+          {this.hasField('owner') && <RB.Col sm={2}>
+            <OwnerSelect value={owner} onChange={ownerChange} />
+          </RB.Col>}
+          {this.hasField('location') && <RB.Col sm={4}>
+            <LocationSelect onChange={locChange} value={location} />
+          </RB.Col>}
+          {btm_fields}
+        </RB.Row>
+    }
+    render(){
+        const row_size = this.row_size
+        const {type} = this.state
+        const fkey = `rows_${type}`, rows = this[fkey] ? this[fkey]() : []
+        return <RB.InputGroup>
+          {this.fields_top()}
+          {this.fields_bottom()}
+          {rows}
+        </RB.InputGroup>
+    }
 }
 

@@ -1,8 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Order, ResourceType, User} from '../common/entity'
-import {Select as CSelect} from '../corp/List'
-import {ResourceSelect} from './Item'
+import {ID, Order, ResourceType, User} from '../common/entity'
+import {ResourceSelect, OwnerSelect} from './inputs'
 import * as util from '../common/util'
 import L from '../common/locale'
 import * as _ from 'lodash'
@@ -69,7 +68,7 @@ type ResourceRow = {
 }
 type ResourceRowID = ResourceRow & {_id: number}
 type RowNewState = {
-    assignee: string
+    assignee?: ID
     cycle: number
     rows: ResourceRowID[]
     err?: ClientError
@@ -77,7 +76,7 @@ type RowNewState = {
 export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     constructor(props){
         super(props)
-        this.state = {assignee: '', cycle: 0, rows: []};
+        this.state = {assignee: null, cycle: 0, rows: []};
         ['onCreate', 'addRow', 'deleteRow'].forEach(
             r=>this[r] = this[r].bind(this))
     }
@@ -90,7 +89,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
         if (rows.find(r=>r.kind<0||!r.required))
             return this.setState({err: new ClientError('Incorrect parameters')})
         const order = new Order()
-        order.assignee = {_id: assignee, name: ''}
+        order.assignee = assignee
         order.cycle = cycle
         order.requests = rows.map(r=>({kind: r.kind,
             required: r.required, filled: r.filled}))
@@ -117,7 +116,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
         const onChange = key=>({target: {value}})=>changeRow(key, +value)
         return <RB.Row key={`order_row_${row._id}`}>
           <RB.Col>
-            <ResourceSelect value={row.kind}
+            <ResourceSelect value={row.kind} optName='res_desc_kind'
                 onChange={type=>changeRow('kind', +type)} />
           </RB.Col>
           <RB.Col>
@@ -141,8 +140,8 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             {state.err && <RB.Row><ErrorMessage field={state.err} /></RB.Row>}
             <RB.Col>{L('order_create')}</RB.Col>
             <RB.Col>
-              <CSelect value={state.assignee} optName='item_desc_owner'
-                onChange={assignee=>this.setState({assignee, err: null})} />
+              <OwnerSelect value={state.assignee} onChange={
+                assignee=>this.setState({assignee, err: null})} />
             </RB.Col>
             <RB.Col sm={1}>{L('cycle')}</RB.Col>
             <RB.Col>
