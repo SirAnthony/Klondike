@@ -5,12 +5,17 @@ load(mod, {
     'interface': 'Интерфейс администратора',
     'listing': 'Список',
     'desc_name': 'Название',
+    'link_rating': 'Время и результаты',
     'link_orders': 'Заказы',
     'link_resources': 'Ресурсы и цены',
     'link_ships': 'Корабли',
     'link_corps': 'Корпорации',
     'link_users': 'Пользователи',
     'res_create': 'Создать ресурс',
+    'server_time': 'Текущее время',
+    'server_cycle': 'Текущий цикл',
+    'time_increase': tpl`Добавить ${0} ч.`,
+    'time_decrease': tpl`Уменьшить на ${0} ч.`,
 })
 
 export function LR(str: string, ...args): string {

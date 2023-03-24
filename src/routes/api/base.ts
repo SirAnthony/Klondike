@@ -4,6 +4,7 @@ import {PlanetController} from '../../entity'
 import {PlanetInfo, Profile, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
+import {Time} from '../../util/time'
 import {ObjectId} from 'mongodb';
 
 export class ApiRouter extends BaseRouter {
@@ -11,6 +12,11 @@ export class ApiRouter extends BaseRouter {
         const {user}: {user: UserController} = ctx.state
         ctx.debug({all: ctx.params.all})
         return {user}
+    }
+
+    @CheckRole(UserType.Master)
+    async get_time(ctx: RenderContext){
+        return Time
     }
 
     @CheckAuthenticated()

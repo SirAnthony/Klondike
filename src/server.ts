@@ -5,6 +5,7 @@ import * as urls from './routes/urls'
 import config from './config'
 import merge = require('lodash.merge')
 import {Server} from 'http';
+import {Time} from './util/time'
 
 process.on('unhandledRejection', (reason: any, promise: Promise<any>)=>
     console.error(reason))
@@ -19,7 +20,7 @@ export async function run(opt: any = {}){
     for (let r of routers)
         app.use(r.routes()).use(r.methods())
     server = await app.listen(port)
-    server.start_ts = new Date()
+    Time.server = Time.basic = +new Date()
     console.log(`Server running on port ${port}`)
     return server
 }

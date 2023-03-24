@@ -50,6 +50,12 @@ const aliases = {
     'res_kind_3': 'Кристаллы',
     'res_kind_4': 'Газ',
     'res_kind_5': 'Частицы',
+    'patent_kind_0': 'Био-медицинский',
+    'patent_kind_1': 'Инженерный',
+    'patent_kind_2': 'Планетарный',
+    'patent_weigth_0': 'Незначительный',
+    'patent_weigth_1': 'Базовый',
+    'patent_weigth_2': 'Премиум',
     'res_required': 'Необходимо',
     'res_filled': 'Предоставлено',
     'order_create': 'Создать заказ',
@@ -65,6 +71,7 @@ const aliases = {
     'act_item_create': 'Создать сущность',
     'market_code': 'Код для покупки',
     'cycle': 'Цикл',
+    'day_number': 'день',
     'assignee': 'Исполнитель',
 }
 

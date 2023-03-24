@@ -3,8 +3,8 @@ import {UserController, CorpController, PlanetController} from '../../entity'
 import {OrderController, ItemController, ResourceController} from '../../entity'
 import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import * as server_util from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
+import {Time} from '../../util/time'
 
 export class AdminApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -82,4 +82,12 @@ export class AdminApiRouter extends BaseRouter {
             throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
         return await order.delete()
     }
+    
+    @CheckRole(UserType.Master)
+    async put_time(ctx: RenderContext){
+        const params: any = ctx.request.body
+        const {time} = params
+        Time.basic += (+time)|0
+    }   
+
 }

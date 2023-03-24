@@ -1,4 +1,5 @@
 import config from './config'
+import L from './locale'
 
 export const sec = {
     NANO: 1/1e9,
@@ -81,3 +82,5 @@ export const longdate = d=>get(d).toLocaleDateString(
 export const daymonth = d=>get(d).toLocaleDateString(
     config.locale, {day: 'numeric', month: 'long'})
 export const time = d=>get(d).getHours()+':'+String(get(d).getMinutes()).padStart(2, '0')
+export const daytime = d=>
+    [time(d), ((+d)%ms.DAY) + 1].filter(Boolean).join(' '+L('day_number')+' ')

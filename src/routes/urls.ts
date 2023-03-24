@@ -33,8 +33,10 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
     '/order/create': {func: 'order_change', methods: ['post']},
     '/order/delete/:id': {func: 'order', methods: ['delete']},
     '/orders/': {func: 'orders_list', methods: ['get']},
+    '/time': {func: 'time', methods: ['put']},
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
+    '/time': {func: 'time', methods: ['get']},
     '/profile': {func: 'profile', methods: ['post']},
     '/planet/list': {func: 'planet_list_short', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},
