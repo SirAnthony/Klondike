@@ -35,8 +35,10 @@ export default class List extends UList<CorpListProps, CorpListState> {
 
 export class Select extends USelect<{}, {}> {
     L = LR
+    get optName(){ return 'item_desc_owner' }
     get fetchUrl(){ return '/api/corp/list' }
+    getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
-        return list.reduce((p, v)=>Object.assign(p, {[v._id]: v.name}), {}) || []
+        return list.reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {ID, Order, ResourceType, User} from '../common/entity'
-import {ResourceSelect, OwnerSelect} from './inputs'
+import {ResourceSelect, OwnerSelect, NumberInput} from './inputs'
 import * as util from '../common/util'
 import L from '../common/locale'
 import * as _ from 'lodash'
@@ -113,19 +113,17 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     }
     row(row: ResourceRowID){
         const changeRow = (key, val)=>this.changeRow({_id: row._id, [key]: +val})
-        const onChange = key=>({target: {value}})=>changeRow(key, +value)
         return <RB.Row key={`order_row_${row._id}`}>
           <RB.Col>
-            <ResourceSelect value={row.kind} optName='res_desc_kind'
-                onChange={type=>changeRow('kind', +type)} />
+            <ResourceSelect value={row.kind} onChange={type=>changeRow('kind', +type)} />
           </RB.Col>
           <RB.Col>
-            <RB.FormControl placeholder={L('res_required')} value={row.required}
-                onChange={onChange('required')} />
+            <NumberInput placeholder={L('res_required')} value={row.required}
+                onChange={val=>changeRow('required', val)} />
           </RB.Col>
           <RB.Col>
-            <RB.FormControl placeholder={L('res_filled')} value={row.filled}
-                onChange={onChange('filled')} />
+            <NumberInput placeholder={L('res_filled')} value={row.filled}
+                onChange={val=>changeRow('filled', val)} />
           </RB.Col>
           <RB.Col>
             <RB.Button onClick={()=>this.deleteRow(row._id)}>{L('act_delete')}</RB.Button>
@@ -145,8 +143,8 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             </RB.Col>
             <RB.Col sm={1}>{L('cycle')}</RB.Col>
             <RB.Col>
-              <RB.FormControl placeholder={L('cycle')} value={state.cycle}
-                onChange={({target: {value}})=>this.setState({cycle: +value})} />
+              <NumberInput placeholder={L('cycle')} value={state.cycle}
+                onChange={cycle=>this.setState({cycle})} />
             </RB.Col>
             <RB.Col>
               <RB.Button onClick={this.addRow}>{L('act_add_row')}</RB.Button>

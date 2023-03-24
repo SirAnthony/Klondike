@@ -72,13 +72,13 @@ class List extends UList<ListProps, ListState> {
     }
     resources(){
         const rows = this.state.resources?.map(r=><ResourceInput res={r}
-          onChange={(data)=>this.changeResource(data)} />)
-        return <RB.Container>
+           key={`res_input_${r._id}`} onChange={(data)=>this.changeResource(data)} />)
+        return <RB.Container key='resource_container'>
             {rows}
         </RB.Container>
     }
     newItem(){
-        return <RB.Container>
+        return <RB.Container key='new_item_ctrl'>
           <ItemRowNew onCreate={(item: Item)=>this.createItem(item)} />
         </RB.Container>
     }
@@ -87,8 +87,13 @@ class List extends UList<ListProps, ListState> {
         const fields = ['kind', 'owner', 'location', 'data']
         const rows = list.map(l=><ItemRow className='menu-list-row' onReload={()=>this.fetch()}
           key={`item_list_${l._id}`} item={l} fields={fields} user={this.props.user} />)
-        return [this.resources(), this.newItem(),
-          <ItemRowDesc className='menu-list-title' fields={fields} user={this.props.user} />,
-          ...rows]
+        return [
+          this.resources(),
+          <hr key='res_delimeter' />,
+          this.newItem(),
+          <ItemRowDesc key='item_row_desc' className='menu-list-title'
+            fields={fields} user={this.props.user} />,
+          ...rows
+        ]
     }
 }

@@ -3,8 +3,9 @@ import * as RB from 'react-bootstrap'
 import {Item, ItemType, MarketType, User} from '../common/entity'
 import {ID, Location} from '../common/entity'
 import {Resource, ResourceType} from '../common/entity'
-import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, MultiOwnerSelect} from './inputs'
-import {LocationSelect, OwnerSelect} from './inputs'
+import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect} from './inputs'
+import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
+import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
 import * as util from '../common/util'
 import L from '../common/locale'
 
@@ -110,7 +111,7 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
     }
 }
 
-function Location(props: ItemProps) {
+function LocationCol(props: ItemProps) {
     const {location} = props.item
     if (!location)
         return null
@@ -134,7 +135,7 @@ export function ItemRow(props: ItemProps){
         {res.kind!=undefined ? L(`res_kind_${res.kind}`) : '-'}</RB.Col>}
       {has('owner') && <RB.Col sm={lyt.owner}>
         {item.owner ? item.owner.name : '-'}</RB.Col>}
-      {has('location') && <Location {...props} layout={lyt.location} />}
+      {has('location') && <LocationCol {...props} layout={lyt.location} />}
       <RB.Col sm={lyt.value}>{res.value || 1}</RB.Col>
       <RB.Col sm={lyt.price}>{item.price}</RB.Col>
       {has('data') && <RB.Col sm={lyt.data}>{res.data}</RB.Col>}
@@ -148,11 +149,11 @@ type ItemRowNewProps = {
     onCreate: (item: Item)=>void
 }
 type ItemRowNewState = {
-    type: ItemType
+    type?: ItemType
     owner?: ID
     location?: Location
     price?: number
-    kind: number
+    kind?: number
     value?: number
     data?: string
     mass?: number
@@ -166,7 +167,7 @@ type ItemRowNewState = {
 export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
     constructor(props){
         super(props)
-        this.state = {type: -1, kind: -1}
+        this.state = {}
     }
     create() {
         const item = new (Item.class(this.state.type))()
@@ -176,7 +177,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     }
     get row_size(){
         return [ItemType.Resource, ItemType.Patent]
-            .includes(this.state.type) ? 2 : 3
+            .includes(+this.state.type) ? 2 : 3
     }
     hasField(name: string){
         const {type} = this.state
@@ -191,13 +192,12 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const row_size = this.row_size
         const {kind, value} = this.state
         const kindChange = type=>this.setState({kind: type})
-        const valChange = ({target: {value}})=>this.setState({value: +value})
+        const valChange = value=>this.setState({value})
         return [<RB.Col sm={row_size}>
-          <ResourceSelect value={kind} onChange={kindChange} optName='res_desc_kind' />
+          <ResourceSelect value={kind} onChange={kindChange} />
         </RB.Col>,
         <RB.Col sm={row_size}>
-          <RB.FormControl placeholder={L('res_desc_value')} value={value}
-            onChange={valChange} />
+          <NumberInput placeholder={L('res_desc_value')} value={value} onChange={valChange} />
         </RB.Col>]
     }
     // coordinates
@@ -212,14 +212,12 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_3(){
         const row_size = this.row_size
         const {mass, energy} = this.state
-        const massChange = ({target: {value}})=>this.setState({mass: +value})
-        const energyChange = ({target: {value}})=>this.setState({energy: +value})
+        const massChange = mas=>this.setState({mass})
+        const energyChange = energy=>this.setState({energy})
         return [<RB.Col sm={row_size}>
-          <RB.FormControl placeholder={L('res_desc_mass')} value={mass}
-            onChange={massChange} />
+          <NumberInput placeholder={L('res_desc_mass')} value={mass} onChange={massChange} />
         </RB.Col>, <RB.Col sm={row_size}>
-          <RB.FormControl placeholder={L('res_desc_energy')} value={energy}
-            onChange={energyChange} />
+          <NumberInput placeholder={L('res_desc_energy')} value={energy} onChange={energyChange} />
         </RB.Col>]
     }
     // patent
@@ -229,22 +227,22 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const kindChange = type=>this.setState({kind: type})
         const weightChange = ({target: {value}})=>this.setState({weight: +value})
         return [<RB.Col sm={row_size}>
-          <PatentTypeSelect value={kind} onChange={kindChange}
-            optName='patent_desc_kind' />
+          <PatentTypeSelect value={kind} onChange={kindChange} />
         </RB.Col>,
         <RB.Col sm={row_size}>
-          <PatentWeightSelect value={weight} onChange={weightChange}
-            optName='patent_desc_weight' />
+          <PatentWeightSelect value={weight} onChange={weightChange} />
         </RB.Col>]
     }
     rows_4(){
-        const {owners} = this.state
-        const ownersChange = (owners: ID[])=>this.setState({owners})
-        return [<RB.Row>
-            <MultiOwnerSelect value={owners} onChange={ownersChange} />
-        </RB.Row>,<RB.Row>
-
-        </RB.Row>]
+        const {owners, resourceCost} = this.state
+        const ownersChange = owners=>this.setState({owners})
+        const resChange = resourceCost=>this.setState({resourceCost})
+        return [
+          <MultiOwnerSelect value={owners} onChange={ownersChange}
+            className='menu-list-row wide-row' />,
+          <MultiResourceSelect value={resourceCost} onChange={resChange}
+            className='menu-list-row wide-row' />
+        ]
     }
     // artifact
     fields_5(){
@@ -254,17 +252,16 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const {type, price} = this.state
         const row_size = this.row_size, fkey = `fields_${type}`
         const top_fields = this[fkey] ? this[fkey]() : []
-        const typeChange = ({target: {value}})=>this.setState({type: +value})
-        const priceChange = ({target: {value}})=>this.setState({price: +value})
+        const typeChange = type=>this.setState({type})
+        const priceChange = price=>this.setState({price})
         return <RB.Row className='menu-list-row'>
           <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
           <RB.Col sm={row_size}>
-            <TypeSelect value={type} onChange={typeChange} optName='item_desc_type'
-              exclude={[ItemType.Ship]}/>
+            <TypeSelect value={type} onChange={typeChange} exclude={[ItemType.Ship]}/>
           </RB.Col>
           {top_fields}
          <RB.Col sm={row_size}>
-            <RB.FormControl placeholder={L('item_desc_price')} value={price} onChange={priceChange} />
+            <NumberInput placeholder={L('item_desc_price')} value={price} onChange={priceChange} />
           </RB.Col>
           <RB.Col sm={row_size}>
             <RB.Button onClick={()=>this.create()}>{L('act_create')}</RB.Button>

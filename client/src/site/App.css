@@ -53,6 +53,10 @@
     overflow-wrap: break-word;
 }
 
+.wide-row {
+    width: 100%;
+}
+
 .menu-container, .menu-container-full {
     background-color: var(--color-ui-box-hover);
     border: solid var(--color-ui-border) 2px;

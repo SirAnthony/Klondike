@@ -2,16 +2,16 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {ErrorMessage} from './errors'
+import {ID} from '../common/entity'
 import L from '../common/locale'
 
 type SelectState = {
     value: any
     list?: any[]
-    options: {[key: string]: string}
+    options: {[key: string]: string | ID}
 }
 type SelectProps = {
     value: any
-    optName: string
     onChange: (value: any)=>void
 }
 export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
@@ -21,6 +21,8 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
         this.state = {value: props.value} as any
         this.onChange = this.onChange.bind(this)
     }
+    get optName(){ return 'default_choise' }
+    get defaultValue(){ return `default_value_opt` }
     fetchState(data: any = {}){
         const {list} = data
         return {item: data, list, options: this.getOptions(list)}
@@ -28,25 +30,32 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     getOptions(list: any[] = []){
         return {}
     }
+    getValue(value){ return value }
     onChange({target: {value}}){
         this.setState({value})
-        this.props.onChange(value)
+        this.props.onChange(this.getValue(value))
     }
     body(): JSX.Element[] {
-        const {optName} = this.props
         const {options} = this.state
-        const opts = Object.keys(options).map(o=>
-          <option key={`opt_${options[o]}_${o}`} value={o}>{options[o]}</option>)
-        opts.unshift(<option key={`opt_name`} disabled={true} value=''>
-            {this.L(optName)}</option>)
+        const opts = Object.keys(options).map(o=>{
+            const opt = options[o];
+            const id = typeof opt=='string' ? o : opt._id
+            const name = typeof opt=='string' ? opt : opt.name
+            return <option key={`opt_${id}_${o}`} value={id}>{name}</option>
+        })
+        opts.unshift(<option key={`opt_name`} disabled={true} value={this.defaultValue}>
+            {this.L(this.optName)}</option>)
         return opts
     }
     render(){
-        const {list, err, value} = this.state
+        const {list, err} = this.state
         if (err)
             return <ErrorMessage field={err} />
         if (!list)
             return <div key={'list_empty'}>{this.L('not_found')}</div>
+        let value = this.state.value
+        if (value===null||value===undefined)
+            value = this.defaultValue
         const body = this.body()
         return <RB.FormSelect value={value} onChange={this.onChange}>
           {body}
@@ -54,9 +63,10 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     }
 }
 
-export function TypedSelect<T>(T: T, key: string){
+export function TypedSelect<T>(T: T, key: string, opt: string){
     return class TypedSelect extends Select<{exclude?: number[]}, {}> {
         L = L
+        get optName(){ return opt }
         async fetch(){
             const list = Object.keys(T).filter(k=>
                 !isNaN(+k) && !this.props.exclude?.includes(+(k)))
