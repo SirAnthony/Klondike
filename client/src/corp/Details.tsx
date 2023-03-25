@@ -1,9 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation as ECorp, Order, User} from '../common/entity'
-import {Item as EItem} from '../common/entity'
+import {Corporation, Order, User} from '../common/entity'
+import {Item, Patent} from '../common/entity'
 import {ItemRow, ItemRowDesc} from '../util/Item'
+import {PatentRow, PatentRowDesc} from '../util/Patent'
 import {OrderRowCompact} from '../util/Order'
 import {default as L, LR} from './locale'
 
@@ -12,7 +13,7 @@ type OrderDetailsState = {
 }
 type OrderDetailsProps = {
     cycle?: number
-    corp: ECorp
+    corp: Corporation
     user: User
     full?: Boolean
     fields?: string[]
@@ -53,10 +54,10 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
 }
 
 type ItemDetailsState = {
-    items?: EItem[]
+    items?: Item[]
 }
 type ItemDetailsProps = {
-    corp: ECorp
+    corp: Corporation
     user: User
 }
 export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
@@ -117,6 +118,43 @@ export class PriceDetails extends F.Fetcher<PriceDetailsProps, PriceDetailsState
             <RB.Col>{L('market_prices')}</RB.Col>
           </RB.Row>
           {items}
+        </RB.Container>
+    }
+}
+
+type PatentDetailsState = {
+    patents?: Patent[]
+}
+type PatentDetailsProps = {
+    corp: Corporation
+    user: User
+}
+export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsState> {
+    constructor(props){
+        super(props)
+        this.state = {}
+    }
+    get fetchUrl() { 
+        const {corp} = this.props
+        return `/api/corp/patents/${corp._id}`
+    }
+    fetchState(data: any = {}){
+        const {patents} = data
+        return {item: data, patents}
+    }
+    rows(){
+        const {patents = []} = this.state
+        const rows = patents.map(i=><PatentRow onReload={()=>this.fetch()}
+            key={`item_row_${i._id}`} patent={i} {...this.props} />)
+        return rows
+    }
+    render(){
+        return <RB.Container>
+          <RB.Row className='menu-list-title'>
+            <RB.Col>{L('res_cur')}</RB.Col>
+          </RB.Row>
+          <PatentRowDesc />
+          {this.rows()}
         </RB.Container>
     }
 }

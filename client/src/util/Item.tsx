@@ -6,6 +6,7 @@ import {Resource, ResourceType} from '../common/entity'
 import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, ArtifactTypeSelect} from './inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
+import {IDField} from './components'
 import * as util from '../common/util'
 import L from '../common/locale'
 
@@ -128,7 +129,7 @@ export function ItemRow(props: ItemProps){
     const has = n=>props.fields?.includes(n)
     const lyt = column_layout(props.fields)
     return <RB.Row className={props.className}>
-      <RB.Col className='wrap-anywhere' sm={lyt.id}>{item._id}</RB.Col>
+      <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
       <RB.Col sm={lyt.name}>{item.name}</RB.Col>
       <RB.Col sm={lyt.type}>{L(`item_type_${item.type}`)}</RB.Col>
       {has('kind') && <RB.Col sm={lyt.kind}>
@@ -150,6 +151,7 @@ type ItemRowNewProps = {
 }
 type ItemRowNewState = {
     type?: ItemType
+    name: string
     owner?: ID
     location?: Location
     price?: number
@@ -167,7 +169,7 @@ type ItemRowNewState = {
 export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
     constructor(props){
         super(props)
-        this.state = {}
+        this.state = {name: ''}
     }
     create() {
         const item = new (Item.class(this.state.type))()
@@ -273,8 +275,9 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         </RB.Row>
     }
     fields_bottom(){
-        const {type, data, owner, location} = this.state
+        const {type, name, data, owner, location} = this.state
         const fkey = `fields_${type}_b`, btm_fields = this[fkey] ? this[fkey]() : []
+        const nameChange = ({target: {value}})=>this.setState({name: value})
         const dataChange = ({target: {value}})=>this.setState({data: value})
         const ownerChange = owner=>this.setState({owner})
         const locChange = location=>this.setState({location})
@@ -283,6 +286,10 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             <RB.FormControl as='textarea' rows={3} placeholder={L('item_desc_data')}
               value={data} onChange={dataChange} />
           </RB.Col>
+          {this.hasField('name') && <RB.Col sm={2}>
+            <RB.FormControl placeholder={L('item_desc_name')}
+              value={name} onChange={nameChange} />
+          </RB.Col>}
           {this.hasField('owner') && <RB.Col sm={2}>
             <OwnerSelect value={owner} onChange={ownerChange} />
           </RB.Col>}

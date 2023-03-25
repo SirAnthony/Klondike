@@ -32,6 +32,12 @@ export class AdminApiRouter extends BaseRouter {
             item.owner = (await CorpController.get(data.owner._id)).identifier
         if (data.location)
             item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
+        if (data.owners){
+            const owners = []
+            for (let k of data.owners){
+                owners.push((await CorpController.get(k._id)).identifier) }
+            (item as any).owners = owners
+        }
         await item.save()
     }
 

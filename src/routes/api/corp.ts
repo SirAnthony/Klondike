@@ -48,12 +48,23 @@ export class CorpApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Corporant)
     async get_orders(ctx: RenderContext){
-        const {id} = ctx.params;
+        const {id} = ctx.params
         if (!id)
             throw 'Self-items not implemented'
         const corp = await CorpController.get(id)
         const orders = await OrderController.all({'assignee._id': corp._id})
         return {orders}
+    }
+    
+    @CheckRole(UserType.Corporant)
+    async get_patents(ctx: RenderContext){
+        const {id} = ctx.params
+        if (!id)
+            throw 'Self-patents not implemented'
+        const corp = await CorpController.get(id)
+        const patents = await ItemController.all({'type': ItemType.Patent,
+            'owners._id': corp._id})
+        return {patents}
     }
 
     @CheckRole(UserType.Master)

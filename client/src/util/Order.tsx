@@ -42,19 +42,19 @@ export function OrderRow(props: RowProps){
     </RB.Row>
 }
 
-function OrderReq(req: ResourceRow) {
+function OrderReq(req: ResourceRow, _id) {
     if (!req)
         return [null]
     return [
-      <RB.Col sm={4}>{L(`res_kind_${req.kind}`)}</RB.Col>,
-      <RB.Col sm={1}>{req.required}</RB.Col>,
-      <RB.Col sm={1}>{req.filled||0}</RB.Col>
+      <RB.Col sm={4} key={`order_req_kind_${_id}`}>{L(`res_kind_${req.kind}`)}</RB.Col>,
+      <RB.Col sm={1} key={`order_req_required_${_id}`}>{req.required}</RB.Col>,
+      <RB.Col sm={1} key={`order_req_filled_${_id}`}>{req.filled||0}</RB.Col>
     ]
 }
 export function OrderRowCompact(props: RowProps){
     const {order} = props, {requests} = order, rows = [];
     for (let i=0; i<requests.length; i+=2)
-        rows.push([...OrderReq(requests[i]), ...OrderReq(requests[i+1])])
+        rows.push([...OrderReq(requests[i], order._id+i), ...OrderReq(requests[i+1], order._id+(i+1))])
     return <RB.Row key={`order_row_${order._id}`}>{rows}</RB.Row>
 }
 

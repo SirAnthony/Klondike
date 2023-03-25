@@ -65,6 +65,11 @@ export class Corporation extends ID {
 }
 
 export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
+export const ItemTypePrefix = {
+    [ItemType.Resource]: 'R', [ItemType.Coordinates]: 'C',
+    [ItemType.Ship]: 'S', [ItemType.Module]: 'M',
+    [ItemType.Patent]: 'P', [ItemType.Artifact]: 'A'
+}
 export enum MarketType {None, Sale, Protected}
 export class Item extends ID {
     type: ItemType

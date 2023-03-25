@@ -18,6 +18,8 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/prices': {func: 'prices', methods: ['get']},
     '/orders': {func: 'orders', methods: ['get']},
     '/orders/:id': {func: 'orders', methods: ['get']},
+    '/patents': {func: 'patents', methods: ['get']},
+    '/patents/:id': {func: 'patents', methods: ['get']},
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},

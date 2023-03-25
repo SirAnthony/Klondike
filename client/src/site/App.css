@@ -228,6 +228,17 @@ button.btn-close {
     /*background-color: #000;*/
 }
 
+div.popover {
+    border-radius: 10px;
+}
+div.popover-body {
+    border-radius: 10px;
+    padding: 10px;
+    color: var(--color-ui-text);
+    background-color: var(--color-ui-box);
+    border: solid 1px var(--color-ui-border);
+}
+
 input.form-control, select.form-select, textarea.form-control {
     color: var(--color-ui-text);
     border: solid var(--color-ui-border) 1px;

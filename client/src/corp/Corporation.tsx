@@ -6,6 +6,7 @@ import {ResourceType} from '../common/entity'
 import * as util from '../common/util'
 import {ControlBar} from '../util/controls'
 import {ItemDetails, PriceDetails, OrderDetails} from './Details'
+import {PatentDetails} from './Details'
 import {default as L, LR} from './locale'
 
 type CorpProps = {
@@ -42,6 +43,14 @@ export function Corporation(props: CorpProps){
         </RB.Col>
         <RB.Col className='menu-box'>
           <ItemDetails {...props} />
+        </RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Col className='menu-box menu-box-col'>
+
+        </RB.Col>
+        <RB.Col className='menu-box'>
+          <PatentDetails {...props} />
         </RB.Col>
       </RB.Row>
     </RB.Container>)
