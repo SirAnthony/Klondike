@@ -73,6 +73,7 @@ function normalize_dur(dur){
     return norm;
 }
 
+export const pad = d=>String(d).padStart(2, '0')
 export const diff = (a, b, period = ms.DAY)=>
     Math.ceil((+get(a) - +get(b)) / period)
 export const weekday = d=>
@@ -81,6 +82,13 @@ export const longdate = d=>get(d).toLocaleDateString(
     config.locale, {weekday: 'long', day: 'numeric', month: 'long'})
 export const daymonth = d=>get(d).toLocaleDateString(
     config.locale, {day: 'numeric', month: 'long'})
-export const time = d=>get(d).getHours()+':'+String(get(d).getMinutes()).padStart(2, '0')
-export const daytime = d=>
-    [time(d), ((+d)%ms.DAY) + 1].filter(Boolean).join(' '+L('day_number')+' ')
+export const time = d=>get(d).getHours()+':'+pad(get(d).getMinutes())
+export const interval = (d: number, opt?: {days?: Boolean, hours?: Boolean, min?: Boolean, sec?: Boolean})=>{
+    opt = Object.assign({days: true, hours: true, min: true, sec: true}, opt)
+    const days = (d/ms.DAY)|0
+    const hours = ((d - days*ms.DAY)/ms.HOUR)|0
+    const minutes = ((d - days*ms.DAY - hours*ms.HOUR)/ms.MIN)|0
+    const seconds = ((d - days*ms.DAY - hours*ms.HOUR - minutes*ms.MIN)/ms.SEC)|0
+    return [opt.hours && pad(hours), opt.min && pad(minutes), opt.sec && pad(seconds)]
+        .filter(Boolean).join(':')+(opt.days ? ` ${L('day_number')} ${days+1}` : '')
+}

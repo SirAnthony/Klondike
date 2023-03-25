@@ -40,12 +40,12 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
     render(){
         const {cycle, err} = this.state
         const time = this.time
-        const current_cycle = ((time/date.ms.HOUR)%(cycle/date.ms.SEC))+1
+        const current_cycle = ((time/date.ms.HOUR)%(cycle/date.ms.SEC))|0+1
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-list-row'>
             <RB.Col>{L('server_time')}</RB.Col>
-            <RB.Col>{date.daytime(time)}</RB.Col>
+            <RB.Col>{date.interval(time)}</RB.Col>
             <RB.Col>{L('server_cycle')}</RB.Col>
             <RB.Col>{current_cycle}</RB.Col>
             <RB.Col>
