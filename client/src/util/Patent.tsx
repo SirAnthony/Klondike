@@ -49,7 +49,7 @@ export function PatentRow(props: RowProps){
         <RB.Col>{L(`patent_weigth_${patent.weight}`)}</RB.Col>
         <RB.Col>{L(`patent_kind_${patent.kind}`)}</RB.Col>
         <RB.Col>
-          <RB.OverlayTrigger placement='top' trigger={[/*'hover', 'focus',*/ 'click']}
+          <RB.OverlayTrigger placement='top' trigger={['hover', 'focus']}
             overlay={OwnerListPopover(patent)}>
             <span>{ownership}</span>
           </RB.OverlayTrigger>
