@@ -222,7 +222,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const row_size = this.row_size
         const {kind, weight} = this.state
         const kindChange = kind=>this.setState({kind})
-        const weightChange = ({target: {value}})=>this.setState({weight: +value})
+        const weightChange = weight=>this.setState({weight})
         return [<RB.Col sm={row_size} key='patent_type_select'>
           <PatentTypeSelect value={kind} onChange={kindChange} />
         </RB.Col>,
