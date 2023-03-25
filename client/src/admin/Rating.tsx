@@ -40,7 +40,7 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
     render(){
         const {cycle, err} = this.state
         const time = this.time
-        const current_cycle = ((time/date.ms.HOUR)%(cycle/date.ms.SEC))|0+1
+        const current_cycle = (time/cycle)|0+1
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-list-row'>
@@ -50,11 +50,11 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
             <RB.Col>{current_cycle}</RB.Col>
             <RB.Col>
               <RB.Button onClick={()=>this.changeTime(date.ms.HOUR)}>
-                {L('time_increase', 1)}</RB.Button>
+                {L('time_decrease', 1)}</RB.Button>
             </RB.Col>
             <RB.Col>
               <RB.Button onClick={()=>this.changeTime(-date.ms.HOUR)}>
-                {L('time_decrease', 1)}</RB.Button>
+                {L('time_increase', 1)}</RB.Button>
               </RB.Col>
           </RB.Row>
         </RB.Container>
