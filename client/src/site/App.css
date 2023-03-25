@@ -186,6 +186,15 @@ div.menu-container-full {
     max-height: var(--map-height);
 }
 
+.selected-item {
+    display: inline;
+    margin: 0px 3px;
+}
+
+.selected-item > button {
+    margin-left: 3px;
+}
+
 .map-container.container {
     position: relative;
     margin-right: 0px;

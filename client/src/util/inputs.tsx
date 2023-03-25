@@ -9,9 +9,10 @@ import L from '../common/locale'
 import * as _ from 'lodash'
 
 export function NumberInput(props: {value?: number, placeholder: string, onChange: (l: number)=>void}){
-    const onChange = ({target: {value}})=>
-        props.onChange(isNaN(+value) ? !value ? undefined : props.value : +value)
-    return <RB.FormControl placeholder={props.placeholder} value={props.value} onChange={onChange} />
+    const empty = typeof props.value==='undefined'
+    const val =  empty ? undefined : +props.value
+    const onChange = ({target: {value}})=>props.onChange(isNaN(+value) ? val : +value)
+    return <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val} onChange={onChange} />
 }
 
 export const ResourceSelect = TypedSelect(ResourceType, 'res_kind', 'res_desc_kind')
@@ -56,8 +57,8 @@ export function MultiOwnerSelect(props: {value?: ID[],
         owner, props.value).filter(Boolean), f=>f._id))
     const removeOwner = (_id: string)=>props.onChange(_.uniqBy([].concat(
         props.value).filter(o=>o && o._id!=_id), f=>f._id))
-    const owners = props.value?.map(o=><RB.Container key={`sel_owner_${o._id}`}>
-      {o.name}<RB.CloseButton onClick={()=>removeOwner(o._id)} />
+    const owners = props.value?.map(o=><RB.Container key={`sel_owner_${o._id}`}
+      className='selected-item'>{o.name}<RB.CloseButton onClick={()=>removeOwner(o._id)} />
     </RB.Container>)
     return <RB.Row className={props.className}>
       <RB.Col sm={2}>
@@ -77,11 +78,11 @@ export function MultiResourceSelect(props: {value?: ResItem[],
     className?: string, onChange: (values: ResItem[])=>void}){
     const [kind, setKind] = React.useState(null)
     const [value, setValue] = React.useState(0)
-    const addRes = ()=>kind>=0 && value>=0 && props.onChange(_.uniqBy([].concat(
-        {kind, value}, props.value).filter(Boolean), f=>f.kind))
+    const addRes = ()=>kind!==null && kind>=0 && value>=0 && props.onChange(_.uniqBy(
+        [].concat({kind, value}, props.value).filter(Boolean), f=>f.kind))
     const removeRes = (kind: number)=>props.onChange(_.uniqBy([].concat(
         props.value).filter(o=>o && o.kind!=kind), f=>f.kind))
-    const resources = props.value?.map(o=><RB.Container key={`sel_res_${o.kind}`}>
+    const resources = props.value?.map(o=><RB.Container key={`sel_res_${o.kind}`} className='selected-item'>
       {L(`res_kind_${o.kind}`)} [{o.value}]<RB.CloseButton onClick={()=>removeRes(o.kind)} />
     </RB.Container>)
     return <RB.Row className={props.className}>

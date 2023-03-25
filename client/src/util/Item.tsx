@@ -179,7 +179,9 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         return 2
     }
     hasField(name: string){
-        return (new (Item.class(this.state.type))()).keys.includes(name) }
+        let cls = new (Item.class(this.state.type))()
+        return cls.keys.includes(name)
+    }
     // resource
     fields_0(){
         const row_size = this.row_size

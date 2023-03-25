@@ -137,7 +137,7 @@ export class Patent extends Item {
     resourceCost: {kind: ResourceType, value: number}[]
     get keys(){
         return super.keys.concat('kind weight owners resourceCost'.split(' '))
-            .filter(k=>['location', 'owner'].includes(k))
+            .filter(k=>!['location', 'owner'].includes(k))
     }
     get fullOwnership(){ return this.owners.length > 1 }
     get shares(){ return 1/(this.owners.length||1) }
