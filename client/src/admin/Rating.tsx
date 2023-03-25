@@ -13,20 +13,17 @@ type TimeControlProps = {
     onUpdate: ()=>void
 }
 type TimeContolState = {
-    basic: number
-    cycle: number
+    time: date.Time
 }
 class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
     L = L
     constructor(props){
         super(props)
-        this.state = {value: props.value} as any
+        this.state = {time: new date.Time()}
     }
     get fetchUrl(){ return '/api/time' }
-    get time(){ return date.diff(undefined, this.state.basic, 1) }
     fetchState(data: any = {}){
-        const {basic, cycle} = data
-        return {item: data, basic, cycle}
+        return {item: data, time: new date.Time(data)}
     }
     async changeTime(value: number){
         this.setState({err: null})
@@ -38,24 +35,30 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
         this.props.onUpdate()
     }
     render(){
-        const {cycle, err} = this.state
-        const time = this.time
-        const current_cycle = (time/cycle)|0+1
+        const {time, err} = this.state
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-list-row'>
             <RB.Col>{L('server_time')}</RB.Col>
-            <RB.Col>{date.interval(time)}</RB.Col>
+            <RB.Col>{time.format}</RB.Col>
             <RB.Col>{L('server_cycle')}</RB.Col>
-            <RB.Col>{current_cycle}</RB.Col>
+            <RB.Col>{time.cycle}</RB.Col>
             <RB.Col>
               <RB.Button onClick={()=>this.changeTime(date.ms.HOUR)}>
                 {L('time_decrease', 1)}</RB.Button>
             </RB.Col>
             <RB.Col>
+              <RB.Button onClick={()=>this.changeTime(time.cycleLength)}>
+                {L('time_decrease', time.hoursInCycle)}</RB.Button>
+              </RB.Col>
+            <RB.Col>
               <RB.Button onClick={()=>this.changeTime(-date.ms.HOUR)}>
                 {L('time_increase', 1)}</RB.Button>
-              </RB.Col>
+            </RB.Col>
+            <RB.Col>
+              <RB.Button onClick={()=>this.changeTime(-time.cycleLength)}>
+                {L('time_increase', time.hoursInCycle)}</RB.Button>
+            </RB.Col>
           </RB.Row>
         </RB.Container>
     }

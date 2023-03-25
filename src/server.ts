@@ -20,7 +20,7 @@ export async function run(opt: any = {}){
     for (let r of routers)
         app.use(r.routes()).use(r.methods())
     server = await app.listen(port)
-    Time.server = Time.basic = +new Date()
+    Time.serverTime = Time.basicTime = +new Date()
     console.log(`Server running on port ${port}`)
     return server
 }

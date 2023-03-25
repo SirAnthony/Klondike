@@ -87,7 +87,7 @@ export class AdminApiRouter extends BaseRouter {
     async put_time(ctx: RenderContext){
         const params: any = ctx.request.body
         const {time} = params
-        Time.basic += (+time)|0
+        Time.basicTime += (+time)|0
     }   
 
 }

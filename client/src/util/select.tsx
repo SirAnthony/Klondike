@@ -12,6 +12,7 @@ type SelectState = {
 }
 type SelectProps = {
     value: any
+    optName?: string
     onChange: (value: any)=>void
 }
 export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
@@ -37,6 +38,7 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     }
     body(): JSX.Element[] {
         const {options} = this.state
+        const {optName} = this.props
         const opts = Object.keys(options).map(o=>{
             const opt = options[o];
             const id = typeof opt=='string' ? o : opt._id
@@ -44,7 +46,7 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
             return <option key={`opt_${id}_${o}`} value={id}>{name}</option>
         })
         opts.unshift(<option key={`opt_name`} disabled={true} value={this.defaultValue}>
-            {this.L(this.optName)}</option>)
+            {this.L(optName||this.optName)}</option>)
         return opts
     }
     render(){
@@ -67,6 +69,7 @@ export function TypedSelect<T>(T: T, key: string, opt: string){
     return class TypedSelect extends Select<{exclude?: number[]}, {}> {
         L = L
         get optName(){ return opt }
+        getValue(value){ return +value }
         async fetch(){
             const list = Object.keys(T).filter(k=>
                 !isNaN(+k) && !this.props.exclude?.includes(+(k)))

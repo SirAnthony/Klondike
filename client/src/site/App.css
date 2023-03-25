@@ -53,10 +53,6 @@
     overflow-wrap: break-word;
 }
 
-.wide-row {
-    width: 100%;
-}
-
 .menu-container, .menu-container-full {
     background-color: var(--color-ui-box-hover);
     border: solid var(--color-ui-border) 2px;
@@ -150,6 +146,7 @@ div.menu-container-full {
 }
 
 .menu-list-row, .menu-list-title {
+    width: 100%;
     padding: 8px;
     color: var(--color-ui-text);
 }

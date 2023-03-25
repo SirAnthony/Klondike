@@ -80,7 +80,9 @@ export class Item extends ID {
     get keys(){ 
         return '_id name type owner location price data market'.split(' ') }
     get class(){ return Item.class(this.type) }
-    static class(type: ItemType) {
+    static class(type?: ItemType) {
+        if (typeof type==='undefined')
+            return Item
         switch (type){
             case ItemType.Resource: return Resource;
             case ItemType.Coordinates: return Coordinates;
@@ -90,7 +92,7 @@ export class Item extends ID {
             case ItemType.Artifact: return Artifact;
         }
         // unreachable
-        throw new Error('Undefined type')
+        throw new Error(`Undefined type ${type}`)
     }
 }
 
@@ -146,7 +148,7 @@ export class Artifact extends Item {
     type = ItemType.Artifact
     kind: ArtifactType
     get keys(){
-        return super.keys.concat('kind description'.split(' ')) }
+        return super.keys.concat('kind'.split(' ')) }
 }
 
 export const ShipValues = {

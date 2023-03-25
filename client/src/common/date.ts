@@ -1,6 +1,22 @@
 import config from './config'
 import L from './locale'
 
+export class Time {
+    serverTime: number
+    basicTime: number
+    cycleLength: number
+    constructor(data?: {serverTime: number, basicTime: number, cycleLength: number}){
+        this.serverTime = this.basicTime = 0
+        this.cycleLength = ms.HOUR
+        for (let k in data)
+            this[k] = data[k]
+    }
+    get time(){ return diff(undefined, this.basicTime, 1) }
+    get cycle(){ return Math.floor(this.time/this.cycleLength)+1 }
+    get format(){ return interval(this.time) }
+    get hoursInCycle(){ return this.cycleLength/ms.HOUR }
+}
+
 export const sec = {
     NANO: 1/1e9,
     MS: 0.001,

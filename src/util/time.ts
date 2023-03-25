@@ -1,6 +1,7 @@
+import * as date from '../../client/src/common/date'
 
-export const Time = {
-    server: 0,
-    basic: 0,
-    cycle: 3600*4,
-}
+export const Time = new date.Time({
+    serverTime: 0,
+    basicTime: 0,
+    cycleLength: 4*date.ms.HOUR,
+})

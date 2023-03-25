@@ -3,7 +3,7 @@ import * as RB from 'react-bootstrap'
 import {Item, ItemType, MarketType, User} from '../common/entity'
 import {ID, Location} from '../common/entity'
 import {Resource, ResourceType} from '../common/entity'
-import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect} from './inputs'
+import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, ArtifactTypeSelect} from './inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
 import * as util from '../common/util'
@@ -176,33 +176,30 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         this.props.onCreate(item)
     }
     get row_size(){
-        return [ItemType.Resource, ItemType.Patent]
-            .includes(+this.state.type) ? 2 : 3
+        return 2
     }
     hasField(name: string){
-        const {type} = this.state
-        switch (type){
-            case ItemType.Patent:
-                return !['location', 'price', 'owner'].includes(name)
-        }
-        return true
-    }
+        return (new (Item.class(this.state.type))()).keys.includes(name) }
     // resource
     fields_0(){
         const row_size = this.row_size
         const {kind, value} = this.state
-        const kindChange = type=>this.setState({kind: type})
+        const kindChange = kind=>this.setState({kind})
         const valChange = value=>this.setState({value})
-        return [<RB.Col sm={row_size}>
+        return [<RB.Col sm={row_size} key='resource_kind_select'>
           <ResourceSelect value={kind} onChange={kindChange} />
         </RB.Col>,
-        <RB.Col sm={row_size}>
+        <RB.Col sm={row_size} key='resource_value_select'>
           <NumberInput placeholder={L('res_desc_value')} value={value} onChange={valChange} />
         </RB.Col>]
     }
     // coordinates
     fields_1(){
-
+        const {target} = this.state
+        const targetChange = target=>this.setState({target})
+        return [<RB.Col sm={4} key='coord_target_select'>
+          <LocationSelect onChange={targetChange} value={target} optName='item_desc_target' />
+        </RB.Col>]
     }
     // ship
     fields_2(){
@@ -214,22 +211,22 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const {mass, energy} = this.state
         const massChange = mas=>this.setState({mass})
         const energyChange = energy=>this.setState({energy})
-        return [<RB.Col sm={row_size}>
-          <NumberInput placeholder={L('res_desc_mass')} value={mass} onChange={massChange} />
-        </RB.Col>, <RB.Col sm={row_size}>
-          <NumberInput placeholder={L('res_desc_energy')} value={energy} onChange={energyChange} />
+        return [<RB.Col sm={row_size} key='module_mass_input'>
+          <NumberInput placeholder={L('item_desc_mass')} value={mass} onChange={massChange} />
+        </RB.Col>, <RB.Col sm={row_size} key='module_energy_input'>
+          <NumberInput placeholder={L('item_desc_energy')} value={energy} onChange={energyChange} />
         </RB.Col>]
     }
     // patent
     fields_4(){
         const row_size = this.row_size
         const {kind, weight} = this.state
-        const kindChange = type=>this.setState({kind: type})
+        const kindChange = kind=>this.setState({kind})
         const weightChange = ({target: {value}})=>this.setState({weight: +value})
-        return [<RB.Col sm={row_size}>
+        return [<RB.Col sm={row_size} key='patent_type_select'>
           <PatentTypeSelect value={kind} onChange={kindChange} />
         </RB.Col>,
-        <RB.Col sm={row_size}>
+        <RB.Col sm={row_size} key='patent_weight_select'>
           <PatentWeightSelect value={weight} onChange={weightChange} />
         </RB.Col>]
     }
@@ -239,14 +236,19 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const resChange = resourceCost=>this.setState({resourceCost})
         return [
           <MultiOwnerSelect value={owners} onChange={ownersChange}
-            className='menu-list-row wide-row' />,
+            className='menu-list-row' key='multi_owner_select' />,
           <MultiResourceSelect value={resourceCost} onChange={resChange}
-            className='menu-list-row wide-row' />
+            className='menu-list-row' key='multi_resource_select' />
         ]
     }
     // artifact
     fields_5(){
-
+        const row_size = this.row_size
+        const {kind} = this.state
+        const kindChange = kind=>this.setState({kind})
+        return [<RB.Col sm={row_size} key='artifact_kind_select'>
+          <ArtifactTypeSelect value={kind} onChange={kindChange} />
+        </RB.Col>]
     }
     fields_top(){
         const {type, price} = this.state
