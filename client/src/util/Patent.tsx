@@ -1,6 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ID, Patent, Corporation, User} from '../common/entity'
+import {ID, Patent, Corporation, User, PatentStatus} from '../common/entity'
+import {CorporationType} from '../common/entity'
 import * as util from '../common/util'
 import L from '../common/locale'
 import * as _ from 'lodash'
@@ -35,7 +36,7 @@ const OwnerListPopover = (patent: Patent)=>{
 type RowProps = {
     corp: Corporation
     patent: Patent
-    onReload?: ()=>void
+    onAction?: (action)=>()=>void
 } & RowDescProps
 export function PatentRow(props: RowProps){
     const {patent, corp} = props
@@ -54,6 +55,29 @@ export function PatentRow(props: RowProps){
             <span>{ownership}</span>
           </RB.OverlayTrigger>
         </RB.Col>
-        <RB.Col>actions</RB.Col>
+        <RB.Col>
+          <PatentActions {...props} />
+        </RB.Col>
     </RB.Row>
+}
+
+export function PatentActions(props: RowProps){
+    const {patent, corp, onAction} = props
+    if (corp.type==CorporationType.Research)
+        return <RB.Button>{L('act_pay')}</RB.Button>
+    const is_served = patent.status==PatentStatus.Served
+    return <RB.Container>
+      {!is_served  && <RB.Row><RB.Col>
+        <RB.Button onClick={onAction('forward')}>{L('act_forward_center')}</RB.Button>
+      </RB.Col></RB.Row>}
+      <RB.Row>
+        {!is_served && <RB.Col>
+          <RB.Button onClick={onAction('sell')}>{L('act_sell')}</RB.Button>
+        </RB.Col>}
+        <RB.Col>
+          <RB.Button onClick={onAction('product')}>{L('act_product')}</RB.Button>
+        </RB.Col>
+      </RB.Row>
+    </RB.Container>
+
 }

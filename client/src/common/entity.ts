@@ -60,8 +60,10 @@ export class Order extends ID {
 
 }
 
+export enum CorporationType {Research, Normal}
 export class Corporation extends ID {
     credit: number
+    type: CorporationType
 }
 
 export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
@@ -133,16 +135,18 @@ export class Module extends Item {
 }
 
 export enum PatentType {Bio, Enginering, Planet}
-export enum PatentWeight {Minimal, Basic, Premium} 
+export enum PatentWeight {Minimal, Basic, Premium}
+export enum PatentStatus {Created, Ready, Served}
 export class Patent extends Item {
     type = ItemType.Patent
     kind: PatentType
     weight: PatentWeight
     owners: ID[]
     resourceCost: {kind: ResourceType, value: number}[]
+    status: PatentStatus
     get keys(){
-        return super.keys.concat('kind weight owners resourceCost'.split(' '))
-            .filter(k=>!['location', 'owner'].includes(k))
+        return super.keys.concat('kind weight owners resourceCost status'
+            .split(' ')).filter(k=>!['location', 'owner'].includes(k))
     }
     get fullOwnership(){ return this.owners.length > 1 }
     get shares(){ return 1/(this.owners.length||1) }

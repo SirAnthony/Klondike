@@ -2,6 +2,7 @@ import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {ResourceController, OrderController, ItemController} from '../../entity'
 import {Item, ItemType, UserType, Resource, Order} from '../../../client/src/common/entity'
+import {CorporationType, PatentStatus} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
@@ -62,8 +63,11 @@ export class CorpApiRouter extends BaseRouter {
         if (!id)
             throw 'Self-patents not implemented'
         const corp = await CorpController.get(id)
-        const patents = await ItemController.all({'type': ItemType.Patent,
-            'owners._id': corp._id})
+        const status = corp.type == CorporationType.Research ?
+            PatentStatus.Created :
+            {'$in': [PatentStatus.Ready, PatentStatus.Served]}
+        const patents = await ItemController.all({type: ItemType.Patent,
+            'owners._id': corp._id, status})
         return {patents}
     }
 
