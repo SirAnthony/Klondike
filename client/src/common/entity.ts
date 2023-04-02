@@ -60,10 +60,16 @@ export class Order extends ID {
 
 }
 
-export enum CorporationType {Research, Normal}
+export enum CorporationType {Normal, Research}
+export enum CorporationPointsType {PatentPart, PatentFull}
 export class Corporation extends ID {
     credit: number
     type: CorporationType
+    points: {
+        value: number
+        time: number
+        type: CorporationPointsType
+    }[]
 }
 
 export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
@@ -101,6 +107,10 @@ export class Item extends ID {
         // unreachable
         throw new Error(`Undefined type ${type}`)
     }
+    constructor(data?: any){
+        super()
+        Object.assign(this, data)
+    }
 }
 
 export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas, Particle}
@@ -137,19 +147,23 @@ export class Module extends Item {
 export enum PatentType {Bio, Enginering, Planet}
 export enum PatentWeight {Minimal, Basic, Premium}
 export enum PatentStatus {Created, Ready, Served}
+export type PatentOwner = ID & {status: PatentStatus}
 export class Patent extends Item {
     type = ItemType.Patent
     kind: PatentType
     weight: PatentWeight
-    owners: ID[]
+    owners: PatentOwner[]
     resourceCost: {kind: ResourceType, value: number}[]
-    status: PatentStatus
     get keys(){
         return super.keys.concat('kind weight owners resourceCost status'
             .split(' ')).filter(k=>!['location', 'owner'].includes(k))
     }
-    get fullOwnership(){ return this.owners.length > 1 }
+    get fullOwnership(){ return this.owners.length < 2 }
     get shares(){ return 1/(this.owners.length||1) }
+    served(owner: ID){
+        return this.owners.some(o=>o._id==owner._id &&
+            o.status==PatentStatus.Served)
+    }
 }
 
 export enum ArtifactType {Bio, Enginering, Anomaly}

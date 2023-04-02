@@ -20,6 +20,7 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/orders/:id': {func: 'orders', methods: ['get']},
     '/patents': {func: 'patents', methods: ['get']},
     '/patents/:id': {func: 'patents', methods: ['get']},
+    '/patent/forward': {func: 'patent_forward', methods: ['post']},
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},

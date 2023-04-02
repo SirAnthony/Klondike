@@ -1,7 +1,7 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController} from '../../entity'
 import {OrderController, ItemController, ResourceController} from '../../entity'
-import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
+import {ItemType, UserType, Resource, PatentOwner, PatentStatus} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {Time} from '../../util/time'
@@ -33,9 +33,11 @@ export class AdminApiRouter extends BaseRouter {
         if (data.location)
             item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
         if (data.owners){
-            const owners = []
+            const owners: PatentOwner[] = []
             for (let k of data.owners){
-                owners.push((await CorpController.get(k._id)).identifier) }
+                let owner = (await CorpController.get(k._id)).identifier
+                owners.push(Object.assign({status: PatentStatus.Created}, owner))
+            }
             (item as any).owners = owners
         }
         await item.save()

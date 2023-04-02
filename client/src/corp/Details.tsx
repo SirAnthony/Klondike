@@ -1,11 +1,12 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation, Order, User} from '../common/entity'
+import {Corporation, CorporationType, Order, User} from '../common/entity'
 import {Item, Patent} from '../common/entity'
 import {ItemRow, ItemRowDesc} from '../util/Item'
-import {PatentRow, PatentRowDesc} from '../util/Patent'
+import {PatentLabItem, PatentRow, PatentRowDesc} from '../util/Patent'
 import {OrderRowCompact} from '../util/Order'
+import * as util from '../common/util'
 import {default as L, LR} from './locale'
 
 type OrderDetailsState = {
@@ -142,18 +143,41 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
         const {patents} = data
         return {item: data, patents}
     }
+    async action_forward(patent: Patent){
+        let ret = util.wget(`/api/corp/patent/forward`, {method: 'PUT',
+            data: {_id: patent._id, requester: this.props.corp._id}});
+
+    }
+    async action_sell(patent: Patent){
+        let ret = util.wget(`/api/corp/patent/sell`, {method: 'PUT', data: {
+            _id: patent._id, requester: this.props.corp._id}});
+    }
+    async action_product(patent: Patent){
+        let ret = util.wget(`/api/corp/patent/product`, {method: 'PUT',
+            data: {_id: patent._id, requester: this.props.corp._id}});
+    }
     rows(){
         const {patents = []} = this.state
-        const rows = patents.map(i=><PatentRow onReload={()=>this.fetch()}
-            key={`item_row_${i._id}`} patent={i} {...this.props} />)
+        const {corp} = this.props
+        const onAction = (name, patent)=>(async ()=>{
+            if (await this[`action_${name}`](patent))
+                this.fetch()
+        })
+        if (corp.type==CorporationType.Research){
+            return patents.map(i=><PatentLabItem onAction={onAction}
+              key={`item_lab_${i._id}`} patent={i} {...this.props} />)
+        }
+        patents.sort((a, b)=>+b.served(corp) - +a.served(corp))
+        const rows = patents.map(i=><PatentRow onAction={onAction}
+          key={`item_row_${i._id}`} patent={i} {...this.props} />)
+        rows.unshift(<PatentRowDesc />)
         return rows
     }
     render(){
         return <RB.Container>
           <RB.Row className='menu-list-title'>
-            <RB.Col>{L('res_cur')}</RB.Col>
+            <RB.Col>{L('patent_cur')}</RB.Col>
           </RB.Row>
-          <PatentRowDesc />
           {this.rows()}
         </RB.Container>
     }

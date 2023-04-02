@@ -2,10 +2,14 @@ import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {ResourceController, OrderController, ItemController} from '../../entity'
 import {Item, ItemType, UserType, Resource, Order} from '../../../client/src/common/entity'
-import {CorporationType, PatentStatus} from '../../../client/src/common/entity'
+import {Patent, PatentStatus} from '../../../client/src/common/entity'
+import {CorporationType, CorporationPointsType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
+import {Time} from '../../util/time'
 import {ApiError, Codes} from '../../../client/src/common/errors'
+
+const POINTS_FOR_PATENT = 100
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -69,6 +73,40 @@ export class CorpApiRouter extends BaseRouter {
         const patents = await ItemController.all({type: ItemType.Patent,
             'owners._id': corp._id, status})
         return {patents}
+    }
+
+    @CheckRole(UserType.Corporant)
+    async post_patent_forward(ctx: RenderContext){
+        const params: any = ctx.request.body
+        const {id, requester} = params
+        if (!id || !requester)
+            throw 'Required fields missing'
+        const item = await ItemController.get(id)
+        const patent = new Patent(item)
+        const owner = await CorpController.get(requester)
+        if (!patent.owners.some(o=>o._id==owner._id))
+            throw new ApiError(Codes.WRONG_USER, 'Not an owner')
+        const parts = patent.owners.filter(o=>o._id==owner._id)
+        const ready = parts.filter(p=>p.status==PatentStatus.Ready);
+        // Serve parts
+        ((item as any) as Patent).owners.forEach(o=>{
+            if (o._id==owner._id)
+                o.status = PatentStatus.Served
+        })
+        await item.save()
+        // Calcluate points
+        const points = ready.length != parts.length ? 0 :
+            POINTS_FOR_PATENT*ready.length/patent.owners.length
+        if (points){
+            owner.points = (owner.points||[]) as any
+            let pts = owner.points
+            pts.push({time: Time.basicTime,
+                type: patent.fullOwnership ?
+                    CorporationPointsType.PatentFull :
+                    CorporationPointsType.PatentPart,
+                value: points})
+            await owner.save()
+        }
     }
 
     @CheckRole(UserType.Master)

@@ -4,6 +4,7 @@ export enum Codes {
     INCORRECT_LOGIN = 4000,
     NO_LOGIN,
     NOT_ADMIN,
+    WRONG_USER,
     INCORRECT_PARAM,
     INCORRECT_REGISTRATION,
     INCORRECT_SELECTION,
@@ -15,6 +16,7 @@ export const Statuses = {
     [Codes.INCORRECT_LOGIN]: 401,
     [Codes.NO_LOGIN]: 401,
     [Codes.NOT_ADMIN]: 403,
+    [Codes.WRONG_USER]: 403,
     [Codes.INCORRECT_REGISTRATION]: 401,
     [Codes.INCORRECT_PARAM]: 422,
 }

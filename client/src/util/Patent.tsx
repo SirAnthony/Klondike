@@ -36,7 +36,7 @@ const OwnerListPopover = (patent: Patent)=>{
 type RowProps = {
     corp: Corporation
     patent: Patent
-    onAction?: (action)=>()=>void
+    onAction?: (action: string, patent: Patent)=>()=>void
 } & RowDescProps
 export function PatentRow(props: RowProps){
     const {patent, corp} = props
@@ -44,7 +44,9 @@ export function PatentRow(props: RowProps){
     const owners = patent.owners.reduce((p, f)=>p + +(f._id==corp._id), 0)
     const ownership = patent.owners.length<2 ? L('patent_ownership_full') :
         L(`patent_ownership_shared`)+` [${owners}/${len}]`
-    return <RB.Row key={`patent_${patent._id}`} className={props.className}>
+    const is_served = patent.served(corp)
+    const cls = props.className+(is_served ? 'patent-served' : '')
+    return <RB.Row key={`patent_${patent._id}`} className={cls}>
         <RB.Col><IDField item={patent} /></RB.Col>
         <RB.Col>{patent.name}</RB.Col>
         <RB.Col>{L(`patent_weigth_${patent.weight}`)}</RB.Col>
@@ -65,19 +67,27 @@ export function PatentActions(props: RowProps){
     const {patent, corp, onAction} = props
     if (corp.type==CorporationType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>
-    const is_served = patent.status==PatentStatus.Served
+    const is_served = patent.served(corp)
     return <RB.Container>
       {!is_served  && <RB.Row><RB.Col>
-        <RB.Button onClick={onAction('forward')}>{L('act_forward_center')}</RB.Button>
+        <RB.Button onClick={onAction('forward', patent)}>
+          {L('act_forward_center')}</RB.Button>
       </RB.Col></RB.Row>}
       <RB.Row>
         {!is_served && <RB.Col>
-          <RB.Button onClick={onAction('sell')}>{L('act_sell')}</RB.Button>
+          <RB.Button onClick={onAction('sell', patent)}>
+            {L('act_sell')}</RB.Button>
         </RB.Col>}
         <RB.Col>
-          <RB.Button onClick={onAction('product')}>{L('act_product')}</RB.Button>
+          <RB.Button onClick={onAction('product', patent)}>
+            {L('act_product')}</RB.Button>
         </RB.Col>
       </RB.Row>
     </RB.Container>
+}
 
+export function PatentLabItem(props: RowProps){
+    return <RB.Container>
+        
+    </RB.Container>
 }

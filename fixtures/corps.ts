@@ -1,4 +1,4 @@
-import {Corporation} from '../client/src/common/entity'
+import {Corporation, CorporationType} from '../client/src/common/entity'
 import {CorpController} from '../src/entity'
 
 export enum CorpAlias {AP = 'AP', R = 'R', WY = 'WY', USC = 'USC', EF = 'EF'}
@@ -10,22 +10,32 @@ const corps: CorpFixture[] = [{
     name: 'Amalgam Pharmaceuticals',
     credit: 25000,
     alias: CorpAlias.AP,
+    type: CorporationType.Normal,
+    points: [],
 }, {
     name: 'Rakuza',
     credit: 25000,
     alias: CorpAlias.R,
+    type: CorporationType.Normal,
+    points: [],
 }, {
     name: 'Wayne-Yuanti',
     credit: 25000,
     alias: CorpAlias.WY,
+    type: CorporationType.Normal,
+    points: [],
 }, {
     name: 'Union Spacecraft Corporation, USC',
     credit: 25000,
     alias: CorpAlias.USC,
+    type: CorporationType.Normal,
+    points: [],
 }, {
     name: 'Земная федерация',
     credit: 25000,
     alias: CorpAlias.EF,
+    type: CorporationType.Research,
+    points: [],
 },]
 
 class CorpControllerFixture extends CorpController {
