@@ -8,6 +8,7 @@ import {PatentLabItem, PatentRow, PatentRowDesc} from '../util/Patent'
 import {OrderRowCompact} from '../util/Order'
 import * as util from '../common/util'
 import {default as L, LR} from './locale'
+import {Delimeter} from '../util/components'
 
 type OrderDetailsState = {
     orders?: Order[]
@@ -76,8 +77,9 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     }
     rows(fields?: string[]){
         const {items = []} = this.state
-        const rows = items.map(i=><ItemRow onReload={()=>this.fetch()}
-            key={`item_row_${i._id}`} item={i} {...this.props} fields={fields}/>)
+        const rows = items.map(i=><ItemRow className='menu-list-row'
+            onReload={()=>this.fetch()} key={`item_row_${i._id}`} item={i}
+            {...this.props} fields={fields}/>)
         return rows
     }
     render(){
@@ -86,6 +88,7 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
           <RB.Row className='menu-list-title'>
             <RB.Col>{L('res_cur')}</RB.Col>
           </RB.Row>
+          <Delimeter />
           <ItemRowDesc {...this.props} fields={fields} />
           {this.rows(fields)}
         </RB.Container>
@@ -118,6 +121,7 @@ export class PriceDetails extends F.Fetcher<PriceDetailsProps, PriceDetailsState
           <RB.Row className='menu-list-title'>
             <RB.Col>{L('market_prices')}</RB.Col>
           </RB.Row>
+          <Delimeter />
           {items}
         </RB.Container>
     }
@@ -178,6 +182,7 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
           <RB.Row className='menu-list-title'>
             <RB.Col>{L('patent_cur')}</RB.Col>
           </RB.Row>
+          <Delimeter />
           {this.rows()}
         </RB.Container>
     }

@@ -8,3 +8,7 @@ export function IDField(props: {item: Item}){
     const str = [ItemTypePrefix[type], _id.slice(0, 6)].join('-')
     return <span className='field-id wrap-anywhere'>{str}</span>
 }
+
+export function Delimeter(){
+    return <hr className='delimeter' />
+}

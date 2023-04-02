@@ -2,6 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Order, User} from '../common/entity'
 import {List as UList} from '../util/controls'
+import {Delimeter} from '../util/components'
 import {OrderRow, OrderRowDesc, OrderRowNew} from '../util/Order'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
@@ -39,7 +40,7 @@ class List extends UList<ListProps, ListState> {
         const rows = list.map(l=><OrderRow order={l} className='menu-list-row'
             key={`order_list_${l._id}`} onReload={()=>this.fetch()} />)
         return [<OrderRowNew onCreate={o=>this.createItem(o)} className='menu-list-row' />,
-          <OrderRowDesc className='menu-list-title' />,
+          <Delimeter />, <OrderRowDesc className='menu-list-title' />, <Delimeter />, 
           ...rows]
     }
 }

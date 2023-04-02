@@ -8,6 +8,7 @@ import {ControlBar} from '../util/controls'
 import {ItemDetails, PriceDetails, OrderDetails} from './Details'
 import {PatentDetails} from './Details'
 import {default as L, LR} from './locale'
+import {Delimeter} from '../util/components'
 
 type CorpProps = {
     corp: ECorp
@@ -21,6 +22,7 @@ export function CorpBalance(props: CorpProps){
       <RB.Row className='menu-list-title'>
         <RB.Col>{L('balance')}</RB.Col>
       </RB.Row>
+      <Delimeter />
       <RB.Row className='menu-list-row'>
         <RB.Col>{L('currency')}</RB.Col>
         <RB.Col>{corp.credit||0}</RB.Col>
@@ -30,7 +32,7 @@ export function CorpBalance(props: CorpProps){
 
 export function Corporation(props: CorpProps){
     const {corp} = props
-    return (<RB.Container>
+    return (<RB.Container className='container-full'>
       <RB.Row>
         <RB.Col className='menu-list-title'>{corp.name}</RB.Col>
       </RB.Row>
@@ -60,7 +62,7 @@ export function Corporation(props: CorpProps){
 
 export function Laboratory(props: CorpProps){
     const {corp} = props
-    return <RB.Container>
+    return <RB.Container className='container-full'>
       <RB.Row>
         <RB.Col className='menu-list-title'>{corp.name}</RB.Col>
       </RB.Row>
@@ -120,7 +122,7 @@ export default class CorpDetails extends F.Fetcher<CorpDetailsProp, CorpDetailsS
     }
     render(){
         const {corp} = this.state
-        return <RB.Container className="menu-container">
+        return <RB.Container className="menu-container-full">
           <ControlBar title={L('interface')} onClose={this.props.onClose} />
           {this.view()}
         </RB.Container>

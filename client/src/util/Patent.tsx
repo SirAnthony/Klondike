@@ -87,7 +87,38 @@ export function PatentActions(props: RowProps){
 }
 
 export function PatentLabItem(props: RowProps){
-    return <RB.Container>
-        
-    </RB.Container>
+    const {patent} = props
+    const owners = _.uniqBy(patent.owners, p=>p._id).map(o=>
+        <span key={`corp_name_${o._id}`}>{o.name}</span>)
+    const costs = patent.resourceCost.map(r=><RB.Row>
+      <RB.Col>{L(`res_kind_${r.kind}`)}</RB.Col>
+      <RB.Col>{r.value}</RB.Col>
+      <RB.Col>{r.provided|0}</RB.Col>
+    </RB.Row>)
+    return <RB.Container><RB.Row><RB.Col><RB.Container>
+      <RB.Row><IDField item={patent} /></RB.Row>
+      <RB.Row>
+        <RB.Col>{L('item_desc_name')}</RB.Col>
+        <RB.Col>{patent.name}</RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Col>{L('patent_desc_kind')+' / '+L('patent_desc_weight')}</RB.Col>
+        <RB.Col>{L(`patent_kind_${patent.kind}`)+' / '+L(`patent_weigth_${patent.weight}`)}</RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Col>{L('item_desc_owner')}</RB.Col>
+        <RB.Col>{owners}</RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Col>{L('item_desc_data')}</RB.Col>
+        <RB.Col>{patent.data}</RB.Col>
+      </RB.Row>
+    </RB.Container></RB.Col><RB.Col><RB.Container>
+      <RB.Row>
+        <RB.Col>{L('res_desc_kind')}</RB.Col>
+        <RB.Col>{L('res_required')}</RB.Col>
+        <RB.Col>{L('res_filled')}</RB.Col>
+      </RB.Row>
+      {costs}
+    </RB.Container></RB.Col></RB.Row></RB.Container>
 }

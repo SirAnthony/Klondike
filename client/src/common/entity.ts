@@ -153,7 +153,7 @@ export class Patent extends Item {
     kind: PatentType
     weight: PatentWeight
     owners: PatentOwner[]
-    resourceCost: {kind: ResourceType, value: number}[]
+    resourceCost: {kind: ResourceType, value: number, provided: number}[]
     get keys(){
         return super.keys.concat('kind weight owners resourceCost status'
             .split(' ')).filter(k=>!['location', 'owner'].includes(k))

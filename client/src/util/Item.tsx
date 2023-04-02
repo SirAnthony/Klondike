@@ -2,7 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Item, ItemType, MarketType, User} from '../common/entity'
 import {ID, Location} from '../common/entity'
-import {Resource, ResourceType} from '../common/entity'
+import {Resource, ResourceType, Patent} from '../common/entity'
 import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, ArtifactTypeSelect} from './inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
@@ -12,7 +12,8 @@ import L from '../common/locale'
 
 const column_layout = (fields = [])=>{
     const MAX_SUM = 12
-    const res: any = {id: 1, name: 1, type: 1, value: 1, price: 1, actions: 2}
+    const res: any = {id: 1, name: 1, type: 1, value: 1, location: 1,
+        price: 1, data: 0, owner: 0, actions: 2}
     let prio = 'data location owner id name type kind'.split(' ')
     fields.forEach(f=>res[f]=1)
     let free = MAX_SUM - Object.keys(res).reduce((p, v)=>p+res[v], 0)
@@ -40,12 +41,12 @@ export function ItemRowDesc(props: ItemRowProps){
       <RB.Col sm={lyt.id}>{L('item_desc_id')}</RB.Col>
       <RB.Col sm={lyt.name}>{L('item_desc_name')}</RB.Col>
       <RB.Col sm={lyt.type}>{L('item_desc_type')}</RB.Col>
-      {has('kind') && <RB.Col sm={lyt.kind}>{L('res_desc_kind')}</RB.Col>}
-      {has('owner') && <RB.Col sm={lyt.owner}>{L('item_desc_owner')}</RB.Col>}
-      {has('location') && <RB.Col sm={lyt.location}>{L('item_desc_location')}</RB.Col>}
+      <RB.Col sm={lyt.kind}>{L('res_desc_kind')}</RB.Col>
+      <RB.Col sm={lyt.owner}>{L('item_desc_owner')}</RB.Col>
+      <RB.Col sm={lyt.location}>{L('item_desc_location')}</RB.Col>
       <RB.Col sm={lyt.value}>{L('res_desc_value')}</RB.Col>
       <RB.Col sm={lyt.price}>{L('item_desc_price')}</RB.Col>
-      {has('data') && <RB.Col sm={lyt.data}>{L('item_desc_data')}</RB.Col>}
+      <RB.Col sm={lyt.data}>{L('item_desc_data')}</RB.Col>
       <RB.Col sm={lyt.actions}>{L('item_desc_actions')}</RB.Col>
     </RB.Row>
 }
@@ -115,7 +116,7 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
 function LocationCol(props: ItemProps) {
     const {location} = props.item
     if (!location)
-        return null
+        return <RB.Col sm={props.layout}>-</RB.Col>
     return <RB.Col sm={props.layout}>
       <span>{location.system}</span>
       <span>{location.name}</span>
@@ -123,23 +124,44 @@ function LocationCol(props: ItemProps) {
     </RB.Col>
 }
 
+function ResourceCostCol(props: ItemProps){
+    const {item, layout} = props
+    const {resourceCost} = item as Patent
+    if (!resourceCost || !resourceCost.length)
+        return <RB.Col sm={props.layout}>-</RB.Col>
+    const res = resourceCost.map(v=>
+      <div key={`res_cost_${item._id}_${v.kind}`}>
+        {L(`res_kind_${v.kind}`)+` [${v.value}]`}
+      </div>)
+    return <RB.Col sm={layout}>
+      {res}
+    </RB.Col>
+}
+
 export function ItemRow(props: ItemProps){
     const {item, user} = props
-    const res = item as Resource
-    const has = n=>props.fields?.includes(n)
-    const lyt = column_layout(props.fields)
+    const obj = new (Item.class(item.type))(item)
+    const res = item as Resource, pt = item as Patent
+    const has = n=>obj.keys.includes(n)
+    const lyt = column_layout(obj.keys)
+    const kind = res.kind==undefined ? '-' :
+        item.type==ItemType.Patent ?
+        L(`patent_kind_${pt.kind}`)+'/'+L(`patent_weigth_${pt.weight}`) :
+        L(`res_kind_${res.kind}`)
+    const owner = item.type==ItemType.Patent ?
+        pt.owners.map(o=><div key={'d_'+o._id}>{o.name}</div>) :
+        item.owner?.name||'-'
     return <RB.Row className={props.className}>
       <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
       <RB.Col sm={lyt.name}>{item.name}</RB.Col>
       <RB.Col sm={lyt.type}>{L(`item_type_${item.type}`)}</RB.Col>
-      {has('kind') && <RB.Col sm={lyt.kind}>
-        {res.kind!=undefined ? L(`res_kind_${res.kind}`) : '-'}</RB.Col>}
-      {has('owner') && <RB.Col sm={lyt.owner}>
-        {item.owner ? item.owner.name : '-'}</RB.Col>}
-      {has('location') && <LocationCol {...props} layout={lyt.location} />}
-      <RB.Col sm={lyt.value}>{res.value || 1}</RB.Col>
+      <RB.Col sm={lyt.kind}>{kind}</RB.Col>
+      <RB.Col sm={lyt.owner}>{owner}</RB.Col>
+      <LocationCol {...props} layout={lyt.location} />
+      {has('resourceCost') && <ResourceCostCol {...props} layout={lyt.value} />}
+      {has('value') && <RB.Col sm={lyt.value}>{res.value || 1}</RB.Col>}
       <RB.Col sm={lyt.price}>{item.price}</RB.Col>
-      {has('data') && <RB.Col sm={lyt.data}>{res.data}</RB.Col>}
+      <RB.Col sm={lyt.data}>{res.data}</RB.Col>
       <ItemActions {...props} layout={lyt.actions} />
     </RB.Row>
 }
@@ -240,9 +262,9 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const resChange = resourceCost=>this.setState({resourceCost})
         return [
           <MultiOwnerSelect value={owners} onChange={ownersChange}
-            className='menu-list-row' key='multi_owner_select' />,
+            className='menu-input-row' key='multi_owner_select' />,
           <MultiResourceSelect value={resourceCost} onChange={resChange}
-            className='menu-list-row' key='multi_resource_select' />
+            className='menu-input-row' key='multi_resource_select' />
         ]
     }
     // artifact
@@ -260,7 +282,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const top_fields = this[fkey] ? this[fkey]() : []
         const typeChange = type=>this.setState({type})
         const priceChange = price=>this.setState({price})
-        return <RB.Row className='menu-list-row'>
+        return <RB.Row className='menu-input-row'>
           <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
           <RB.Col sm={row_size}>
             <TypeSelect value={type} onChange={typeChange} exclude={[ItemType.Ship]}/>
@@ -281,7 +303,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const dataChange = ({target: {value}})=>this.setState({data: value})
         const ownerChange = owner=>this.setState({owner})
         const locChange = location=>this.setState({location})
-        return <RB.Row className='menu-list-row'>
+        return <RB.Row className='menu-input-row'>
           <RB.Col sm={4}>
             <RB.FormControl as='textarea' rows={3} placeholder={L('item_desc_data')}
               value={data} onChange={dataChange} />

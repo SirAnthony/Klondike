@@ -12,6 +12,7 @@ load(mod, {
     'link_corps': 'Корпорации',
     'link_users': 'Пользователи',
     'res_create': 'Создать ресурс',
+    'res_show': 'Настройки базовых ресурсы',
     'server_time': 'Текущее время',
     'server_cycle': 'Текущий цикл',
     'time_increase': tpl`Добавить ${0} ч.`,

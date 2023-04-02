@@ -134,7 +134,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
         const {props} = this, {state} = this
         const rows = state.rows.map(r=>this.row(r))
         return <RB.Row><RB.Col><RB.InputGroup>
-          <RB.Row className={props.className}>
+          <RB.Row className='menu-input-row'>
             {state.err && <RB.Row><ErrorMessage field={state.err} /></RB.Row>}
             <RB.Col>{L('order_create')}</RB.Col>
             <RB.Col>

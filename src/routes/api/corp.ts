@@ -67,11 +67,14 @@ export class CorpApiRouter extends BaseRouter {
         if (!id)
             throw 'Self-patents not implemented'
         const corp = await CorpController.get(id)
-        const status = corp.type == CorporationType.Research ?
-            PatentStatus.Created :
-            {'$in': [PatentStatus.Ready, PatentStatus.Served]}
-        const patents = await ItemController.all({type: ItemType.Patent,
-            'owners._id': corp._id, status})
+        const filter: any = {type: ItemType.Patent}
+        if (corp.type==CorporationType.Research)
+            filter['owners.status'] = {$in: [PatentStatus.Created, undefined]}
+        else {
+            Object.assign(filter, {'owners._id': corp._id,
+                'owners.status': {$exists: true, '$ne': PatentStatus.Created}})
+        }
+        const patents = await ItemController.all(filter)
         return {patents}
     }
 
