@@ -11,6 +11,7 @@
     "watch-inspect": "concurrently 'cd client && npm run watch-build' 'npm run watch-server-inspect'",
     "inspect": "node --inspect -r ts-node/register ./src/server.ts",
     "build-ts": "tsc",
+    "build-server": "npm run build-ts",
     "build-client": "(cd client && npm run build)",
     "build": "npm run build-client && npm run build-server",
     "start-client": "cd client && npm start",

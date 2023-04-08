@@ -85,10 +85,17 @@ const aliases = {
     'act_forward_center': 'Передать в метрополию',
     'act_product': 'Произвести',
     'act_transfer': 'Передать',
+    'act_transfer_show': 'Трансфер',
+    'act_agree': 'Подтвердить',
+    'act_disagree': 'Отказаться',
     'market_code': 'Код для покупки',
+    'confirmation_needed': 'Подтвердите действие',
     'cycle': 'Цикл',
     'day_number': 'день',
     'assignee': 'Исполнитель',
+    'error_empty_select': 'Не выбрано',
+    'error_value_high': 'Значение слишком велико',
+    'error_value_low': 'Значение слишком мало',
 }
 
 export function extend(obj: {string: string | ((...values: any[])=>string)}) {

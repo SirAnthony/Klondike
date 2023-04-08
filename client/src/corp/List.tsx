@@ -39,6 +39,7 @@ export class Select extends USelect<{}, {}> {
     get fetchUrl(){ return '/api/corp/list' }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
-        return list.reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
+        return list.filter(this.props.filter||Boolean)
+            .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }
 }

@@ -52,6 +52,21 @@ export class CorpApiRouter extends BaseRouter {
     }
 
     @CheckRole(UserType.Corporant)
+    async post_transfer(ctx: RenderContext){
+        const params: any = ctx.request.body
+        const {owner, target, amount} = params
+        const src = await CorpController.get(owner)
+        const dst = await CorpController.get(target)
+        if (src._id==dst._id || amount<0 || amount>src.credit)
+            throw 'field_error_invalid'
+        src.credit -= amount
+        dst.credit += amount
+        await src.save()
+        await dst.save()
+        return {credit: src.credit}
+    }
+
+    @CheckRole(UserType.Corporant)
     async get_orders(ctx: RenderContext){
         const {id} = ctx.params
         if (!id)

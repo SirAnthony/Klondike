@@ -70,7 +70,7 @@ div.menu-container-full, div.container-full {
 }
 
 .menu-box {
-    margin: 25px 0;
+    margin: 25px 5px;
     padding: 10px !important;
     color: var(--color-ui-text);
     font-size: 10pt;

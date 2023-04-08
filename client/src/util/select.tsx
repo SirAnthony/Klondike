@@ -13,6 +13,7 @@ type SelectState = {
 type SelectProps = {
     value: any
     optName?: string
+    filter?: (item: any)=>Boolean
     onChange: (value: any)=>void
 }
 export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {

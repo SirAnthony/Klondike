@@ -44,10 +44,11 @@ export function LocationSelect(props: {value?: Location, optName?: string, onCha
     </RB.Container>
 }
 
-export function OwnerSelect(props: {value?: ID, onChange: (owner: ID)=>void}){
+export function OwnerSelect(props: {value?: ID, filter?: (val: ID)=>Boolean,
+    onChange: (owner: ID)=>void}){
     const [owner, setOwner] = React.useState(props.value)
     const ownerChange = owner=>{ setOwner(owner); props.onChange(owner) }
-    return <CSelect value={owner} onChange={ownerChange} />
+    return <CSelect value={owner} filter={props.filter} onChange={ownerChange} />
 }
 
 export function MultiOwnerSelect(props: {value?: ID[],
