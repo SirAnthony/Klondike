@@ -84,6 +84,7 @@ const aliases = {
     'act_pay': 'Оплатить',
     'act_forward_center': 'Передать в метрополию',
     'act_product': 'Произвести',
+    'act_transfer': 'Передать',
     'market_code': 'Код для покупки',
     'cycle': 'Цикл',
     'day_number': 'день',

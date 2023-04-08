@@ -17,6 +17,9 @@ type CorpProps = {
 
 export function CorpBalance(props: CorpProps){
     const {corp} = props
+    const onClick = async ()=>{
+
+    }
     return <RB.Col className='menu-box menu-box-col'>
     <RB.Container>
       <RB.Row className='menu-list-title'>
@@ -26,6 +29,9 @@ export function CorpBalance(props: CorpProps){
       <RB.Row className='menu-list-row'>
         <RB.Col>{L('currency')}</RB.Col>
         <RB.Col>{corp.credit||0}</RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Button onClick={onClick}>{L('act_transfer')}</RB.Button>
       </RB.Row>
     </RB.Container></RB.Col>
 }
