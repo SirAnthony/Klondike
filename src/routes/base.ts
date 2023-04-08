@@ -45,6 +45,20 @@ export function CheckRole(roles: UserType[] | UserType){
     }
 }
 
+export function CheckIDParam(param: string = 'id'){
+    return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
+        return {...descriptor, value: async function check(ctx: RenderContext){
+            if (!ctx.isAuthenticated())
+               throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
+            const id = ctx.params[param]
+            const {user}: {user: UserController} = ctx.state
+            if (user.type!=UserType.Master && !(id && id!=user?.relation?.entity?._id))
+                throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
+            return descriptor.value.apply(this, arguments)
+        }}
+    }
+}
+
 type RouterOptions = {
     json?: boolean
     admin?: boolean

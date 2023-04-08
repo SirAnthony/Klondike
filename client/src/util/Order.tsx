@@ -24,7 +24,9 @@ export function OrderRowDesc(props: RowDescProps){
 
 type RowProps = {
     order: Order
+    user?: User
     onReload?: ()=>void
+    onDelete?: (o: Order)=>void
 } & RowDescProps
 export function OrderRow(props: RowProps){
     const {order} = props
@@ -34,11 +36,15 @@ export function OrderRow(props: RowProps){
         <RB.Col>{r.required}</RB.Col>
         <RB.Col>{r.filled}</RB.Col>
       </RB.Row>)
+    const is_admin = props.user.admin
+    const onClick = ()=>props.onDelete(order)
     return <RB.Row key={`order_${order._id}`} className={props.className}>
         <RB.Col><RB.Container>{reqs}</RB.Container></RB.Col>
         <RB.Col sm={1}>{order.cycle}</RB.Col>
         <RB.Col sm={2}>{order.assignee.name}</RB.Col>
-        <RB.Col sm={2}>actions</RB.Col>
+        <RB.Col sm={2}>
+          {is_admin && <RB.Button onClick={onClick}>{L('act_delete')}</RB.Button>}
+        </RB.Col>
     </RB.Row>
 }
 
@@ -98,7 +104,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     addRow(){
         const rows = this.state.rows.map(r=>Object.assign({}, r))
         const _id = rows.reduce((p, r)=>r._id<p ? p : r._id, -1)+1
-        rows.push({_id, kind: -1})
+        rows.push({_id, kind: null})
         this.setState({rows, err: null})
     }
     changeRow(row: any){
@@ -113,19 +119,19 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     }
     row(row: ResourceRowID){
         const changeRow = (key, val)=>this.changeRow({_id: row._id, [key]: +val})
-        return <RB.Row key={`order_row_${row._id}`}>
-          <RB.Col>
+        return <RB.Row key={`order_row_${row._id}`} className='menu-input-row'>
+          <RB.Col sm={2}>
             <ResourceSelect value={row.kind} onChange={type=>changeRow('kind', +type)} />
           </RB.Col>
-          <RB.Col>
+          <RB.Col sm={2}>
             <NumberInput placeholder={L('res_required')} value={row.required}
                 onChange={val=>changeRow('required', val)} />
           </RB.Col>
-          <RB.Col>
+          <RB.Col sm={2}>
             <NumberInput placeholder={L('res_filled')} value={row.filled}
                 onChange={val=>changeRow('filled', val)} />
           </RB.Col>
-          <RB.Col>
+          <RB.Col sm={2}>
             <RB.Button onClick={()=>this.deleteRow(row._id)}>{L('act_delete')}</RB.Button>
           </RB.Col>
         </RB.Row>

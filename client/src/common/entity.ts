@@ -25,6 +25,7 @@ export const Profile = {
 }
 
 export enum UserType {None, Corporant, Captain, Mechanic, Navigator, Scientist, Guard, Master}
+export enum UserRelationType {None, Corporation, Ship}
 export class User extends ID {
     alias: string
     first_name: string
@@ -33,6 +34,7 @@ export class User extends ID {
     phone: string
     credit: number
     type: UserType
+    relation: {type: UserRelationType, entity: ID}
     get admin(){ return this.type == UserType.Master }
     get displayName(){
         return this.alias || [this.first_name,

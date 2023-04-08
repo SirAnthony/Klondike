@@ -55,8 +55,7 @@ export class AdminApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async post_resource_change(ctx: RenderContext){
         const {id} = ctx.params
-        const params: any = ctx.request.body
-        const {data = {}} = params
+        const data: any = ctx.request.body
         let item = await ResourceController.get(id)
         for (let k in data)
             item[k] = data[k]

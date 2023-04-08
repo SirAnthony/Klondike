@@ -1,10 +1,11 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {ItemType, ResourceType, PatentType, PatentWeight, ArtifactType} from '../common/entity'
-import {ID, Location} from '../common/entity'
+import {Patent, Corporation} from '../common/entity'
+import {ID, Location, Item, Resource} from '../common/entity'
 import {Select as USelect, TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
-import {Select as CSelect} from '../corp/List'
+import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
 import L from '../common/locale'
 import * as _ from 'lodash'
 
@@ -21,23 +22,34 @@ export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_d
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
 
+export function PatentSelect(props: {value?: Patent, corp: Corporation,
+    item: Item, onChange: (p: Patent)=>void}){
+    const {value, corp, item, onChange} = props
+    const res = item as Resource
+    const filter = (p: Patent)=>p.resourceCost.some(r=>
+        r.kind==res.kind && ((r.provided|0)<r.value))
+    return <RPSelect value={value} corp={corp} filter={filter} onChange={onChange} />
+}
+
 export function LocationSelect(props: {value?: Location, optName?: string, onChange: (loc: Location)=>void}){
     const {value} = props
     const [location, setLocation] = React.useState(value)
     const [coord, setCoord] = React.useState(!value ? '' : `${value.pos.col}:${value.pos.row}`)
-    const updateLocation = ()=>{
+    const updateLocation = (loc, coord)=>{
+        setLocation(loc)
+        setCoord(coord)
         const pos = coord?.split(':')
-        props.onChange({_id: location._id, name: location.name,
-            system: location.system, pos: {col: +pos[0], row: +pos[1]}})
+        props.onChange({_id: loc._id, name: loc.name, system: loc?.system,
+            pos: {col: +pos[0], row: +pos[1]}})
     }
-    const locChange = value=>{ setLocation(value); updateLocation() }
-    const coordChange = ({target: {value}})=>{ setCoord(value); updateLocation() }
+    const locChange = value=>updateLocation(value, coord)
+    const coordChange = ({target: {value}})=>updateLocation(location, value)
     return <RB.Container>
       <RB.Row><RB.Col>
         <PSelect value={location} onChange={locChange} optName={props.optName} />
       </RB.Col>
       <RB.Col>
-        <RB.FormControl value={coord} onChange={coordChange}
+        <RB.FormControl value={coord} onChange={coordChange} disabled={!location}
             placeholder={L('loc_desc_coord')} />
       </RB.Col>
       </RB.Row>

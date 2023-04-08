@@ -1,7 +1,8 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, ItemController} from '../../entity'
-import {PlanetController} from '../../entity'
+import {PlanetController, ResourceController} from '../../entity'
 import {PlanetInfo, Profile, UserType} from '../../../client/src/common/entity'
+import {ItemType, Item, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
 import {Time} from '../../util/time'
@@ -63,6 +64,20 @@ export class ApiRouter extends BaseRouter {
         const planets = await PlanetController.all()
         const list = planets.map(p=>({_id: p._id, name: p.name}))
         return {list}
+    }
+
+    @CheckRole(UserType.Corporant)
+    async get_prices(ctx: RenderContext){
+        const prices = {}
+        const res = await ResourceController.all()
+        for (let k of res)
+            prices[k.kind] = k.price
+        const res_filter = f=>f.type == ItemType.Resource
+        const items: Item[] = await ItemController.all()
+        let resources: Resource[] = items.filter(res_filter).map(f=>f as Resource)
+        for (let item of resources)
+            prices[item.kind] = (prices[item.kind]+item.price)/2
+        return {list: prices}
     }
 
     @CheckRole(UserType.Master)

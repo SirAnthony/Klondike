@@ -1,11 +1,11 @@
-import {BaseRouter, CheckRole} from '../base'
+import {BaseRouter, CheckRole, CheckIDParam} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {ResourceController, OrderController, ItemController} from '../../entity'
 import {Item, ItemType, UserType, Resource, Order} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
 import {CorporationType, CorporationPointsType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import * as server_util from '../../util/server'
+import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 
@@ -18,6 +18,7 @@ export class CorpApiRouter extends BaseRouter {
         return {user}
     }
 
+    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async get_corp(ctx: RenderContext){
         const {id} = ctx.params;
@@ -26,38 +27,24 @@ export class CorpApiRouter extends BaseRouter {
         return {corp}
     }
 
+    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async get_items(ctx: RenderContext) {
         const {id} = ctx.params;
-        if (!id)
-            throw 'Self-items not implemented'
         const corp = await CorpController.get(id)
-        const items = await ItemController.all({'owner._id': corp._id})
-        return {items}
+        const list = await ItemController.all({'owner._id': corp._id})
+        return {list}
     }
 
-    @CheckRole(UserType.Corporant)
-    async get_prices(ctx: RenderContext){
-        const prices = {}
-        const res = await ResourceController.all()
-        for (let k of res)
-            prices[k.kind] = k.price
-        const corps = await CorpController.all()
-        const res_filter = f=>f.type == ItemType.Resource
-        const items: Item[] = await ItemController.all()
-        let resources: Resource[] = items.filter(res_filter).map(f=>f as Resource)
-        for (let item of resources)
-            prices[item.kind] = (prices[item.kind]+item.price)/2
-        return {prices}
-    }
-
+    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async post_transfer(ctx: RenderContext){
+        const {id} = ctx.params
         const params: any = ctx.request.body
-        const {owner, target, amount} = params
-        const src = await CorpController.get(owner)
+        const {target, amount} = params
+        const src = await CorpController.get(id)
         const dst = await CorpController.get(target)
-        if (src._id==dst._id || amount<0 || amount>src.credit)
+        if (IDMatch(src._id, dst._id) || amount<0 || amount>src.credit)
             throw 'field_error_invalid'
         src.credit -= amount
         dst.credit += amount
@@ -66,21 +53,19 @@ export class CorpApiRouter extends BaseRouter {
         return {credit: src.credit}
     }
 
+    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async get_orders(ctx: RenderContext){
         const {id} = ctx.params
-        if (!id)
-            throw 'Self-items not implemented'
         const corp = await CorpController.get(id)
-        const orders = await OrderController.all({'assignee._id': corp._id})
-        return {orders}
+        const list = await OrderController.all({'assignee._id': corp._id})
+        return {list}
     }
     
+    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async get_patents(ctx: RenderContext){
         const {id} = ctx.params
-        if (!id)
-            throw 'Self-patents not implemented'
         const corp = await CorpController.get(id)
         const filter: any = {type: ItemType.Patent}
         if (corp.type==CorporationType.Research)
@@ -89,26 +74,60 @@ export class CorpApiRouter extends BaseRouter {
             Object.assign(filter, {'owners._id': corp._id,
                 'owners.status': {$exists: true, '$ne': PatentStatus.Created}})
         }
-        const patents = await ItemController.all(filter)
-        return {patents}
+        const list = await ItemController.all(filter)
+        return {list}
     }
 
+    @CheckIDParam()
+    @CheckRole(UserType.Scientist)
+    async put_item_pay(ctx: RenderContext){
+        const {id, item, target} = ctx.params
+        if (!item || !target)
+            throw 'Required fields missing'
+        const corp = await CorpController.get(id)
+        const resource = await ItemController.get(item)
+        const patent = await ItemController.get(target)
+        if (!IDMatch(resource.owner._id, corp._id))
+            throw 'Wrong owner of resource'
+        const res = (resource as unknown) as Resource
+        const pt = (patent as unknown) as Patent
+        let used = false
+        for (let k of pt.resourceCost){
+            if (!res.value)
+                break
+            if (k.kind!=res.kind || k.value<=k.provided)
+                continue
+            let amount = Math.min(res.value, k.value-(k.provided|0))
+            k.provided = (k.provided|0) + amount
+            res.value -= amount
+            used = true
+        }
+        // Resource is single-used
+        if (used)
+            res.value = 0
+        // Should delete?
+        await resource.save()
+        await patent.save()
+    }
+
+    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async post_patent_forward(ctx: RenderContext){
+        const {id} = ctx.params
         const params: any = ctx.request.body
-        const {id, requester} = params
+        const {requester} = params
         if (!id || !requester)
             throw 'Required fields missing'
         const item = await ItemController.get(id)
         const patent = new Patent(item)
         const owner = await CorpController.get(requester)
-        if (!patent.owners.some(o=>o._id==owner._id))
+        if (!patent.owners.some(o=>IDMatch(o._id, owner._id)))
             throw new ApiError(Codes.WRONG_USER, 'Not an owner')
-        const parts = patent.owners.filter(o=>o._id==owner._id)
+        const parts = patent.owners.filter(o=>IDMatch(o._id, owner._id))
         const ready = parts.filter(p=>p.status==PatentStatus.Ready);
         // Serve parts
         ((item as any) as Patent).owners.forEach(o=>{
-            if (o._id==owner._id)
+            if (IDMatch(o._id, owner._id))
                 o.status = PatentStatus.Served
         })
         await item.save()

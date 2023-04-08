@@ -2,7 +2,7 @@ import {load, isDefined, tpl, default as BL} from '../common/locale'
 const mod = 'corp'
 load(mod, {
     'not_found': 'Корпорация не найдена',
-    'interface': 'Интерфейс корпорации',
+    'interface': tpl`Интерфейс корпорации ${0}`,
     'listing': 'Список корпораций',
     'desc_name': 'Название',
     'balance': 'Текущий счет',

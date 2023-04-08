@@ -24,6 +24,62 @@
   color: white;
 }
 
+a.nav-link, a.navbar-brand {
+    color: var(--color-ui-text);
+    font-size: 12pt;
+    padding: 0px 8px;
+}
+
+a.nav-link:hover, a.navbar-brand:hover {
+    color: var(--color-ui-text-shade);
+}
+
+a.nav-link:focus, a.navbar-brand:focus,
+.navbar-nav a.nav-link.active, .navbar-nav .show>a.nav-link {
+    color: var(--color-ui-text);
+}
+
+div.app-head {
+    max-width: 90%;
+    background: var(--color-ui-box);
+    border: 3px solid var(--color-ui-border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    margin-top: -10px;
+    padding-top: 10px;    
+}
+
+.app-head > div {
+    max-width: 98%;
+}
+
+.app-footer {
+    margin-top: 10px;
+}
+
+.app-footer .nav-tabs {
+    border-bottom: none;
+}
+
+.app-footer .nav-tabs .nav-link {
+    background: var(--color-ui-border-light);
+    color: var(--color-ui-box);
+    padding: 3px 0px;
+    margin: 0px 3px;
+}
+
+.app-footer .nav-tabs .nav-link.active {
+    background: var(--color-ui-box-hover);
+    color: var(--color-ui-text);
+    border: 1px solid var(--color-ui-border);
+}
+
+.app-footer .footer-tab {
+    padding: 15px;
+    background: var(--color-ui-box-hover);
+    border: 1px solid var(--color-ui-border);
+}
+
 .App-link {
   color: #61dafb;
 }
@@ -151,9 +207,10 @@ div.menu-container-full, div.container-full {
     padding: 0;
 }
 
-.menu-list-row, .menu-list-title, .menu-input-row {
+div .menu-list-row, .menu-list-title, .menu-input-row {
     width: 100%;
     padding: 6px;
+    margin-left: 0px;
     color: var(--color-ui-text);
 }
 
@@ -185,6 +242,13 @@ div.menu-container-full, div.container-full {
     width: auto;
     padding: 2px 5px;
     font-size: 9pt;
+}
+
+.menu-list-box {
+    border: 1px solid var(--color-ui-border-light);
+    border-radius: 2px;
+    margin: 8px 0px;
+    padding: 10px 0px;
 }
 
 .menu-absolute.container {

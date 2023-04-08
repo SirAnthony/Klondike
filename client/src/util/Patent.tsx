@@ -95,7 +95,7 @@ export function PatentLabItem(props: RowProps){
       <RB.Col>{r.value}</RB.Col>
       <RB.Col>{r.provided|0}</RB.Col>
     </RB.Row>)
-    return <RB.Container><RB.Row><RB.Col><RB.Container>
+    return <RB.Container className='menu-list-box'><RB.Row><RB.Col><RB.Container>
       <RB.Row><IDField item={patent} /></RB.Row>
       <RB.Row>
         <RB.Col>{L('item_desc_name')}</RB.Col>

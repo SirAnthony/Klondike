@@ -28,8 +28,16 @@ class List extends UList<ListProps, ListState> {
         let data = new item.class()
         for (let k of data.keys)
             data[k] = item[k]
-        const res = await util.wget('/api/admin/order/create', {method: 'POST',
-            data: {data}})
+        const res = await util.wget('/api/admin/order/create',
+            {method: 'POST', data: {data}})
+        if (res.err)
+            return void this.setState({err: res.err})
+        this.setState({err: null})
+        this.fetch()
+    }
+    async deleteItem(item: Order){
+        const res = await util.wget(`/api/admin/order/${item._id}/delete`,
+            {method: 'DELETE'})
         if (res.err)
             return void this.setState({err: res.err})
         this.setState({err: null})
@@ -38,7 +46,8 @@ class List extends UList<ListProps, ListState> {
     body(){
         const {list} = this.state
         const rows = list.map(l=><OrderRow order={l} className='menu-list-row'
-            key={`order_list_${l._id}`} onReload={()=>this.fetch()} />)
+            onDelete={o=>this.deleteItem(o)} onReload={()=>this.fetch()}
+            key={`order_list_${l._id}`} {...this.props} />)
         return [<OrderRowNew onCreate={o=>this.createItem(o)} className='menu-list-row' />,
           <Delimeter />, <OrderRowDesc className='menu-list-title' />, <Delimeter />, 
           ...rows]

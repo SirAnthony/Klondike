@@ -40,8 +40,8 @@ export function CorpBalance(props: CorpProps){
         setShowConfirm(true)
     }
     const onConfirm = async ()=>{
-        let res = await util.wget('/api/corp/transfer', {method: 'POST',
-            data: {owner: corp._id, target: transferee._id, amount}})
+        let res = await util.wget(`/api/corp/transfer/${corp._id}`, {method: 'POST',
+            data: {target: transferee._id, amount}})
         if (res.err)
             return setError(res.err)
         setCredit(res.data?.credit)
@@ -183,7 +183,7 @@ export default class CorpDetails extends F.Fetcher<CorpDetailsProp, CorpDetailsS
     render(){
         const {corp} = this.state
         return <RB.Container className="menu-container-full">
-          <ControlBar title={L('interface')} onClose={this.props.onClose} />
+          <ControlBar title={L('interface', corp?.name||'')} onClose={this.props.onClose} />
           {this.view()}
         </RB.Container>
     }

@@ -6,3 +6,7 @@ export function currentDate(){
     const diff = +(new Date())-(+date)
     return new Date(+defines.date + diff)
 }
+
+export function IDMatch(a, b){
+    return (''+a)==(''+b)
+}

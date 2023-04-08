@@ -30,8 +30,8 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
         return `/api/corp/orders/${corp._id}`
     }
     fetchState(data: any = {}){
-        const {orders} = data
-        return {item: data, orders}
+        const {list} = data
+        return {item: data, list, orders: list}
     }
     has(field: string){ return this.props.fields?.includes(field) }
     planInfo(){
@@ -72,8 +72,8 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         return `/api/corp/items/${corp._id}`
     }
     fetchState(data: any = {}){
-        const {items} = data
-        return {item: data, items}
+        const {list} = data
+        return {item: data, list, items: list}
     }
     rows(fields?: string[]){
         const {items = []} = this.state
@@ -106,10 +106,10 @@ export class PriceDetails extends F.Fetcher<PriceDetailsProps, PriceDetailsState
         super(props)
         this.state = {}
     }
-    get fetchUrl() { return '/api/corp/prices' }
+    get fetchUrl() { return '/api/prices' }
     fetchState(data: any = {}){
-        const {prices} = data
-        return {item: data, prices}
+        const {list} = data
+        return {item: data, list, prices: list}
     }
     render(){
         const {prices = {}} = this.state
@@ -144,21 +144,24 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
         return `/api/corp/patents/${corp._id}`
     }
     fetchState(data: any = {}){
-        const {patents} = data
-        return {item: data, patents}
+        const {list} = data
+        return {item: data, list, patents: list}
     }
     async action_forward(patent: Patent){
-        let ret = util.wget(`/api/corp/patent/forward`, {method: 'PUT',
-            data: {_id: patent._id, requester: this.props.corp._id}});
-
+        const {corp} = this.props
+        let ret = util.wget(`/api/corp/patent/forward/${corp._id}`, {method: 'PUT',
+            data: {_id: patent._id, requester: corp._id}});
     }
+
     async action_sell(patent: Patent){
-        let ret = util.wget(`/api/corp/patent/sell`, {method: 'PUT', data: {
-            _id: patent._id, requester: this.props.corp._id}});
+        const {corp} = this.props
+        let ret = util.wget(`/api/corp/patent/sell/${corp._id}`, {method: 'PUT',
+            data: {_id: patent._id, requester: corp._id}});
     }
     async action_product(patent: Patent){
-        let ret = util.wget(`/api/corp/patent/product`, {method: 'PUT',
-            data: {_id: patent._id, requester: this.props.corp._id}});
+        const {corp} = this.props
+        let ret = util.wget(`/api/corp/patent/product/${corp._id}`, {method: 'PUT',
+            data: {_id: patent._id, requester: corp._id}});
     }
     rows(){
         const {patents = []} = this.state

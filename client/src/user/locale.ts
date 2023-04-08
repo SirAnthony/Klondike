@@ -33,6 +33,14 @@ load(mod, {
     'desc_user_type_5': 'Ученый',
     'desc_user_type_6': 'Охранник',
     'desc_user_type_7': 'Мастер',
+    'tab_cabinet': 'Личный кабинет',
+    'tab_ship': tpl`Корабль ${0}`,
+    'tab_corporation': tpl`Корпорация ${0}`,
+    'pane_fligth_table': 'Таблица вылетов',
+    'pane_inventory': 'Инвентарь',
+    'pane_maps': 'Планетарные карты',
+    'pane_ship': 'Корабль и дрон',
+    'pane_log': 'Журнал'
 })
 
 export function LR(str: string, ...args): string {

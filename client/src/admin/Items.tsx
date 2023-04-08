@@ -57,11 +57,20 @@ class List extends UList<ListProps, ListState> {
         let data = new item.class()
         for (let k of data.keys)
             data[k] = item[k]
-        const res = await util.wget('/api/admin/item/create', {method: 'POST',
-            data: {data}})
+        const res = await util.wget('/api/admin/item/create',
+            {method: 'POST', data: {data}})
         if (res.err)
             return void this.setState({err: res.err})
         this.setState({err: null})
+        this.fetch()
+    }
+    async deleteItem(item: Item){
+        if (!item?._id)
+            return null
+        const res = await util.wget(`/api/admin/item/${item._id}/delete`,
+            {method: 'DELETE'})
+        if (res.err)
+            return this.setState({err: res.err})
         this.fetch()
     }
     async changeResource(data: ResourceFields){
@@ -92,8 +101,9 @@ class List extends UList<ListProps, ListState> {
     body(){
         const {list} = this.state
         const fields = ['kind', 'owner', 'location', 'data']
-        const rows = list.map(l=><ItemRow className='menu-list-row' onReload={()=>this.fetch()}
-          key={`item_list_${l._id}`} item={l} fields={fields} user={this.props.user} />)
+        const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
+          onReload={()=>this.fetch()} onDelete={item=>this.deleteItem(item)}
+          item={l} fields={fields} user={this.props.user} />)
         return [
           this.resources(),
           <Delimeter key='res_delimeter' />,

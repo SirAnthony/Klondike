@@ -1,20 +1,23 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, MarketType, User} from '../common/entity'
+import {Corporation, CorporationType, Item, ItemType, MarketType, User} from '../common/entity'
 import {ID, Location} from '../common/entity'
 import {Resource, ResourceType, Patent} from '../common/entity'
 import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, ArtifactTypeSelect} from './inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
+import {PatentSelectTrigger} from './popovers'
 import {IDField} from './components'
+import {ApiError} from '../common/errors'
 import * as util from '../common/util'
 import L from '../common/locale'
 
 const column_layout = (fields = [])=>{
     const MAX_SUM = 12
-    const res: any = {id: 1, name: 1, type: 1, value: 1, location: 1,
-        price: 1, data: 0, owner: 0, actions: 2}
-    let prio = 'data location owner id name type kind'.split(' ')
+    const res: any = Object.assign({id: 1, name: 1, type: 1, value: 1,
+        location: 1, price: 1, data: 1, owner: 1, actions: 1},
+        fields.reduce((p, c)=>{ p[c]=1; return p }, {}))
+    let prio = 'actions data location owner id name type kind'.split(' ')
     fields.forEach(f=>res[f]=1)
     let free = MAX_SUM - Object.keys(res).reduce((p, v)=>p+res[v], 0)
     for (let i = free; i>0; --i)
@@ -30,8 +33,10 @@ type ItemRowProps = {
 
 type ItemProps = {
     item: Item
+    corp?: Corporation 
     layout?: number
     onReload: ()=>void
+    onDelete?: (item: Item)=>void
 } & ItemRowProps
 
 export function ItemRowDesc(props: ItemRowProps){
@@ -52,12 +57,13 @@ export function ItemRowDesc(props: ItemRowProps){
 }
 
 type ItemState = {
-
+    err?: ApiError
+    patent?: Patent
 }
 class ItemActions extends React.Component<ItemProps, ItemState> {
     constructor(props){
         super(props);
-        ['sell', 'delete'].forEach(cmd=>
+        ['sell', 'delist', 'pay'].forEach(cmd=>
             this[`do_${cmd}`] = this[`do_${cmd}`].bind(this))
     }
     get is_admin(){ return this.props.user.admin }
@@ -65,30 +71,45 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
         const {user, item} = this.props
         return user && item && user._id == item.owner?._id
     }
-    async do_delist(){
-        const {item} = this.props
-        if (!this.is_owner || !item?._id || item.market?.type != MarketType.Sale)
+    async do_pay(patent: Patent){
+        const {item, corp} = this.props
+        if (!this.is_admin && !(this.is_owner && corp.type==CorporationType.Research))
             return
-        await util.wget(`/api/corp/item/delist/${item._id}`, {method: 'PUT'})
+        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/pay/${patent._id}`,
+            {method: 'PUT'})
+        if (res.err)
+            return this.setState({err: res.err})
+        this.props.onReload()
+    }
+    async do_delist(){
+        const {item, corp} = this.props
+        if (!this.is_admin && !(this.is_owner && item.market?.type==MarketType.Sale))
+            return
+        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/delist`,
+            {method: 'PUT'})
+        if (res.err)
+            return this.setState({err: res.err})
         this.props.onReload()
     }
     async do_sell(){
-        const {item} = this.props
-        if (!this.is_owner || !item?._id || item.market?.type != MarketType.None)
+        const {item, corp} = this.props
+        if (!this.is_admin && !(this.is_owner && item.market?.type==MarketType.None))
             return
-        await util.wget(`/api/corp/item/sell/${item._id}`, {method: 'PUT'})
+        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/sell`,
+            {method: 'PUT'})
+        if (res.err)
+            return this.setState({err: res.err})
         this.props.onReload()
     }
-    async do_delete(){
-        const {props} = this
-        if (!this.is_admin || !props.item?._id)
-            return
-        await util.wget(`/api/admin/item/delete/${props.item._id}`, {method: 'DELETE'})
-        this.props.onReload()
+    btn_pay(){
+        const {item, corp} = this.props
+        if (!this.is_admin && !(this.is_owner && corp.type==CorporationType.Research))
+            return null
+        return <PatentSelectTrigger item={item} corp={corp} onClick={this.do_pay} desc={L('act_pay')} />
     }
     btn_sell(){
         const {item} = this.props
-        if (!this.is_owner || item.market?.type==MarketType.Protected)
+        if (!this.is_admin && !(this.is_owner && item.market?.type!=MarketType.Protected))
             return null
         if (item.market?.type!=MarketType.Sale)
             return <RB.Button onClick={this.do_sell}>{L('act_sell')}</RB.Button>
@@ -99,14 +120,16 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
         ]
     }
     btn_delete(){
-        if (!this.is_admin)
+        const {item, onDelete} = this.props
+        if (!this.is_admin || !onDelete)
             return null
-        return <RB.Button onClick={this.do_delete}>{L('act_delete')}</RB.Button>
+        return <RB.Button onClick={()=>onDelete(item)}>{L('act_delete')}</RB.Button>
     }
     render() {
         if (!this.props.item)
             return null
         return <RB.Col sm={this.props.layout}>
+          {this.btn_pay()}
           {this.btn_sell()}
           {this.btn_delete()}
         </RB.Col>
@@ -143,7 +166,7 @@ export function ItemRow(props: ItemProps){
     const obj = new (Item.class(item.type))(item)
     const res = item as Resource, pt = item as Patent
     const has = n=>obj.keys.includes(n)
-    const lyt = column_layout(obj.keys)
+    const lyt = column_layout(obj.keys.filter(f=>!['_id', 'market'].includes(f)))
     const kind = res.kind==undefined ? '-' :
         item.type==ItemType.Patent ?
         L(`patent_kind_${pt.kind}`)+'/'+L(`patent_weigth_${pt.weight}`) :

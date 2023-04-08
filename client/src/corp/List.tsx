@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, User, Item} from '../common/entity'
+import {Corporation, User, Item, Patent, ItemType} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
@@ -40,6 +40,21 @@ export class Select extends USelect<{}, {}> {
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
         return list.filter(this.props.filter||Boolean)
+            .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
+    }
+}
+
+type PatentSelectProps = {
+    corp: Corporation
+}
+export class PatentSelect extends USelect<PatentSelectProps, {}> {
+    L = LR
+    get optName(){ return 'item_desc_name' }
+    get fetchUrl(){
+        return `/api/corp/patents/${this.props.corp?._id}` }
+    getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getOptions(list: Patent[]){
+        return list?.filter(this.props.filter||Boolean)
             .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }
 }
