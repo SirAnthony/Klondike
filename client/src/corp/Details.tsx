@@ -8,7 +8,7 @@ import {PatentLabItem, PatentRow, PatentRowDesc} from '../util/Patent'
 import {OrderRowCompact} from '../util/Order'
 import EventEmitter from '../common/events'
 import * as util from '../common/util'
-import {default as L, LR} from './locale'
+import {default as L} from './locale'
 import {Delimeter} from '../util/components'
 
 const DetailsEvents = new EventEmitter()
@@ -128,39 +128,6 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
           <Delimeter />
           <ItemRowDesc {...this.props} fields={fields} />
           {this.rows(fields)}
-        </RB.Container>
-    }
-}
-
-type PriceDetailsState = {
-    prices?: {ResourceType: number}
-}
-type PriceDetailsProps = {
-    user: User
-}
-export class PriceDetails extends F.Fetcher<PriceDetailsProps, PriceDetailsState> {
-    constructor(props){
-        super(props)
-        this.state = {}
-        DetailsEvents.on(EventType[EventType.reloadPrices], ()=>this.fetch())
-    }
-    get fetchUrl() { return '/api/prices' }
-    fetchState(data: any = {}){
-        const {list} = data
-        return {item: data, list, prices: list}
-    }
-    render(){
-        const {prices = {}} = this.state
-        const items = Object.keys(prices).map(k=><RB.Row key={`market_res_${k}`}>
-          <RB.Col>{LR(`res_kind_${k}`)}</RB.Col>
-          <RB.Col>{prices[k]}</RB.Col>
-        </RB.Row>)
-        return <RB.Container>
-          <RB.Row className='menu-list-title'>
-            <RB.Col>{L('market_prices')}</RB.Col>
-          </RB.Row>
-          <Delimeter />
-          {items}
         </RB.Container>
     }
 }
