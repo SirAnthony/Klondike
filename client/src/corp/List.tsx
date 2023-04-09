@@ -7,9 +7,13 @@ import {default as L, LR} from './locale'
 
 function CorpRow(params: {corp: Corporation}) {
     const {corp} = params
+    const url = corp.type==InstitutionType.Ship ? 'ship' :
+        corp.type==InstitutionType.Organization ? 'org' :
+        corp.type==InstitutionType.Research ? 'lab' :
+        corp.type==InstitutionType.User ? 'user' : 'corp'
     return <RB.Row className="menu-list-row">
       <RB.Col><img src={`/static/corp/${corp._id}.png`} /></RB.Col>
-      <RB.Col><RB.NavLink href={`/corp/${corp._id}`}>{corp.name}</RB.NavLink></RB.Col>
+      <RB.Col><RB.NavLink href={`/${url}/${corp._id}`}>{corp.name}</RB.NavLink></RB.Col>
     </RB.Row>
 }
 
