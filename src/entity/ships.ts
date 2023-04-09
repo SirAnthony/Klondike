@@ -1,5 +1,5 @@
 import {Entity} from './base';
-import {Identifier, PlanetShip, Ship} from '../../client/src/common/entity'
+import {Identifier, Owner, PlanetShip, Ship} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
 
@@ -16,6 +16,7 @@ export class Controller extends ShipDB {
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
+    get asOwner(): Owner { return {_id: this._id, name: this.name, type: this.type} }
     get asObject(): any { return {...this} }
 
     get PlanetShip(): PlanetShip {

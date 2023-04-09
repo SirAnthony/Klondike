@@ -2,7 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {Corporation, InstitutionType, Order, User} from '../common/entity'
-import {Item, Patent, MarketType} from '../common/entity'
+import {Item, Patent, MarketType, Owner} from '../common/entity'
 import {ItemRow, ItemRowDesc} from '../util/Item'
 import {PatentLabItem, PatentRow, PatentRowDesc} from '../util/Patent'
 import {OrderRowCompact} from '../util/Order'
@@ -90,12 +90,12 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     get is_admin(){ return this.props.user.admin }
     is_owner(item: Item){
         return this.props.user && item && this.props.user._id == item.owner?._id }
-    async onItemAction(item: Item, check: ()=>boolean, action: string){
+    async onItemAction(item: Item, check: ()=>boolean, action: string, opt?: any){
         const {corp} = this.props
         if (!this.is_admin && !(this.is_owner(item) && check()))
             return
-        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/${action}`,
-            {method: 'PUT'})
+        const res = await util.wget(`/api/inventory/${corp.type}/${corp._id}/item/${item._id}/${action}`,
+            Object.assign({method: 'PUT'}, opt))
         if (res.err)
             return this.setState({err: res.err})
         this.fetch()
@@ -109,9 +109,14 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
             Events.reloadPatents()
     }
     async onDelist(item: Item){
-        await this.onItemAction(item, ()=>item.market?.type==MarketType.Sale, 'delist') }
-    async onSell(item: Item){
-        await this.onItemAction(item, ()=>item.market?.type==MarketType.None, 'sell') }
+        const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
+        await this.onItemAction(item, check, 'delist')
+    }
+    async onSell(item: Item, target: Owner, price: number){
+        const check = ()=>![MarketType.Protected, MarketType.Sale].includes(item.market?.type)
+        await this.onItemAction(item, check, 'sell', {
+            data: {target: target._id, dtype: target.type, price: price}})
+    }
     rows(fields?: string[]){
         const {items = []} = this.state
         const rows = items.filter(util.not_depleted).map(i=><ItemRow className='menu-list-row'

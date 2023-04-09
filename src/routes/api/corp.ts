@@ -10,7 +10,6 @@ import {IDMatch} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 
 const POINTS_FOR_PATENT = 100
-const POINTS_FOR_PATENT_PAY = 100
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -82,62 +81,6 @@ export class CorpApiRouter extends BaseRouter {
         }
         const list = await ItemController.all(filter)
         return {list}
-    }
-
-    @CheckIDParam()
-    @CheckRole(UserType.Scientist)
-    async put_item_pay(ctx: RenderContext){
-        const {id, item, target} = ctx.aparams
-        if (!item || !target)
-            throw 'Required fields missing'
-        const corp = await CorpController.get(id)
-        const resource = await ItemController.get(item)
-        const patent = await ItemController.get(target)
-        if (!IDMatch(resource.owner._id, corp._id))
-            throw 'Wrong owner of resource'
-        const pt = (patent as unknown) as Patent
-        pt.resourceCost.forEach(k=>k.provided |= 0)
-        if (pt.owners.some(o=>o.status!=PatentStatus.Created)){
-            pt.owners.forEach(o=>{
-                if (o.status==PatentStatus.Created)
-                    o.status = PatentStatus.Ready
-            })
-            await patent.save()
-            throw 'Wrong patent status'
-        }
-        const res = (resource as unknown) as Resource
-        let {value} = res
-        for (let k of pt.resourceCost){
-            if (!res.value)
-                break
-            if (k.kind!=res.kind || k.value<=k.provided)
-                continue
-            let amount = Math.min(res.value, k.value-k.provided)
-            k.provided += amount
-            res.value -= amount
-        }
-        // Resource is single-used
-        if (value != res.value) {
-            await LogController.log({
-                name: 'resource_used', info: `post_patent_pay`,
-                owner: corp.asOwner, item: res, points: 0,
-                data: {value}, action: LogAction.ResourceUsed
-            })
-            res.value = 0
-            // Should delete?
-            await resource.save()
-        }
-        // Patent closed
-        if (!pt.resourceCost.some(k=>k.provided<k.value)){
-            pt.owners.forEach(o=>o.status=PatentStatus.Ready)
-            const points = POINTS_FOR_PATENT_PAY
-            await LogController.log({
-                name: 'patent_pay', info: 'post_patent_pay',
-                owner: corp.asOwner, item: patent, points,
-                action: LogAction.PatentPaid
-            })
-        }
-        await patent.save()
     }
 
     @CheckIDParam()

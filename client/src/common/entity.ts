@@ -52,6 +52,7 @@ export class Item extends ID {
         type: MarketType
         price: number
         code: string
+        to?: Owner
     }
     get keys(){ 
         return '_id name type owner location price data market'.split(' ') }
@@ -276,6 +277,7 @@ export class PlanetInfo extends Planet {
 export enum LogAction {
     PatentPaid, PatentForwardFull, PatentForwardPart, PatentForwardLeftovers,
     ResourceUsed,
+    ItemPutSale, ItemRemoveSale, ItemBuy,
 }
 export class LogEntry extends ID {
     action: LogAction

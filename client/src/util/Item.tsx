@@ -7,7 +7,7 @@ import {ResourceSelect, TypeSelect, PatentTypeSelect} from './inputs'
 import {PatentWeightSelect, ArtifactTypeSelect} from './inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
-import {PatentSelectTrigger} from './popovers'
+import {OwnerValueSelectTrigger, PatentSelectTrigger} from './popovers'
 import {IDField} from './components'
 import {ApiError, FormError} from '../common/errors'
 import L from '../common/locale'
@@ -23,6 +23,18 @@ const column_layout = (fields = [])=>{
     for (let i = free; i>0; --i)
         res[prio.shift()] += 1
     return res
+}
+
+const owners_exclude = (type: ItemType)=>{
+    switch(type){
+        case ItemType.Resource: return [InstitutionType.User]
+        case ItemType.Coordinates: return [InstitutionType.User]
+        case ItemType.Module: return [InstitutionType.User]
+        case ItemType.Patent: return [InstitutionType.User, InstitutionType.Ship,
+            InstitutionType.Research, InstitutionType.Organization]
+        case ItemType.Artifact: return []
+    }
+    return []
 }
 
 type ItemRowProps = {
@@ -54,7 +66,7 @@ type ItemProps = {
     layout?: number
     onDelete?: (item: Item)=>void
     onPay?: (item: Item, patent: Patent)=>void
-    onSell?: (item: Item)=>void
+    onSell?: (item: Item, target: Owner, price: number)=>void
     onDelist?: (item: Item)=>void
 } & ItemRowProps
 
@@ -82,8 +94,10 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
         const {item, onSell, onDelist} = this.props
         if (!onSell || !this.is_admin && !(this.is_owner && item.market?.type!=MarketType.Protected))
             return null
-        if (item.market?.type!=MarketType.Sale)
-            return <RB.Button onClick={()=>onSell(item)}>{L('act_sell')}</RB.Button>
+        if (item.market?.type!=MarketType.Sale){
+            return <OwnerValueSelectTrigger onClick={(owner, price)=>onSell(item, owner, price)}
+                desc={L('act_sell')} valDesc={L('item_desc_price')} exclude={owners_exclude(item.type)}/>
+        }
         return [
             <span>{L('market_code')}</span>,
             <span>{item.market?.code}</span>,
@@ -217,18 +231,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         return item.keys.filter(k=>!['_id', 'market'].includes(k) &&
             !this.state[k] && isNaN(this.state[k]))
     }
-    get ownerExclude(){
-        const {type} = this.state
-        switch(type){
-            case ItemType.Resource: return [InstitutionType.User]
-            case ItemType.Coordinates: return [InstitutionType.User]
-            case ItemType.Module: return [InstitutionType.User]
-            case ItemType.Patent: return [InstitutionType.User, InstitutionType.Ship,
-                InstitutionType.Research, InstitutionType.Organization]
-            case ItemType.Artifact: return []
-        }
-        return []
-    }
+    get ownerExclude(){ return owners_exclude(this.state.type) }
     // resource
     fields_resource(){
         const row_size = this.row_size

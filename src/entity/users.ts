@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt'
 import {Entity} from './base';
-import {Identifier, User, UserType} from '../../client/src/common/entity'
+import {Identifier, Owner, User, UserType} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import * as sutil from '../util/util'
 import { ObjectId } from 'mongodb';
@@ -47,6 +47,7 @@ export class Controller extends UserDB {
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
+    get asOwner(): Owner { return {_id: this._id, name: this.name, type: this.type} }
     get asObject(): any { return {...this} }
 
     async save() {
