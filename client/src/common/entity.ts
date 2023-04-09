@@ -122,8 +122,10 @@ export class Patent extends Item {
     }
     get fullOwnership(){ return this.owners.length < 2 }
     get shares(){ return 1/(this.owners.length||1) }
-    served(owner: ID){
-        return this.owners.some(o=>(''+o._id)==(''+owner._id) &&
+    static ready(p: Patent){
+        return !p.owners.some(o=>o.status==PatentStatus.Created) }
+    static served(p: Patent, owner: ID){
+        return p.owners.some(o=>(''+o._id)==(''+owner._id) &&
             o.status==PatentStatus.Served)
     }
 }
@@ -137,17 +139,11 @@ export class Artifact extends Item {
 }
 
 export enum InstitutionType {User, Organization, Research, Corporation, Ship}
-export enum InstitutionPointsType {PatentPart, PatentFull}
 export class Institution extends ID {
     type: InstitutionType
     credit: number
     data: string
     cost: number
-    points: {
-        value: number
-        time: number
-        type: InstitutionPointsType
-    }[]
     get keys(){
         return '_id name type data cost points'.split(' ')
     }
@@ -275,4 +271,19 @@ export class Planet extends ID {
 export class PlanetInfo extends Planet {
     items?: Item[]
     ships?: PlanetShip[]
+}
+
+export enum LogAction {
+    PatentPaid, PatentForwardFull, PatentForwardPart, PatentForwardLeftovers,
+    ResourceUsed,
+}
+export class LogEntry extends ID {
+    action: LogAction
+    owner: Owner
+    info: string
+    item?: Item
+    institution?: Owner
+    ts?: number
+    points?: number
+    data?: any
 }

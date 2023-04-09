@@ -59,3 +59,10 @@ export type FormValidationError = ApiStackError & {
     field: string
 }
 
+type ErrorField = {field: string, message: string}
+export class FormError extends ApiError {
+    constructor(fields: ErrorField[], message: string = 'form_error_notvalid'){
+        super(Codes.INITIAL_VALUE, message, fields)
+    }
+}
+

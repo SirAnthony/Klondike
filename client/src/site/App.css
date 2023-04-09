@@ -241,6 +241,7 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
 .menu-list-row > div button {
     width: auto;
     padding: 2px 5px;
+    margin: 0px 3px;
     font-size: 9pt;
 }
 
@@ -249,6 +250,15 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
     border-radius: 2px;
     margin: 8px 0px;
     padding: 10px 0px;
+}
+
+.menu-list-box .row.resource-full {
+    color: var(--color-ui-border);
+}
+
+.menu-list-box.patent-ready {
+    background: var(--color-ui-border-light);
+    opacity: 50%;
 }
 
 .menu-absolute.container {
@@ -314,6 +324,10 @@ div.popover-body {
     color: var(--color-ui-text);
     background-color: var(--color-ui-box);
     border: solid 1px var(--color-ui-border);
+}
+
+div.popover-body .form-select {
+    margin-bottom: 7px;
 }
 
 input.form-control, select.form-select, textarea.form-control {

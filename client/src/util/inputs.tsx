@@ -3,17 +3,27 @@ import * as RB from 'react-bootstrap'
 import {ItemType, ResourceType, PatentType, PatentWeight, ArtifactType} from '../common/entity'
 import {Patent, Corporation, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
-import {Select as USelect, TypedSelect} from '../util/select'
+import {TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
+import {ApiStackError} from '../common/errors'
 import L from '../common/locale'
 import * as _ from 'lodash'
 
-export function NumberInput(props: {value?: number, placeholder: string, onChange: (l: number)=>void}){
+type InputProps = {
+    value: number
+    placeholder: string
+    onChange: (l: number)=>void
+    err?: ApiStackError
+}
+
+export function NumberInput(props: InputProps){
     const empty = typeof props.value==='undefined'
     const val =  empty ? undefined : +props.value
     const onChange = ({target: {value}})=>props.onChange(isNaN(+value) ? val : +value)
-    return <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val} onChange={onChange} />
+    const cls = props.err ? 'input-error' : ''
+    return <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val}
+      className={cls} onChange={onChange} />
 }
 
 export const ResourceSelect = TypedSelect(ResourceType, 'res_kind', 'res_desc_kind')
@@ -57,50 +67,52 @@ export function LocationSelect(props: {value?: Location, optName?: string, onCha
     </RB.Container>
 }
 
-const IDFromOwner = (owner: Owner) : ID|null => {
-    return owner ? {_id: owner._id, name: owner.name} : null
+const asID = (obj: ID) : ID|null => {
+    return obj ? {_id: obj._id, name: obj.name} : null
 }
 
 export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolean,
-    onChange: (owner: Owner)=>void}){
+    exclude?: number[], onChange: (owner: Owner)=>void}){
     const [owner, setOwner] = React.useState(props.value)
     const [instType, setInstType] = React.useState(props.value?.type)
-    const [id, setId] = React.useState(IDFromOwner(props.value))
+    const [id, setId] = React.useState(asID(props.value))
     const ownerChange = (type: InstitutionType, id: ID)=>{
+      const obj = asID(id), owner = Object.assign({type}, obj)
       setInstType(type)
-      setId(id)
-      setOwner(Object.assign({type: instType}, owner));
+      setId(obj)
+      setOwner(owner)
       props.onChange(owner)
     }
-    return <RB.Container><RB.Row>
+    return <RB.Row>
       <RB.Col>
-        <InstitutionTypeSelect value={instType} onChange={type=>ownerChange(type, id)} />
+        <InstitutionTypeSelect value={instType} exclude={props.exclude}
+          onChange={type=>ownerChange(type, id)} />
       </RB.Col>
       <RB.Col>
         <CSelect value={id} type={instType} filter={props.filter}
           onChange={id=>ownerChange(instType, id)} disabled={isNaN(instType)} />
       </RB.Col>
-    </RB.Row></RB.Container>
+    </RB.Row>
 }
 
-export function MultiOwnerSelect(props: {value?: Owner[],
-    className?: string, onChange: (owners: Owner[])=>void}){
+export function MultiOwnerSelect(props: {value?: Owner[], className?: string,
+    exclude?: number[], onChange: (owners: Owner[])=>void}){
     const [owner, setOwner] = React.useState(null)
     const addOwner = ()=>owner && props.onChange(_.uniqBy([].concat(
-        owner, props.value).filter(Boolean), f=>f._id))
+        owner, props.value).filter(f=>f?._id&&f.type), f=>f._id))
     const removeOwner = (_id: string)=>props.onChange(_.uniqBy([].concat(
         props.value).filter(o=>o && o._id!=_id), f=>f._id))
     const owners = props.value?.map(o=><RB.Container key={`sel_owner_${o._id}`}
       className='selected-item'>{o.name}<RB.CloseButton onClick={()=>removeOwner(o._id)} />
     </RB.Container>)
     return <RB.Row className={props.className}>
-      <RB.Col sm={2}>
-        <OwnerSelect value={owner} onChange={setOwner} />
+      <RB.Col sm={4}>
+        <OwnerSelect value={owner} exclude={props.exclude} onChange={setOwner} />
       </RB.Col>
       <RB.Col sm={2}>
         <RB.Button onClick={addOwner}>{L('act_add')}</RB.Button>
       </RB.Col>
-      <RB.Col sm={8}>
+      <RB.Col sm={6}>
         {owners}
       </RB.Col>
     </RB.Row>
@@ -112,7 +124,7 @@ export function MultiResourceSelect(props: {value?: ResItem[],
     const [kind, setKind] = React.useState(null)
     const [value, setValue] = React.useState(0)
     const addRes = ()=>kind!==null && kind>=0 && value>=0 && props.onChange(_.uniqBy(
-        [].concat({kind, value}, props.value).filter(Boolean), f=>f.kind))
+        [].concat({kind, value}, props.value).filter(f=>!isNaN(+f?.kind)&&f?.value), f=>f.kind))
     const removeRes = (kind: number)=>props.onChange(_.uniqBy([].concat(
         props.value).filter(o=>o && o.kind!=kind), f=>f.kind))
     const resources = props.value?.map(o=><RB.Container key={`sel_res_${o.kind}`} className='selected-item'>

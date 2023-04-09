@@ -81,5 +81,9 @@ export function TypedSelect<T>(T: T, key: string, opt: string){
             return list.reduce((p, v)=>
                 Object.assign(p, {[v as string]: L(`${key}_${v}`)}), {}) || []
         }
+        componentDidUpdate(prevProps){
+            if (prevProps.exclude!=this.props.exclude)
+                this.fetch()
+        }
     }
 }

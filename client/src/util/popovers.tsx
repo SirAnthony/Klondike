@@ -19,7 +19,7 @@ export function PatentSelectTrigger(props: PatentSelectProps){
         <RB.Button disabled={!patent} onClick={onClick}>{desc}</RB.Button>
       </RB.PopoverBody>
     </RB.Popover>
-    return <RB.OverlayTrigger placement='top' trigger={'click'} overlay={btn}>
+    return <RB.OverlayTrigger placement='top' trigger={'click'} overlay={btn} rootClose={true}>
       <RB.Button>{desc}</RB.Button>
     </RB.OverlayTrigger>
 }

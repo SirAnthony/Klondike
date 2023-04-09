@@ -1,6 +1,6 @@
 import * as mongodb from '../util/mongodb'
 import {ObjectId} from 'mongodb';
-import {Identifier} from '../../client/src/common/entity'
+import {Identifier, Owner, Institution} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 
 export class Entity<T> {
@@ -9,6 +9,7 @@ export class Entity<T> {
     constructor(db: string) {
         this.db = db
     }
+    get asObject(): any { return {...this} }
     async get(id: ObjectId | string): Promise<Awaited<T>> {
         let _id = id instanceof ObjectId ? id : new ObjectId(id)
         let data = await mongodb.find_one(this.db, {_id})
@@ -51,7 +52,7 @@ export class Entity<T> {
         if (!obj)
             return false
         const id: any = (obj as Identifier)._id
-        const _id = id instanceof ObjectId ? id : new ObjectId(id)
+        const _id = (!id || id instanceof ObjectId) ? id : new ObjectId(id)
         if (!_id) {
             const ret = await this.add(obj);
             if (ret)
@@ -92,7 +93,12 @@ export function MakeController<TBase extends Constructor>(Base: TBase, db: strin
         get identifier(): Identifier {
             const data = (this as unknown) as DBBase
             return {_id: data._id, name: data.name}
-         }
+        }
+        get asObject(): any { return {...this} }
+        get asOwner(): Owner {
+            const data = (this as unknown) as Institution
+            return Object.assign({type: data.type}, this.identifier)
+        }
     
         async save() {
             const data = (this as unknown) as DBBase

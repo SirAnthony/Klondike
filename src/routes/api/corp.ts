@@ -1,16 +1,16 @@
 import {BaseRouter, CheckRole, CheckIDParam} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
-import {institutionController} from '../../entity'
+import {institutionController, LogController} from '../../entity'
 import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
-import {InstitutionType, InstitutionPointsType} from '../../../client/src/common/entity'
+import {InstitutionType, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
-import {Time} from '../../util/time'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 
 const POINTS_FOR_PATENT = 100
+const POINTS_FOR_PATENT_PAY = 100
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -69,9 +69,7 @@ export class CorpApiRouter extends BaseRouter {
         const {id} = ctx.params
         const corp = await CorpController.get(id)
         const filter: any = {type: ItemType.Patent}
-        if (corp.type==InstitutionType.Research)
-            filter['owners.status'] = {$in: [PatentStatus.Created, undefined]}
-        else {
+        if (corp.type!=InstitutionType.Research) {
             Object.assign(filter, {'owners._id': corp._id,
                 'owners.status': {$exists: true, '$ne': PatentStatus.Created}})
         }
@@ -82,7 +80,7 @@ export class CorpApiRouter extends BaseRouter {
     @CheckIDParam()
     @CheckRole(UserType.Scientist)
     async put_item_pay(ctx: RenderContext){
-        const {id, item, target} = ctx.params
+        const {id, item, target} = ctx.aparams
         if (!item || !target)
             throw 'Required fields missing'
         const corp = await CorpController.get(id)
@@ -90,24 +88,48 @@ export class CorpApiRouter extends BaseRouter {
         const patent = await ItemController.get(target)
         if (!IDMatch(resource.owner._id, corp._id))
             throw 'Wrong owner of resource'
-        const res = (resource as unknown) as Resource
         const pt = (patent as unknown) as Patent
-        let used = false
+        pt.resourceCost.forEach(k=>k.provided |= 0)
+        if (pt.owners.some(o=>o.status!=PatentStatus.Created)){
+            pt.owners.forEach(o=>{
+                if (o.status==PatentStatus.Created)
+                    o.status = PatentStatus.Ready
+            })
+            await patent.save()
+            throw 'Wrong patent status'
+        }
+        const res = (resource as unknown) as Resource
+        let {value} = res
         for (let k of pt.resourceCost){
             if (!res.value)
                 break
             if (k.kind!=res.kind || k.value<=k.provided)
                 continue
-            let amount = Math.min(res.value, k.value-(k.provided|0))
-            k.provided = (k.provided|0) + amount
+            let amount = Math.min(res.value, k.value-k.provided)
+            k.provided += amount
             res.value -= amount
-            used = true
         }
         // Resource is single-used
-        if (used)
+        if (value != res.value) {
+            await LogController.log({
+                name: 'resource_used', info: `post_patent_pay`,
+                owner: corp.asOwner, item: res, points: 0,
+                data: {value}, action: LogAction.ResourceUsed
+            })
             res.value = 0
-        // Should delete?
-        await resource.save()
+            // Should delete?
+            await resource.save()
+        }
+        // Patent closed
+        if (!pt.resourceCost.some(k=>k.provided<k.value)){
+            pt.owners.forEach(o=>o.status=PatentStatus.Ready)
+            const points = POINTS_FOR_PATENT_PAY
+            await LogController.log({
+                name: 'patent_pay', info: 'post_patent_pay',
+                owner: corp.asOwner, item: patent, points,
+                action: LogAction.PatentPaid
+            })
+        }
         await patent.save()
     }
 
@@ -134,14 +156,13 @@ export class CorpApiRouter extends BaseRouter {
         const points = ready.length != parts.length ? 0 :
             POINTS_FOR_PATENT*ready.length/patent.owners.length
         if (points){
-            owner.points = (owner.points||[]) as any
-            let pts = owner.points
-            pts.push({time: Time.basicTime,
-                type: patent.fullOwnership ?
-                    InstitutionPointsType.PatentFull :
-                    InstitutionPointsType.PatentPart,
-                value: points})
-            await owner.save()
+            await LogController.log({
+                name: 'patent_forward', info: 'post_patent_forward',
+                owner: owner.asOwner, points, item,
+                action: patent.fullOwnership ?
+                    LogAction.PatentForwardFull :
+                    LogAction.PatentForwardPart,
+            })
         }
     }
 

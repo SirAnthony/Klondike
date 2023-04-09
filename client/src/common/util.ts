@@ -1,5 +1,6 @@
 import * as conf from './config'
 import {ApiError} from './errors'
+import {Item, ItemType, Resource} from './entity'
 import axios from 'axios'
 
 export const url = (path: string)=>{
@@ -43,3 +44,6 @@ export const obj_copyto = (data: any, target: any, keys?: string | string[])=>{
 }
 
 export const get_name = (data: any)=>typeof data==='object' ? data.name : data
+
+export const not_depleted = (item: Item)=>{
+    return item.type!=ItemType.Resource || (item as Resource).value>0 }

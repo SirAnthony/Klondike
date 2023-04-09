@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Owner, Order, ResourceType, User} from '../common/entity'
+import {Owner, Order, ResourceType, User, InstitutionType} from '../common/entity'
 import {ResourceSelect, OwnerSelect, NumberInput} from './inputs'
 import * as util from '../common/util'
 import L from '../common/locale'
@@ -86,6 +86,8 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
         ['onCreate', 'addRow', 'deleteRow'].forEach(
             r=>this[r] = this[r].bind(this))
     }
+    stateChange(obj: any){
+        this.setState(Object.assign({err: null}, obj)) }
     onCreate(){
         const {assignee, cycle, rows} = this.state
         if (!assignee)
@@ -105,17 +107,17 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
         const rows = this.state.rows.map(r=>Object.assign({}, r))
         const _id = rows.reduce((p, r)=>r._id<p ? p : r._id, -1)+1
         rows.push({_id, kind: null})
-        this.setState({rows, err: null})
+        this.stateChange({rows})
     }
     changeRow(row: any){
         const rows = this.state.rows.map(r=>Object.assign({}, r))
         Object.assign(rows.find(r=>r._id==row._id), row)
-        this.setState({rows, err: null})
+        this.stateChange({rows})
     }
     deleteRow(id: number){
         const rows = this.state.rows.filter(r=>r._id!=id)
             .map(r=>Object.assign({}, r))
-        this.setState({rows, err: null})
+        this.stateChange({rows})
     }
     row(row: ResourceRowID){
         const changeRow = (key, val)=>this.changeRow({_id: row._id, [key]: +val})
@@ -139,18 +141,20 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     render(){
         const {props} = this, {state} = this
         const rows = state.rows.map(r=>this.row(r))
+        const exclude = [InstitutionType.Organization, InstitutionType.Research,
+            InstitutionType.Ship, InstitutionType.User]
         return <RB.Row><RB.Col><RB.InputGroup>
           <RB.Row className='menu-input-row'>
             {state.err && <RB.Row><ErrorMessage field={state.err} /></RB.Row>}
             <RB.Col>{L('order_create')}</RB.Col>
             <RB.Col>
-              <OwnerSelect value={state.assignee} onChange={
-                assignee=>this.setState({assignee, err: null})} />
+              <OwnerSelect value={state.assignee} exclude={exclude}
+                onChange={assignee=>this.stateChange({assignee})} />
             </RB.Col>
             <RB.Col sm={1}>{L('cycle')}</RB.Col>
             <RB.Col>
               <NumberInput placeholder={L('cycle')} value={state.cycle}
-                onChange={cycle=>this.setState({cycle})} />
+                onChange={cycle=>this.stateChange({cycle})} />
             </RB.Col>
             <RB.Col>
               <RB.Button onClick={this.addRow}>{L('act_add_row')}</RB.Button>

@@ -40,7 +40,7 @@ export function PatentRow(props: RowProps){
     const owners = patent.owners.reduce((p, f)=>p + +(f._id==corp._id), 0)
     const ownership = patent.owners.length<2 ? L('patent_ownership_full') :
         L(`patent_ownership_shared`)+` [${owners}/${len}]`
-    const is_served = patent.served(corp)
+    const is_served = Patent.served(patent, corp)
     const cls = props.className+(is_served ? 'patent-served' : '')
     return <RB.Row key={`patent_${patent._id}`} className={cls}>
         <RB.Col><IDField item={patent} /></RB.Col>
@@ -63,7 +63,7 @@ export function PatentActions(props: RowProps){
     const {patent, corp, onAction} = props
     if (corp.type==InstitutionType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>
-    const is_served = patent.served(corp)
+    const is_served = Patent.served(patent, corp)
     return <RB.Container>
       {!is_served  && <RB.Row><RB.Col>
         <RB.Button onClick={onAction('forward', patent)}>
@@ -86,12 +86,14 @@ export function PatentLabItem(props: RowProps){
     const {patent} = props
     const owners = _.uniqBy(patent.owners, p=>p._id).map(o=>
         <span key={`corp_name_${o._id}`}>{o.name}</span>)
-    const costs = patent.resourceCost.map(r=><RB.Row>
+    const rowClass = r=>(r.provided|0)>=r.value ? 'resource-full' : ''
+    const costs = patent.resourceCost.map(r=><RB.Row className={rowClass(r)}>
       <RB.Col>{L(`res_kind_${r.kind}`)}</RB.Col>
       <RB.Col>{r.value}</RB.Col>
       <RB.Col>{r.provided|0}</RB.Col>
     </RB.Row>)
-    return <RB.Container className='menu-list-box'><RB.Row><RB.Col><RB.Container>
+    const cls = Patent.ready(patent) ? 'patent-ready' : ''
+    return <RB.Container className={`menu-list-box ${cls}`}><RB.Row><RB.Col><RB.Container>
       <RB.Row><IDField item={patent} /></RB.Row>
       <RB.Row>
         <RB.Col>{L('item_desc_name')}</RB.Col>

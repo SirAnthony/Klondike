@@ -52,11 +52,6 @@ const client_files = (()=>{
     return ret
 })()
 
-function mix_params(ctx: RenderContext, next: Function){
-    ctx.aparams = Object.assign({}, ctx.query, ctx.request.body, ctx.params)
-    return next()
-}
-
 async function render(view: string, context:any = {}){
     if (!view)
         throw new Error('Undefined template rendered')
@@ -86,6 +81,8 @@ const add_render = (ctx: RenderContext, next: Function)=>{
     ctx.state.debug = Object.assign({
         errors: env.NODE_ENV!='production'
     }, ctx.state.debug)
+    Object.defineProperty(ctx, 'aparams', {
+        get: ()=>Object.assign({}, ctx.query, ctx.request.body, ctx.params) })
     ctx.debug = obj=>merge(ctx.state.debug, obj)
     ctx.state.flash = ctx.state.flash||{}
     ctx.flash = (k, v)=>ctx.state.flash[k]=v
@@ -128,6 +125,5 @@ export function load(app: Koa, conf: any){
     account.register()
     // app.use(login_redirect)
     app.use(parameter(app))
-    app.use(mix_params)
     app.use(add_render)
 }

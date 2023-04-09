@@ -1,5 +1,5 @@
 import {Entity} from './base';
-import {Identifier, Corporation} from '../../client/src/common/entity'
+import {Identifier, Owner, Corporation} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
 
@@ -16,6 +16,8 @@ export class Controller extends CorporationDB {
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
+    get asObject(): any { return {...this} }
+    get asOwner(): Owner { return {_id: this._id, name: this.name, type: this.type} }
 
     async save() {
         const data = this as CorporationDB

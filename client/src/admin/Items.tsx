@@ -102,8 +102,7 @@ class List extends UList<ListProps, ListState> {
         const {list} = this.state
         const fields = ['kind', 'owner', 'location', 'data']
         const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
-          onReload={()=>this.fetch()} onDelete={item=>this.deleteItem(item)}
-          item={l} fields={fields} user={this.props.user} />)
+          onDelete={item=>this.deleteItem(item)} item={l} fields={fields} user={this.props.user} />)
         return [
           this.resources(),
           <Delimeter key='res_delimeter' />,

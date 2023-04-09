@@ -9,8 +9,7 @@ import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
 import {PatentSelectTrigger} from './popovers'
 import {IDField} from './components'
-import {ApiError} from '../common/errors'
-import * as util from '../common/util'
+import {ApiError, FormError} from '../common/errors'
 import L from '../common/locale'
 
 const column_layout = (fields = [])=>{
@@ -53,9 +52,10 @@ type ItemProps = {
     item: Item
     corp?: Corporation 
     layout?: number
-    onReload: ()=>void
     onDelete?: (item: Item)=>void
-    onPay?: (item: Item)=>void
+    onPay?: (item: Item, patent: Patent)=>void
+    onSell?: (item: Item)=>void
+    onDelist?: (item: Item)=>void
 } & ItemRowProps
 
 type ItemState = {
@@ -65,60 +65,29 @@ type ItemState = {
 class ItemActions extends React.Component<ItemProps, ItemState> {
     constructor(props){
         super(props);
-        ['sell', 'delist', 'pay'].forEach(cmd=>
-            this[`do_${cmd}`] = this[`do_${cmd}`].bind(this))
     }
     get is_admin(){ return this.props.user.admin }
     get is_owner(){
         const {user, item} = this.props
         return user && item && user._id == item.owner?._id
     }
-    async do_pay(patent: Patent){
-        const {item, corp} = this.props
-        if (!this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
-            return
-        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/pay/${patent._id}`,
-            {method: 'PUT'})
-        if (res.err)
-            return this.setState({err: res.err})
-        this.props.onReload()
-    }
-    async do_delist(){
-        const {item, corp} = this.props
-        if (!this.is_admin && !(this.is_owner && item.market?.type==MarketType.Sale))
-            return
-        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/delist`,
-            {method: 'PUT'})
-        if (res.err)
-            return this.setState({err: res.err})
-        this.props.onReload()
-    }
-    async do_sell(){
-        const {item, corp} = this.props
-        if (!this.is_admin && !(this.is_owner && item.market?.type==MarketType.None))
-            return
-        const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/sell`,
-            {method: 'PUT'})
-        if (res.err)
-            return this.setState({err: res.err})
-        this.props.onReload()
-    }
     btn_pay(){
-        const {item, corp} = this.props
-        if (!this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
+        const {item, corp, onPay} = this.props
+        if (!onPay || !this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
             return null
-        return <PatentSelectTrigger item={item} corp={corp} onClick={this.do_pay} desc={L('act_pay')} />
+        return <PatentSelectTrigger item={item} corp={corp} desc={L('act_pay')}
+          onClick={patent=>onPay(item, patent)} />
     }
     btn_sell(){
-        const {item} = this.props
-        if (!this.is_admin && !(this.is_owner && item.market?.type!=MarketType.Protected))
+        const {item, onSell, onDelist} = this.props
+        if (!onSell || !this.is_admin && !(this.is_owner && item.market?.type!=MarketType.Protected))
             return null
         if (item.market?.type!=MarketType.Sale)
-            return <RB.Button onClick={this.do_sell}>{L('act_sell')}</RB.Button>
+            return <RB.Button onClick={()=>onSell(item)}>{L('act_sell')}</RB.Button>
         return [
             <span>{L('market_code')}</span>,
             <span>{item.market?.code}</span>,
-            <RB.Button onClick={this.do_delist}>{L('act_delist')}</RB.Button>
+            <RB.Button onClick={()=>onDelist(item)}>{L('act_delist')}</RB.Button>
         ]
     }
     btn_delete(){
@@ -156,7 +125,7 @@ function ResourceCostCol(props: ItemProps){
         return <RB.Col sm={props.layout}>-</RB.Col>
     const res = resourceCost.map(v=>
       <div key={`res_cost_${item._id}_${v.kind}`}>
-        {L(`res_kind_${v.kind}`)+` [${v.value}]`}
+        {L(`res_kind_${v.kind}`)+` [${v.provided|0}/${v.value}]`}
       </div>)
     return <RB.Col sm={layout}>
       {res}
@@ -174,7 +143,7 @@ export function ItemRow(props: ItemProps){
         L(`patent_kind_${pt.kind}`)+'/'+L(`patent_weigth_${pt.weight}`) :
         L(`res_kind_${res.kind}`)
     const owner = item.type==ItemType.Patent ?
-        pt.owners.map(o=><div key={'d_'+o._id}>{o.name}</div>) :
+        pt.owners.map(o=><div key={'d_'+o._id}>{`${o.name} (${L('patent_status_'+o.status)})`}</div>) :
         item.owner?.name||'-'
     return <RB.Row className={props.className}>
       <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
@@ -184,7 +153,7 @@ export function ItemRow(props: ItemProps){
       <RB.Col sm={lyt.owner}>{owner}</RB.Col>
       <LocationCol {...props} layout={lyt.location} />
       {has('resourceCost') && <ResourceCostCol {...props} layout={lyt.value} />}
-      {has('value') && <RB.Col sm={lyt.value}>{res.value || 1}</RB.Col>}
+      {has('value') && <RB.Col sm={lyt.value}>{res.value|0}</RB.Col>}
       <RB.Col sm={lyt.price}>{item.price}</RB.Col>
       <RB.Col sm={lyt.data}>{res.data}</RB.Col>
       <ItemActions {...props} layout={lyt.actions} />
@@ -212,14 +181,25 @@ type ItemRowNewState = {
     target?: Location
     resourceCost?: {kind: ResourceType, value: number}[]
     boosts?: {kind: string, value: number}[]
-    owners?: Owner[]    
+    owners?: Owner[]
+    err?: ApiError
 }
 export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
     constructor(props){
         super(props)
         this.state = {name: ''}
     }
+    stateChange(obj: any){
+        this.setState(Object.assign({err: null}, obj)) }
     create() {
+        const errors = this.errors
+        if (errors.length){
+            return this.setState({err: new FormError(errors.reduce((p, c)=>{
+                p[c] = 'field_error_noempty'
+                return p
+            }, {}))})
+        }
+        this.setState({err: null})
         const item = new (Item.class(this.state.type))()
         for (let k of item.keys)
             item[k] = this.state[k]
@@ -232,12 +212,29 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         let cls = new (Item.class(this.state.type))()
         return cls.keys.includes(name)
     }
+    get errors(){
+        const item = new (Item.class(this.state.type))()
+        return item.keys.filter(k=>!['_id', 'market'].includes(k) &&
+            !this.state[k] && isNaN(this.state[k]))
+    }
+    get ownerExclude(){
+        const {type} = this.state
+        switch(type){
+            case ItemType.Resource: return [InstitutionType.User]
+            case ItemType.Coordinates: return [InstitutionType.User]
+            case ItemType.Module: return [InstitutionType.User]
+            case ItemType.Patent: return [InstitutionType.User, InstitutionType.Ship,
+                InstitutionType.Research, InstitutionType.Organization]
+            case ItemType.Artifact: return []
+        }
+        return []
+    }
     // resource
     fields_resource(){
         const row_size = this.row_size
         const {kind, value} = this.state
-        const kindChange = kind=>this.setState({kind})
-        const valChange = value=>this.setState({value})
+        const kindChange = kind=>this.stateChange({kind})
+        const valChange = value=>this.stateChange({value})
         return [<RB.Col sm={row_size} key='resource_kind_select'>
           <ResourceSelect value={kind} onChange={kindChange} />
         </RB.Col>,
@@ -248,7 +245,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     // coordinates
     fields_coordinates(){
         const {target} = this.state
-        const targetChange = target=>this.setState({target})
+        const targetChange = target=>this.stateChange({target})
         return [<RB.Col sm={4} key='coord_target_select'>
           <LocationSelect onChange={targetChange} value={target} optName='item_desc_target' />
         </RB.Col>]
@@ -257,8 +254,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_module(){
         const row_size = this.row_size
         const {mass, energy} = this.state
-        const massChange = mas=>this.setState({mass})
-        const energyChange = energy=>this.setState({energy})
+        const massChange = mas=>this.stateChange({mass})
+        const energyChange = energy=>this.stateChange({energy})
         return [<RB.Col sm={row_size} key='module_mass_input'>
           <NumberInput placeholder={L('item_desc_mass')} value={mass} onChange={massChange} />
         </RB.Col>, <RB.Col sm={row_size} key='module_energy_input'>
@@ -269,8 +266,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_patent(){
         const row_size = this.row_size
         const {kind, weight} = this.state
-        const kindChange = kind=>this.setState({kind})
-        const weightChange = weight=>this.setState({weight})
+        const kindChange = kind=>this.stateChange({kind})
+        const weightChange = weight=>this.stateChange({weight})
         return [<RB.Col sm={row_size} key='patent_type_select'>
           <PatentTypeSelect value={kind} onChange={kindChange} />
         </RB.Col>,
@@ -280,11 +277,12 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     }
     rows_patent(){
         const {owners, resourceCost} = this.state
-        const ownersChange = owners=>this.setState({owners})
-        const resChange = resourceCost=>this.setState({resourceCost})
+        const ownersChange = owners=>this.stateChange({owners})
+        const resChange = resourceCost=>this.stateChange({resourceCost})
         return [
-          <MultiOwnerSelect value={owners} onChange={ownersChange}
-            className='menu-input-row' key='multi_owner_select' />,
+          <MultiOwnerSelect value={owners} exclude={this.ownerExclude}
+            className='menu-input-row' key='multi_owner_select'
+            onChange={ownersChange} />,
           <MultiResourceSelect value={resourceCost} onChange={resChange}
             className='menu-input-row' key='multi_resource_select' />
         ]
@@ -293,7 +291,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_artifact(){
         const row_size = this.row_size
         const {kind} = this.state
-        const kindChange = kind=>this.setState({kind})
+        const kindChange = kind=>this.stateChange({kind})
         return [<RB.Col sm={row_size} key='artifact_kind_select'>
           <ArtifactTypeSelect value={kind} onChange={kindChange} />
         </RB.Col>]
@@ -302,8 +300,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const {type, price} = this.state
         const row_size = this.row_size 
         const top_fields = (this[`fields_${TypeString(type)}`] || (()=>[])).call(this)
-        const typeChange = type=>this.setState({type})
-        const priceChange = price=>this.setState({price})
+        const typeChange = type=>this.stateChange({type})
+        const priceChange = price=>this.stateChange({price})
         return <RB.Row className='menu-input-row'>
           <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
           <RB.Col sm={row_size}>
@@ -314,17 +312,18 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             <NumberInput placeholder={L('item_desc_price')} value={price} onChange={priceChange} />
           </RB.Col>
           <RB.Col sm={row_size}>
-            <RB.Button onClick={()=>this.create()}>{L('act_create')}</RB.Button>
+            <RB.Button disabled={this.errors.length} onClick={()=>this.create()}>
+              {L('act_create')}</RB.Button>
           </RB.Col>
         </RB.Row>
     }
     fields_bottom(){
         const {type, name, data, owner, location} = this.state
         const btm_fields = (this[`fields_${TypeString(type)}_b`] || (()=>[])).call(this)
-        const nameChange = ({target: {value}})=>this.setState({name: value})
-        const dataChange = ({target: {value}})=>this.setState({data: value})
-        const ownerChange = owner=>this.setState({owner})
-        const locChange = location=>this.setState({location})
+        const nameChange = ({target: {value}})=>this.stateChange({name: value})
+        const dataChange = ({target: {value}})=>this.stateChange({data: value})
+        const ownerChange = owner=>this.stateChange({owner})
+        const locChange = location=>this.stateChange({location})
         return <RB.Row className='menu-input-row'>
           <RB.Col sm={2}>
             <RB.FormControl as='textarea' rows={3} placeholder={L('item_desc_data')}
@@ -335,7 +334,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
               value={name} onChange={nameChange} />
           </RB.Col>}
           {this.hasField('owner') && <RB.Col sm={4}>
-            <OwnerSelect value={owner} onChange={ownerChange} />
+            <OwnerSelect value={owner} onChange={ownerChange} exclude={this.ownerExclude} />
           </RB.Col>}
           {this.hasField('location') && <RB.Col sm={4}>
             <LocationSelect onChange={locChange} value={location} />

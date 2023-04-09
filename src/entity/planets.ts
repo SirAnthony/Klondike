@@ -16,6 +16,7 @@ export class Controller extends PlanetDB {
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }
+    get asObject(): any { return {...this} }
     location(pos: Pos): Location {
         return {_id: this._id, name: this.name, pos, system: this.system} }
 
