@@ -4,6 +4,7 @@ import {CorpController, ShipController, UserController} from '../src/entity/inde
 export class UserFixture extends User {
     constructor(data){
         super()
+        this.type = InstitutionType.User
         for (let key in data)
             this[key] = data[key]
     }

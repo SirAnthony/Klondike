@@ -8,7 +8,6 @@ export class CorpFixture extends Corporation {
         super()
         for (let key in data)
             this[key] = data[key]
-        this.points = []
         this.credit = 25000
     }
 }
