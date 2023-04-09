@@ -1,4 +1,4 @@
-import {Corporation, Ship, ShipClass, ItemType} from '../client/src/common/entity'
+import {Corporation, Ship, ShipClass, InstitutionType} from '../client/src/common/entity'
 import {ShipController, CorpController} from '../src/entity/index'
 import {CorpAlias, Fixtures as CorpFixtures} from './corps'
 
@@ -14,85 +14,85 @@ class ShipFixture extends Ship {
 }
 
 const ships: ShipFixture[] = [new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Солнечная виверна',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Красная королева',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'нет 3',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Милость богини Кали',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Мустанг',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'нет 6',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Бойкот',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'нет 8',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Sanctuary',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Honeybadger',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Черная Птица',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'нет 12',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'Корабль 13',
     port: '',
     captain: {_id: '', name: ''},
     owner: {_id: '', name: CorpAlias.AP},
 }), new ShipFixture({
-    type: ItemType.Ship,
+    type: InstitutionType.Ship,
     name: 'ZX326 "Валера"',
     port: '',
     captain: {_id: '', name: ''},

@@ -1,8 +1,8 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {ItemType, ResourceType, PatentType, PatentWeight, ArtifactType} from '../common/entity'
-import {Patent, Corporation} from '../common/entity'
-import {ID, Location, Item, Resource} from '../common/entity'
+import {Patent, Corporation, InstitutionType} from '../common/entity'
+import {ID, Owner, Location, Item, Resource} from '../common/entity'
 import {Select as USelect, TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
@@ -21,6 +21,7 @@ export const TypeSelect = TypedSelect(ItemType, 'item_type', 'item_desc_type')
 export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_desc_kind')
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
+export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
 
 export function PatentSelect(props: {value?: Patent, corp: Corporation,
     item: Item, onChange: (p: Patent)=>void}){
@@ -56,15 +57,34 @@ export function LocationSelect(props: {value?: Location, optName?: string, onCha
     </RB.Container>
 }
 
-export function OwnerSelect(props: {value?: ID, filter?: (val: ID)=>Boolean,
-    onChange: (owner: ID)=>void}){
-    const [owner, setOwner] = React.useState(props.value)
-    const ownerChange = owner=>{ setOwner(owner); props.onChange(owner) }
-    return <CSelect value={owner} filter={props.filter} onChange={ownerChange} />
+const IDFromOwner = (owner: Owner) : ID|null => {
+    return owner ? {_id: owner._id, name: owner.name} : null
 }
 
-export function MultiOwnerSelect(props: {value?: ID[],
-    className?: string, onChange: (owners: ID[])=>void}){
+export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolean,
+    onChange: (owner: Owner)=>void}){
+    const [owner, setOwner] = React.useState(props.value)
+    const [instType, setInstType] = React.useState(props.value?.type)
+    const [id, setId] = React.useState(IDFromOwner(props.value))
+    const ownerChange = (type: InstitutionType, id: ID)=>{
+      setInstType(type)
+      setId(id)
+      setOwner(Object.assign({type: instType}, owner));
+      props.onChange(owner)
+    }
+    return <RB.Container><RB.Row>
+      <RB.Col>
+        <InstitutionTypeSelect value={instType} onChange={type=>ownerChange(type, id)} />
+      </RB.Col>
+      <RB.Col>
+        <CSelect value={id} type={instType} filter={props.filter}
+          onChange={id=>ownerChange(instType, id)} disabled={isNaN(instType)} />
+      </RB.Col>
+    </RB.Row></RB.Container>
+}
+
+export function MultiOwnerSelect(props: {value?: Owner[],
+    className?: string, onChange: (owners: Owner[])=>void}){
     const [owner, setOwner] = React.useState(null)
     const addOwner = ()=>owner && props.onChange(_.uniqBy([].concat(
         owner, props.value).filter(Boolean), f=>f._id))

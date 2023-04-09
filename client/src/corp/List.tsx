@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, User, Item, Patent, ItemType} from '../common/entity'
+import {Corporation, User, Item, Patent, InstitutionType} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
@@ -32,15 +32,19 @@ export default class List extends UList<CorpListProps, CorpListState> {
     }
 }
 
-
-export class Select extends USelect<{}, {}> {
+export class Select extends USelect<{type: InstitutionType}, {}> {
     L = LR
     get optName(){ return 'item_desc_owner' }
     get fetchUrl(){ return '/api/corp/list' }
+    get fetchOpt(){ return {params: {type: this.props.type}} }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
-        return list.filter(this.props.filter||Boolean)
+        return list?.filter(this.props.filter||Boolean)
             .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
+    }
+    componentDidUpdate(prevProps){
+        if (prevProps.type!=this.props.type)
+            this.fetch()
     }
 }
 

@@ -1,42 +1,44 @@
-import {Corporation, CorporationType} from '../client/src/common/entity'
+import {Corporation, InstitutionType} from '../client/src/common/entity'
 import {CorpController} from '../src/entity'
 
 export enum CorpAlias {AP = 'AP', R = 'R', WY = 'WY', USC = 'USC', EF = 'EF'}
 export class CorpFixture extends Corporation {
     alias: CorpAlias
+    constructor(data){
+        super()
+        for (let key in data)
+            this[key] = data[key]
+        this.points = []
+        this.credit = 25000
+    }
 }
 
-const corps: CorpFixture[] = [{
+const corps: CorpFixture[] = [new CorpFixture({
     name: 'Amalgam Pharmaceuticals',
-    credit: 25000,
     alias: CorpAlias.AP,
-    type: CorporationType.Normal,
+    type: InstitutionType.Corporation,
     points: [],
-}, {
+}), new CorpFixture({
     name: 'Rakuza',
-    credit: 25000,
     alias: CorpAlias.R,
-    type: CorporationType.Normal,
+    type: InstitutionType.Corporation,
     points: [],
-}, {
+}), new CorpFixture({
     name: 'Wayne-Yuanti',
-    credit: 25000,
     alias: CorpAlias.WY,
-    type: CorporationType.Normal,
+    type: InstitutionType.Corporation,
     points: [],
-}, {
+}), new CorpFixture({
     name: 'Union Spacecraft Corporation, USC',
-    credit: 25000,
     alias: CorpAlias.USC,
-    type: CorporationType.Normal,
+    type: InstitutionType.Corporation,
     points: [],
-}, {
+}), new CorpFixture({
     name: 'Земная федерация',
-    credit: 25000,
     alias: CorpAlias.EF,
-    type: CorporationType.Research,
+    type: InstitutionType.Research,
     points: [],
-},]
+}),]
 
 class CorpControllerFixture extends CorpController {
     constructor(data: Corporation) {

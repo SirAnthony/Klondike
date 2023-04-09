@@ -19,6 +19,7 @@ import {env} from 'process'
 export const NJ = nunjucks.configure('templates', {})
 
 export interface RenderContext extends KoaRouter.IRouterContext {
+    aparams: any
     render(view: string, r_ctx: any)
     json(r_ctx: any),
     flash(key: string, value: any)
@@ -50,6 +51,11 @@ const client_files = (()=>{
     console.log(`Reading ${index}, using client files ${JSON.stringify(ret)}`)
     return ret
 })()
+
+function mix_params(ctx: RenderContext, next: Function){
+    ctx.aparams = Object.assign({}, ctx.query, ctx.request.body, ctx.params)
+    return next()
+}
 
 async function render(view: string, context:any = {}){
     if (!view)
@@ -122,5 +128,6 @@ export function load(app: Koa, conf: any){
     account.register()
     // app.use(login_redirect)
     app.use(parameter(app))
+    app.use(mix_params)
     app.use(add_render)
 }

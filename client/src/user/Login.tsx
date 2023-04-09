@@ -28,7 +28,7 @@ export function UserLoginNav(props: {value: Boolean, onClick: (val: Boolean)=>vo
           </a> }
         </RB.Col>
         <RB.Col>
-          <RB.Nav.Item className='nowrap' onClick={click}>{nav_text}</RB.Nav.Item>
+          <RB.Nav.Link className='nowrap' onClick={click}>{nav_text}</RB.Nav.Link>
         </RB.Col>
       </RB.Row>
     </RB.Container>
@@ -85,7 +85,7 @@ export class UserLogin extends React.Component<UserLoginProps, UserLoginState> {
     }
     render(){
         return <RB.Container>
-          <RB.Row>
+          <RB.Row className='menu-input-row'>
             <UserLoginEmail onSubmit={this.sendLogin} />
           </RB.Row>
           <RB.Row>{this.errorRow()}</RB.Row>

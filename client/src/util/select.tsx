@@ -13,6 +13,7 @@ type SelectState = {
 type SelectProps = {
     value: any
     optName?: string
+    disabled?: boolean
     filter?: (item: any)=>Boolean
     onChange: (value: any)=>void
 }
@@ -60,7 +61,7 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
         if (value===null||value===undefined)
             value = this.defaultValue
         const body = this.body()
-        return <RB.FormSelect value={value} onChange={this.onChange}>
+        return <RB.FormSelect value={value} onChange={this.onChange} disabled={this.props.disabled}>
           {body}
         </RB.FormSelect>
     }

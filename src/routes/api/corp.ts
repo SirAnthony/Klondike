@@ -1,9 +1,10 @@
 import {BaseRouter, CheckRole, CheckIDParam} from '../base'
 import {UserController, CorpController} from '../../entity'
-import {ResourceController, OrderController, ItemController} from '../../entity'
-import {Item, ItemType, UserType, Resource, Order} from '../../../client/src/common/entity'
+import {OrderController, ItemController} from '../../entity'
+import {institutionController} from '../../entity'
+import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
-import {CorporationType, CorporationPointsType} from '../../../client/src/common/entity'
+import {InstitutionType, InstitutionPointsType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
@@ -68,7 +69,7 @@ export class CorpApiRouter extends BaseRouter {
         const {id} = ctx.params
         const corp = await CorpController.get(id)
         const filter: any = {type: ItemType.Patent}
-        if (corp.type==CorporationType.Research)
+        if (corp.type==InstitutionType.Research)
             filter['owners.status'] = {$in: [PatentStatus.Created, undefined]}
         else {
             Object.assign(filter, {'owners._id': corp._id,
@@ -113,9 +114,7 @@ export class CorpApiRouter extends BaseRouter {
     @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async post_patent_forward(ctx: RenderContext){
-        const {id} = ctx.params
-        const params: any = ctx.request.body
-        const {requester} = params
+        const {id, requester} = ctx.aparams
         if (!id || !requester)
             throw 'Required fields missing'
         const item = await ItemController.get(id)
@@ -139,8 +138,8 @@ export class CorpApiRouter extends BaseRouter {
             let pts = owner.points
             pts.push({time: Time.basicTime,
                 type: patent.fullOwnership ?
-                    CorporationPointsType.PatentFull :
-                    CorporationPointsType.PatentPart,
+                    InstitutionPointsType.PatentFull :
+                    InstitutionPointsType.PatentPart,
                 value: points})
             await owner.save()
         }
@@ -148,7 +147,11 @@ export class CorpApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Master)
     async get_list(ctx: RenderContext){
-        const list = await CorpController.all()
+        const {type} = ctx.aparams
+        const controller = institutionController(+type)
+        if (!controller)
+            return {}
+        const list = await controller.all({type: +type})
         return {list}
     }
 }

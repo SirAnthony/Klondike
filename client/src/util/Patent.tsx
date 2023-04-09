@@ -1,13 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ID, Patent, Corporation, User, PatentStatus} from '../common/entity'
-import {CorporationType} from '../common/entity'
-import * as util from '../common/util'
+import {Patent, Corporation, InstitutionType} from '../common/entity'
+import {IDField} from '../util/components'
 import L from '../common/locale'
 import * as _ from 'lodash'
-import {ClientError} from '../common/errors'
-import {ErrorMessage} from './errors'
-import {IDField} from '../util/components'
 
 type RowDescProps = {
     className?: string
@@ -65,7 +61,7 @@ export function PatentRow(props: RowProps){
 
 export function PatentActions(props: RowProps){
     const {patent, corp, onAction} = props
-    if (corp.type==CorporationType.Research)
+    if (corp.type==InstitutionType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>
     const is_served = patent.served(corp)
     return <RB.Container>

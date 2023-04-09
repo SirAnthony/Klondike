@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ID, Order, ResourceType, User} from '../common/entity'
+import {Owner, Order, ResourceType, User} from '../common/entity'
 import {ResourceSelect, OwnerSelect, NumberInput} from './inputs'
 import * as util from '../common/util'
 import L from '../common/locale'
@@ -74,7 +74,7 @@ type ResourceRow = {
 }
 type ResourceRowID = ResourceRow & {_id: number}
 type RowNewState = {
-    assignee?: ID
+    assignee?: Owner
     cycle: number
     rows: ResourceRowID[]
     err?: ClientError

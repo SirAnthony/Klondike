@@ -1,9 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, CorporationType, Item, ItemType, MarketType, User} from '../common/entity'
-import {ID, Location} from '../common/entity'
+import {Corporation, Item, ItemType, MarketType, User} from '../common/entity'
+import {Owner, Location, InstitutionType} from '../common/entity'
 import {Resource, ResourceType, Patent} from '../common/entity'
-import {ResourceSelect, TypeSelect, PatentTypeSelect, PatentWeightSelect, ArtifactTypeSelect} from './inputs'
+import {ResourceSelect, TypeSelect, PatentTypeSelect} from './inputs'
+import {PatentWeightSelect, ArtifactTypeSelect} from './inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
 import {PatentSelectTrigger} from './popovers'
@@ -31,14 +32,6 @@ type ItemRowProps = {
     fields?: string[]
 }
 
-type ItemProps = {
-    item: Item
-    corp?: Corporation 
-    layout?: number
-    onReload: ()=>void
-    onDelete?: (item: Item)=>void
-} & ItemRowProps
-
 export function ItemRowDesc(props: ItemRowProps){
     const has = n=>props.fields?.includes(n)
     const lyt = column_layout(props.fields)
@@ -55,6 +48,15 @@ export function ItemRowDesc(props: ItemRowProps){
       <RB.Col sm={lyt.actions}>{L('item_desc_actions')}</RB.Col>
     </RB.Row>
 }
+
+type ItemProps = {
+    item: Item
+    corp?: Corporation 
+    layout?: number
+    onReload: ()=>void
+    onDelete?: (item: Item)=>void
+    onPay?: (item: Item)=>void
+} & ItemRowProps
 
 type ItemState = {
     err?: ApiError
@@ -73,7 +75,7 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
     }
     async do_pay(patent: Patent){
         const {item, corp} = this.props
-        if (!this.is_admin && !(this.is_owner && corp.type==CorporationType.Research))
+        if (!this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
             return
         const res = await util.wget(`/api/corp/${corp._id}/item/${item._id}/pay/${patent._id}`,
             {method: 'PUT'})
@@ -103,7 +105,7 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
     }
     btn_pay(){
         const {item, corp} = this.props
-        if (!this.is_admin && !(this.is_owner && corp.type==CorporationType.Research))
+        if (!this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
             return null
         return <PatentSelectTrigger item={item} corp={corp} onClick={this.do_pay} desc={L('act_pay')} />
     }
@@ -190,6 +192,7 @@ export function ItemRow(props: ItemProps){
 }
 
 
+const TypeString = (t: ItemType = 0)=>ItemType[t].toLowerCase()
 
 type ItemRowNewProps = {
     onCreate: (item: Item)=>void
@@ -197,7 +200,7 @@ type ItemRowNewProps = {
 type ItemRowNewState = {
     type?: ItemType
     name: string
-    owner?: ID
+    owner?: Owner
     location?: Location
     price?: number
     kind?: number
@@ -209,7 +212,7 @@ type ItemRowNewState = {
     target?: Location
     resourceCost?: {kind: ResourceType, value: number}[]
     boosts?: {kind: string, value: number}[]
-    owners?: ID[]    
+    owners?: Owner[]    
 }
 export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
     constructor(props){
@@ -230,7 +233,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         return cls.keys.includes(name)
     }
     // resource
-    fields_0(){
+    fields_resource(){
         const row_size = this.row_size
         const {kind, value} = this.state
         const kindChange = kind=>this.setState({kind})
@@ -243,19 +246,15 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         </RB.Col>]
     }
     // coordinates
-    fields_1(){
+    fields_coordinates(){
         const {target} = this.state
         const targetChange = target=>this.setState({target})
         return [<RB.Col sm={4} key='coord_target_select'>
           <LocationSelect onChange={targetChange} value={target} optName='item_desc_target' />
         </RB.Col>]
     }
-    // ship
-    fields_2(){
-        throw new Error('cannot create ships')
-    }
     // module
-    fields_3(){
+    fields_module(){
         const row_size = this.row_size
         const {mass, energy} = this.state
         const massChange = mas=>this.setState({mass})
@@ -267,7 +266,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         </RB.Col>]
     }
     // patent
-    fields_4(){
+    fields_patent(){
         const row_size = this.row_size
         const {kind, weight} = this.state
         const kindChange = kind=>this.setState({kind})
@@ -279,7 +278,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
           <PatentWeightSelect value={weight} onChange={weightChange} />
         </RB.Col>]
     }
-    rows_4(){
+    rows_patent(){
         const {owners, resourceCost} = this.state
         const ownersChange = owners=>this.setState({owners})
         const resChange = resourceCost=>this.setState({resourceCost})
@@ -291,7 +290,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         ]
     }
     // artifact
-    fields_5(){
+    fields_artifact(){
         const row_size = this.row_size
         const {kind} = this.state
         const kindChange = kind=>this.setState({kind})
@@ -301,14 +300,14 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     }
     fields_top(){
         const {type, price} = this.state
-        const row_size = this.row_size, fkey = `fields_${type}`
-        const top_fields = this[fkey] ? this[fkey]() : []
+        const row_size = this.row_size 
+        const top_fields = (this[`fields_${TypeString(type)}`] || (()=>[])).call(this)
         const typeChange = type=>this.setState({type})
         const priceChange = price=>this.setState({price})
         return <RB.Row className='menu-input-row'>
           <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
           <RB.Col sm={row_size}>
-            <TypeSelect value={type} onChange={typeChange} exclude={[ItemType.Ship]}/>
+            <TypeSelect value={type} onChange={typeChange}/>
           </RB.Col>
           {top_fields}
          <RB.Col sm={row_size}>
@@ -321,13 +320,13 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     }
     fields_bottom(){
         const {type, name, data, owner, location} = this.state
-        const fkey = `fields_${type}_b`, btm_fields = this[fkey] ? this[fkey]() : []
+        const btm_fields = (this[`fields_${TypeString(type)}_b`] || (()=>[])).call(this)
         const nameChange = ({target: {value}})=>this.setState({name: value})
         const dataChange = ({target: {value}})=>this.setState({data: value})
         const ownerChange = owner=>this.setState({owner})
         const locChange = location=>this.setState({location})
         return <RB.Row className='menu-input-row'>
-          <RB.Col sm={4}>
+          <RB.Col sm={2}>
             <RB.FormControl as='textarea' rows={3} placeholder={L('item_desc_data')}
               value={data} onChange={dataChange} />
           </RB.Col>
@@ -335,7 +334,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             <RB.FormControl placeholder={L('item_desc_name')}
               value={name} onChange={nameChange} />
           </RB.Col>}
-          {this.hasField('owner') && <RB.Col sm={2}>
+          {this.hasField('owner') && <RB.Col sm={4}>
             <OwnerSelect value={owner} onChange={ownerChange} />
           </RB.Col>}
           {this.hasField('location') && <RB.Col sm={4}>
@@ -345,9 +344,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         </RB.Row>
     }
     render(){
-        const row_size = this.row_size
         const {type} = this.state
-        const fkey = `rows_${type}`, rows = this[fkey] ? this[fkey]() : []
+        const rows = (this[`rows_${TypeString(type)}`] || (()=>[])).call(this)
         return <RB.InputGroup>
           {this.fields_top()}
           {this.fields_bottom()}

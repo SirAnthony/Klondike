@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation, CorporationType, Order, User} from '../common/entity'
+import {Corporation, InstitutionType, Order, User} from '../common/entity'
 import {Item, Patent} from '../common/entity'
 import {ItemRow, ItemRowDesc} from '../util/Item'
 import {PatentLabItem, PatentRow, PatentRowDesc} from '../util/Patent'
@@ -170,7 +170,7 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
             if (await this[`action_${name}`](patent))
                 this.fetch()
         })
-        if (corp.type==CorporationType.Research){
+        if (corp.type==InstitutionType.Research){
             return patents.map(i=><PatentLabItem onAction={onAction}
               key={`item_lab_${i._id}`} patent={i} {...this.props} />)
         }

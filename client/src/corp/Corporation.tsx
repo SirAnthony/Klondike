@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation as ECorp, CorporationType, User, ID} from '../common/entity'
+import {Corporation as ECorp, InstitutionType, User, ID} from '../common/entity'
 import {ControlBar} from '../util/controls'
 import {ItemDetails, PriceDetails, OrderDetails} from './Details'
 import {PatentDetails} from './Details'
@@ -176,7 +176,7 @@ export default class CorpDetails extends F.Fetcher<CorpDetailsProp, CorpDetailsS
         const {corp} = this.state
         if (!corp)
             return <div>{L('not_found')}</div>
-        return corp.type==CorporationType.Research ?
+        return corp.type==InstitutionType.Research ?
             <Laboratory corp={corp} user={this.props.user} /> :
             <Corporation corp={corp} user={this.props.user} />
     }

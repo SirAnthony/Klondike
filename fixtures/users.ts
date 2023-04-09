@@ -1,4 +1,4 @@
-import {User, UserRelationType, UserType} from '../client/src/common/entity'
+import {User, InstitutionType, UserType} from '../client/src/common/entity'
 import {CorpController, ShipController, UserController} from '../src/entity/index'
 
 export class UserFixture extends User {
@@ -6,9 +6,7 @@ export class UserFixture extends User {
         super()
         for (let key in data)
             this[key] = data[key]
-        
     }
-
 }
 
 const users: User[] = [new UserFixture({
@@ -16,61 +14,61 @@ const users: User[] = [new UserFixture({
     alias: 'Master',
     first_name: 'Mas',
     last_name: 'ter',
-    type: UserType.Master,
+    kind: UserType.Master,
 }), new UserFixture({
     name: 'Captain',
     alias: 'Cpt',
     first_name: 'Captain',
     last_name: 'Brave',
-    type: UserType.Captain,
-    relation: {type: UserRelationType.Ship, entity: 'Солнечная виверна'}
+    kind: UserType.Captain,
+    relation: {type: InstitutionType.Ship, entity: 'Солнечная виверна'}
 }), new UserFixture({
     name: 'Corporant',
     alias: 'Corp',
     first_name: 'Rat',
     last_name: 'Fisher',
-    type: UserType.Corporant,
-    relation: {type: UserRelationType.Corporation, entity: 'Amalgam Pharmaceuticals'}
+    kind: UserType.Corporant,
+    relation: {type: InstitutionType.Corporation, entity: 'Amalgam Pharmaceuticals'}
 }), new UserFixture({
     name: 'Rakuzant',
     alias: 'Raku',
     first_name: 'Rat',
     last_name: 'Fisher',
-    type: UserType.Corporant,
-    relation: {type: UserRelationType.Corporation, entity: 'Rakuza'}
+    kind: UserType.Corporant,
+    relation: {type: InstitutionType.Corporation, entity: 'Rakuza'}
 }), new UserFixture({
     name: 'Guard',
     alias: 'Steely',
     first_name: 'Iron',
     last_name: 'Brow',
-    type: UserType.Guard,
+    kind: UserType.Guard,
 }), new UserFixture({
     name: 'Mechanic',
     alias: 'Mech',
     first_name: 'Peter',
     last_name: 'Moons',
-    type: UserType.Mechanic,
-    relation: {type: UserRelationType.Ship, entity: 'Солнечная виверна'}
+    kind: UserType.Mechanic,
+    relation: {type: InstitutionType.Ship, entity: 'Солнечная виверна'}
 }), new UserFixture({
     name: 'Navigator',
     alias: 'Baldy',
     first_name: 'Blue',
     last_name: 'Eyes',
-    type: UserType.Navigator,
-    relation: {type: UserRelationType.Ship, entity: 'Солнечная виверна'}
+    kind: UserType.Navigator,
+    relation: {type: InstitutionType.Ship, entity: 'Солнечная виверна'}
 }), new UserFixture({
     name: 'Scientist',
     alias: 'Bighead',
     first_name: 'Gordon',
     last_name: 'Bondman',
-    type: UserType.Scientist,
-    relation: {type: UserRelationType.Corporation, entity: 'Земная федерация'}
+    kind: UserType.Scientist,
+    relation: {type: InstitutionType.Corporation, entity: 'Земная федерация'}
 }), new UserFixture({
     name: 'Nobody',
     alias: 'Nobody',
     first_name: 'John',
     last_name: 'Doe',
-    type: UserType.None,
+    kind: UserType.None,
 })]
 
 class UserControllerFixture extends UserController {
@@ -92,7 +90,7 @@ export default async function load() {
         s.email = s.name.toLowerCase().replace(/[^\w]+/g, '')+'@klondike.fed'
         s.password = await UserController.hash_password(s.email)
         if (s.relation){
-            const controller = s.relation.type==UserRelationType.Corporation ?
+            const controller = s.relation.type==InstitutionType.Corporation ?
                 CorpController : ShipController
             s.relation.entity = (await controller.find({name: s.relation.entity})).identifier
         }

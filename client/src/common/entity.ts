@@ -18,33 +18,7 @@ export class ID implements Identifier {
     name: string
 }
 
-export const Profile = {
-    fields: `email first_name last_name alias
-        phone`.replace(/\s+/g, ' ').split(' '),
-    static: ['email'],
-}
-
-export enum UserType {None, Corporant, Captain, Mechanic, Navigator, Scientist, Guard, Master}
-export enum UserRelationType {None, Corporation, Ship}
-export class User extends ID {
-    alias: string
-    first_name: string
-    last_name: string
-    email: string
-    phone: string
-    credit: number
-    type: UserType
-    relation: {type: UserRelationType, entity: ID}
-    get admin(){ return this.type == UserType.Master }
-    get displayName(){
-        return this.alias || [this.first_name,
-            this.last_name].filter(Boolean).join(' ')
-    }
-    get fullName(){
-        return [this.first_name, this.alias ? `(${this.alias})` : '',
-            this.last_name].filter(Boolean).join(' ')
-    }
-}
+export type Owner = ID & {type: InstitutionType}
 
 export class Order extends ID {
     requests: {
@@ -59,31 +33,18 @@ export class Order extends ID {
     }
     get keys(){ return 'requests cycle assignee'.split(' ') }
     get class(){ return Order }
-
 }
 
-export enum CorporationType {Normal, Research}
-export enum CorporationPointsType {PatentPart, PatentFull}
-export class Corporation extends ID {
-    credit: number
-    type: CorporationType
-    points: {
-        value: number
-        time: number
-        type: CorporationPointsType
-    }[]
-}
-
-export enum ItemType {Resource, Coordinates, Ship, Module, Patent, Artifact}
+export enum ItemType {Resource, Coordinates, Module, Patent, Artifact}
 export const ItemTypePrefix = {
     [ItemType.Resource]: 'R', [ItemType.Coordinates]: 'C',
-    [ItemType.Ship]: 'S', [ItemType.Module]: 'M',
-    [ItemType.Patent]: 'P', [ItemType.Artifact]: 'A'
+    [ItemType.Module]: 'M', [ItemType.Patent]: 'P',
+    [ItemType.Artifact]: 'A'
 }
 export enum MarketType {None, Sale, Protected}
 export class Item extends ID {
     type: ItemType
-    owner: ID | null
+    owner: Owner | null
     location: Location | null
     price: number
     data: string
@@ -101,7 +62,6 @@ export class Item extends ID {
         switch (type){
             case ItemType.Resource: return Resource;
             case ItemType.Coordinates: return Coordinates;
-            case ItemType.Ship: return Ship;
             case ItemType.Module: return Module;
             case ItemType.Patent: return Patent;
             case ItemType.Artifact: return Artifact;
@@ -149,7 +109,7 @@ export class Module extends Item {
 export enum PatentType {Bio, Enginering, Planet}
 export enum PatentWeight {Minimal, Basic, Premium}
 export enum PatentStatus {Created, Ready, Served}
-export type PatentOwner = ID & {status: PatentStatus}
+export type PatentOwner = Owner & {status: PatentStatus}
 export class Patent extends Item {
     type = ItemType.Patent
     kind: PatentType
@@ -163,7 +123,7 @@ export class Patent extends Item {
     get fullOwnership(){ return this.owners.length < 2 }
     get shares(){ return 1/(this.owners.length||1) }
     served(owner: ID){
-        return this.owners.some(o=>o._id==owner._id &&
+        return this.owners.some(o=>(''+o._id)==(''+owner._id) &&
             o.status==PatentStatus.Served)
     }
 }
@@ -176,6 +136,83 @@ export class Artifact extends Item {
         return super.keys.concat('kind'.split(' ')) }
 }
 
+export enum InstitutionType {User, Organization, Research, Corporation, Ship}
+export enum InstitutionPointsType {PatentPart, PatentFull}
+export class Institution extends ID {
+    type: InstitutionType
+    credit: number
+    data: string
+    cost: number
+    points: {
+        value: number
+        time: number
+        type: InstitutionPointsType
+    }[]
+    get keys(){
+        return '_id name type data cost points'.split(' ')
+    }
+    get class(){ return Institution.class(this.type) }
+    static class(type: InstitutionType){
+        if (typeof type==='undefined')
+            return Institution
+        switch (type){
+            case InstitutionType.User: return User;
+            case InstitutionType.Organization: return Organization;
+            case InstitutionType.Corporation: return Corporation;
+            case InstitutionType.Ship: return Ship;
+        }
+        // unreachable
+        throw new Error(`Undefined type ${type}`)
+    }
+}
+
+export const Profile = {
+    fields: `email first_name last_name alias
+        phone`.replace(/\s+/g, ' ').split(' '),
+    static: ['email'],
+}
+
+export enum UserType {None, Corporant, Captain, Mechanic, Navigator, Scientist, Guard, Master}
+export class User extends Institution {
+    type = InstitutionType.User
+    kind: UserType
+    alias: string
+    first_name: string
+    last_name: string
+    email: string
+    phone: string
+    relation: {type: InstitutionType, entity: ID}
+    get admin(){ return this.kind == UserType.Master }
+    get displayName(){
+        return this.alias || [this.first_name,
+            this.last_name].filter(Boolean).join(' ')
+    }
+    get fullName(){
+        return [this.first_name, this.alias ? `(${this.alias})` : '',
+            this.last_name].filter(Boolean).join(' ')
+    }
+    get keys(){
+        return super.keys.concat(`kind alias first_name last_name email
+            phone relation`.replace(/\s+/g, ' ').split(' '))
+    }
+}
+
+export class Organization extends Institution {
+    type = InstitutionType.Organization
+    get keys(){
+        return super.keys.concat(``.replace(/\s+/g, ' ').split(' '))
+    }
+}
+
+
+export class Corporation extends Institution {
+    type = InstitutionType.Corporation
+}
+
+export class ResearchLab extends Institution {
+    type = InstitutionType.Research
+}
+
 export const ShipValues = {
     stats: `integrity mass engine slots speed movement
         attack defence crew`.replace(/\s+/g, ' ').split(' '),
@@ -184,12 +221,15 @@ export const ShipValues = {
     mods: `size energy`.replace(/\s+/g, ' ').split(' ')
 }
 export enum ShipClass {A = 'A', B = 'B', C = 'C', D = 'D', E = 'E'}
-export class Ship extends Item {
-    type = ItemType.Ship
+export class Ship extends Institution {
+    type = InstitutionType.Ship
     kind: ShipClass
+    owner: Owner | null
+    location: Location | null
+    price: number
+    data: string
     port: string
     captain: ID
-    round_cost: number
     integrity: number
     mass: number
     engine: number
@@ -201,12 +241,11 @@ export class Ship extends Item {
     crew: number
     slots: number
     modules: Module[]
-    inventory: Item[]
     img?: string
     get keys(){
-        return super.keys.concat('kind port captain round_cost '+
-            'integrity mass engine speed movement size attack defence '+
-            'crew modules inventory img'.split(' '))
+        return super.keys.concat(`kind location price data port captain
+            integrity mass engine speed movement size attack defence 
+            crew modules img`.replace(/\s+/g, ' ').split(' '))
     }
 }
 

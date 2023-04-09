@@ -43,7 +43,7 @@ export class Controller extends UserDB {
     protected constructor(data, fields?){
         super()
         util.obj_copyto(data, this, fields)
-        this.type = this.type||UserType.None
+        this.kind = this.kind||UserType.None
         return this
     }
     get identifier(): Identifier { return {_id: this._id, name: this.name} }

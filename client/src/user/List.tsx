@@ -11,7 +11,7 @@ function UserRow(params: {user: User}) {
     return <RB.Row key={`user_${user._id}`} className="menu-list-row">
       <RB.Col><RB.NavLink href={`/profile/${user._id}`}>{user.name}</RB.NavLink></RB.Col>
       <RB.Col>{user.fullName}</RB.Col>
-      <RB.Col>{L(`desc_user_type_${user.type}`)}</RB.Col>
+      <RB.Col>{L(`desc_user_type_${user.kind}`)}</RB.Col>
       <RB.Col>{user.phone}</RB.Col>
     </RB.Row>
 }

@@ -38,7 +38,7 @@ export function CheckRole(roles: UserType[] | UserType){
             if (!types.includes(UserType.Master))
                 types.push(UserType.Master)
             const {user}: {user: UserController} = ctx.state
-            if (types.length && !types.includes(user.type))
+            if (types.length && !types.includes(user.kind))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}
@@ -50,9 +50,9 @@ export function CheckIDParam(param: string = 'id'){
         return {...descriptor, value: async function check(ctx: RenderContext){
             if (!ctx.isAuthenticated())
                throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
-            const id = ctx.params[param]
+            const id = ctx.aparams[param]
             const {user}: {user: UserController} = ctx.state
-            if (user.type!=UserType.Master && !(id && id!=user?.relation?.entity?._id))
+            if (user.kind!=UserType.Master && !(id && id!=user?.relation?.entity?._id))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}
