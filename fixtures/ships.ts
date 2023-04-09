@@ -112,7 +112,7 @@ export default async function load() {
         const oname = ship.owner?.name || ''
         let corp = corps[oname] || (corps[oname] = await CorpController.find({
             name: CorpFixtures.find(f=>f.alias==oname)?.name}))
-        ship.owner = {_id: corp._id, name: corp.name}
+        ship.owner = {type: InstitutionType.Corporation, _id: corp._id, name: corp.name}
         const prev = await ShipController.find({name: ship.name})
         if (prev) {
             for (let k in ship)
