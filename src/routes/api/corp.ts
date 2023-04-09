@@ -119,10 +119,12 @@ export class CorpApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async get_list(ctx: RenderContext){
         const {type} = ctx.aparams
-        const controller = institutionController(+type)
+        const controller = type ?
+            institutionController(+type) : CorpController
         if (!controller)
             return {}
-        const list = await controller.all({type: +type})
+        const filter = type ? {type: +type} : null
+        const list = await controller.all(filter)
         return {list}
     }
 }
