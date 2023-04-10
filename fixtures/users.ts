@@ -22,21 +22,21 @@ const users: User[] = [new UserFixture({
     first_name: 'Captain',
     last_name: 'Brave',
     kind: UserType.Captain,
-    relation: {type: InstitutionType.Ship, entity: 'Солнечная виверна'}
+    relation: {type: InstitutionType.Ship, name: 'Солнечная виверна'}
 }), new UserFixture({
     name: 'Corporant',
     alias: 'Corp',
     first_name: 'Rat',
     last_name: 'Fisher',
     kind: UserType.Corporant,
-    relation: {type: InstitutionType.Corporation, entity: 'Amalgam Pharmaceuticals'}
+    relation: {type: InstitutionType.Corporation, name: 'Amalgam Pharmaceuticals'}
 }), new UserFixture({
     name: 'Rakuzant',
     alias: 'Raku',
     first_name: 'Rat',
     last_name: 'Fisher',
     kind: UserType.Corporant,
-    relation: {type: InstitutionType.Corporation, entity: 'Rakuza'}
+    relation: {type: InstitutionType.Corporation, name: 'Rakuza'}
 }), new UserFixture({
     name: 'Guard',
     alias: 'Steely',
@@ -49,21 +49,21 @@ const users: User[] = [new UserFixture({
     first_name: 'Peter',
     last_name: 'Moons',
     kind: UserType.Mechanic,
-    relation: {type: InstitutionType.Ship, entity: 'Солнечная виверна'}
+    relation: {type: InstitutionType.Ship, name: 'Солнечная виверна'}
 }), new UserFixture({
     name: 'Navigator',
     alias: 'Baldy',
     first_name: 'Blue',
     last_name: 'Eyes',
     kind: UserType.Navigator,
-    relation: {type: InstitutionType.Ship, entity: 'Солнечная виверна'}
+    relation: {type: InstitutionType.Ship, name: 'Солнечная виверна'}
 }), new UserFixture({
     name: 'Scientist',
     alias: 'Bighead',
     first_name: 'Gordon',
     last_name: 'Bondman',
     kind: UserType.Scientist,
-    relation: {type: InstitutionType.Corporation, entity: 'Земная федерация'}
+    relation: {type: InstitutionType.Corporation, name: 'Земная федерация'}
 }), new UserFixture({
     name: 'Nobody',
     alias: 'Nobody',
@@ -93,7 +93,7 @@ export default async function load() {
         if (s.relation){
             const controller = s.relation.type==InstitutionType.Corporation ?
                 CorpController : ShipController
-            s.relation.entity = (await controller.find({name: s.relation.entity})).identifier
+            Object.assign(s.relation, (await controller.find({name: s.relation.name})).identifier)
         }
         await s.save()
     }

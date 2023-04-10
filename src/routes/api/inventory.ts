@@ -1,6 +1,6 @@
 import {BaseRouter, CheckRole, CheckIDParam} from '../base'
 import {CorpController, institutionController, LogController} from '../../entity'
-import {ItemController} from '../../entity'
+import {ItemController, UserController} from '../../entity'
 import {UserType, Patent, PatentStatus, InstitutionType, MarketType} from '../../../client/src/common/entity'
 import {Resource, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
@@ -57,6 +57,7 @@ export class InventoryApiRouter extends BaseRouter {
             // Should delete?
             await resource.save()
         }
+        await patent.save()
         // Patent closed
         if (!pt.resourceCost.some(k=>k.provided<k.value)){
             pt.owners.forEach(o=>o.status=PatentStatus.Ready)
@@ -67,7 +68,6 @@ export class InventoryApiRouter extends BaseRouter {
                 action: LogAction.PatentPaid
             })
         }
-        await patent.save()
     }
 
     @CheckIDParam()
@@ -101,13 +101,61 @@ export class InventoryApiRouter extends BaseRouter {
 
     @CheckIDParam()
     async post_item_buy(ctx: RenderContext){
-
+        const {user}: {user: UserController} = ctx.state
+        const {stype, id, itemid, code} = ctx.aparams
+        if (+stype==InstitutionType.User)
+            throw 'Users cannot trade'
+        if (!user.admin && !IDMatch(user.relation?._id, id))
+            throw 'Cannot act on foreign item'
+        const item = await ItemController.get(itemid)
+        if (!item)
+            throw 'Item not found'
+        if (+item.market?.type!=MarketType.Sale)
+            throw 'Wrong market status'
+        if (item.market.code!=code)
+            throw 'Wrong confirmation code'
+        const srcController = institutionController(+stype)
+        if (!srcController)
+            throw 'No source type'
+        const src = await srcController.get(id)
+        if (item.market.to && !IDMatch(item.market.to._id, src._id))
+            throw 'Cannot act on foreign item'
+        const dst = await (institutionController(item.owner.type)).get(item.owner._id)
+        dst.credit = dst.credit|0 + item.market.price
+        item.owner = src.asOwner
+        item.market = null
+        await dst.save()
+        await item.save()
+        await LogController.log({
+            name: 'item_buy', info: 'post_item_buy',
+            owner: src.asOwner, item,
+            action: LogAction.ItemPurchase
+        })
     }
 
     @CheckIDParam()
     @CheckRole([UserType.Captain, UserType.Corporant, UserType.Scientist])
     async put_item_delist(ctx: RenderContext){
         const {stype, id, itemid} = ctx.aparams
-        
+        if (+stype==InstitutionType.User)
+            throw 'Users cannot trade'
+        const item = await ItemController.get(itemid)
+        if (!item)
+            throw 'Item not found'
+        if (+item.market?.type!=MarketType.Sale)
+            throw 'Wrong market status'
+        const srcController = institutionController(+stype)
+        if (!srcController)
+            throw 'No source type'
+        const src = await srcController.get(id)
+        if (!IDMatch(item.owner._id, src._id))
+            throw 'Cannot act on foreign item'
+        item.market = null
+        await item.save()
+        await LogController.log({
+            name: 'item_delist', info: 'put_item_delist',
+            owner: src.asOwner, item,
+            action: LogAction.ItemRemoveSale
+        })
     }
 } 

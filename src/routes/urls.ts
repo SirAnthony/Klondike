@@ -46,6 +46,7 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/time': {func: 'time', methods: ['get']},
     '/profile': {func: 'profile', methods: ['post']},
+    '/item/:id': {func: 'item', methods: ['get']},
     '/planet/list': {func: 'planet_list_short', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},
     '/planets/': {func: 'planet_list', methods: ['get']},

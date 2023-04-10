@@ -39,6 +39,13 @@ export class ApiRouter extends BaseRouter {
         return {done: 1, user}
     }
 
+    // TODO: no checks at all
+    @CheckAuthenticated()
+    async get_item(ctx: RenderContext){
+        const {id} = ctx.aparams
+        return await ItemController.get(id)
+    }
+
     @CheckRole(UserType.Navigator)
     async get_planet(ctx: RenderContext){
         const {id} = ctx.params;

@@ -77,7 +77,6 @@ const aliases = {
     'artifact_kind_1': 'Инженерный',
     'artifact_kind_2': 'Аномалия',
     'loc_desc_coord': 'Координаты (x:y)',
-    'confirmation_needed': 'Подтвердите действие',
     'cycle': 'Цикл',
     'day_number': 'день',
     'assignee': 'Исполнитель',

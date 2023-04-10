@@ -52,7 +52,7 @@ export function CheckIDParam(param: string = 'id'){
                throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
             const id = ctx.aparams[param]
             const {user}: {user: UserController} = ctx.state
-            if (user.kind!=UserType.Master && !(id && id!=user?.relation?.entity?._id))
+            if (user.kind!=UserType.Master && !(id && id!=user?.relation?._id))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}

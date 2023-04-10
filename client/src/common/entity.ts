@@ -140,6 +140,11 @@ export class Artifact extends Item {
 }
 
 export enum InstitutionType {User, Organization, Research, Corporation, Ship}
+export const InstitutionTypePrefix = {
+    [InstitutionType.User]: 'profile', [InstitutionType.Organization]: 'org',
+    [InstitutionType.Research]: 'lab', [InstitutionType.Corporation]: 'corp',
+    [InstitutionType.Ship]: 'ship'
+}
 export class Institution extends ID {
     type: InstitutionType
     credit: number
@@ -178,7 +183,7 @@ export class User extends Institution {
     last_name: string
     email: string
     phone: string
-    relation: {type: InstitutionType, entity: ID}
+    relation: Owner
     get admin(){ return this.kind == UserType.Master }
     get displayName(){
         return this.alias || [this.first_name,
@@ -277,7 +282,7 @@ export class PlanetInfo extends Planet {
 export enum LogAction {
     PatentPaid, PatentForwardFull, PatentForwardPart, PatentForwardLeftovers,
     ResourceUsed,
-    ItemPutSale, ItemRemoveSale, ItemBuy,
+    ItemPutSale, ItemRemoveSale, ItemPurchase,
 }
 export class LogEntry extends ID {
     action: LogAction

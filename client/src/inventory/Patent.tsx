@@ -88,7 +88,7 @@ export function PatentLabItem(props: RowProps){
         <span key={`corp_name_${o._id}`}>{o.name}</span>)
     const rowClass = r=>(r.provided|0)>=r.value ? 'resource-full' : ''
     const costs = patent.resourceCost.map(r=><RB.Row className={rowClass(r)}>
-      <RB.Col>{L(`res_kind_${r.kind}`)}</RB.Col>
+      <RB.Col>{LR(`res_kind_${r.kind}`)}</RB.Col>
       <RB.Col>{r.value}</RB.Col>
       <RB.Col>{r.provided|0}</RB.Col>
     </RB.Row>)

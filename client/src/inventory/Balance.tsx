@@ -5,6 +5,7 @@ import {Delimeter} from '../util/components'
 import {NumberInput, OwnerSelect} from '../util/inputs'
 import {ErrorMessage} from '../util/errors'
 import {ClientError} from '../common/errors'
+import {Modal} from './modal'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 
@@ -72,15 +73,8 @@ export function Balance(props: BalanceProps){
           <RB.Button onClick={wrapReset(onTransfer)}>{LR('act_transfer')}</RB.Button>
         </RB.Col>
       </RB.Row>}
-      <RB.Modal show={showConfirm} onHide={wrapReset(()=>{})}>
-        <RB.ModalHeader closeButton>
-          <RB.ModalTitle>{LR('confirmation_needed')}</RB.ModalTitle>
-        </RB.ModalHeader>
-        <RB.ModalBody>{LR('act_transfer')+` ${amount} ${transferee?.name}`}</RB.ModalBody>
-        <RB.ModalFooter>
-          <RB.Button onClick={wrapReset(()=>{})}>{LR('act_disagree')}</RB.Button>
-          <RB.Button onClick={wrapReset(onConfirm)}>{LR('act_agree')}</RB.Button>
-        </RB.ModalFooter>
-      </RB.Modal>
+      <Modal show={showConfirm} onReject={wrapReset(()=>{})} onAgree={wrapReset(onConfirm)}>
+        {LR('act_transfer')+` ${amount} ${transferee?.name}`}
+      </Modal>
     </RB.Container></RB.Col>
 }

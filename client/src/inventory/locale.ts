@@ -28,6 +28,7 @@ load(mod, {
     'act_show_code': 'Код покупки',
     'amount_required': 'Необходимо',
     'amount_filled': 'Предоставлено',
+    'confirmation_needed': 'Подтвердите действие',
 })
 
 export function LR(str: string, ...args): string {

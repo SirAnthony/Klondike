@@ -168,15 +168,15 @@ export function ItemRow(props: ItemProps){
     const lyt = column_layout(obj.keys.filter(f=>!['_id', 'market'].includes(f)))
     const kind = res.kind==undefined ? '-' :
         item.type==ItemType.Patent ?
-        L(`patent_kind_${pt.kind}`)+'/'+L(`patent_weigth_${pt.weight}`) :
-        L(`res_kind_${res.kind}`)
+        LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
+        LR(`res_kind_${res.kind}`)
     const owner = item.type==ItemType.Patent ?
         pt.owners.map(o=><div key={'d_'+o._id}>{`${o.name} (${LR('patent_status_'+o.status)})`}</div>) :
         item.owner?.name||'-'
     return <RB.Row className={props.className}>
       <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
       <RB.Col sm={lyt.name}>{item.name}</RB.Col>
-      <RB.Col sm={lyt.type}>{L(`item_type_${item.type}`)}</RB.Col>
+      <RB.Col sm={lyt.type}>{LR(`item_type_${item.type}`)}</RB.Col>
       <RB.Col sm={lyt.kind}>{kind}</RB.Col>
       <RB.Col sm={lyt.owner}>{owner}</RB.Col>
       <LocationCol {...props} layout={lyt.location} />

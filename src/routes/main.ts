@@ -28,12 +28,11 @@ export class MainRouter extends BaseRouter {
         const item = await ItemController.get(id)
         if (!item || item.market?.type!=MarketType.Sale)
             throw 'Not found'
-        const {entity} = user.relation||{}
         const {to} = item.market||{}
-        if (!user.admin && to?._id && !IDMatch(to._id, entity._id))
+        if (!user.admin && to?._id && !IDMatch(to._id, user.relation?._id))
             throw 'Not found'
         const host = [util.localhost_to_ip(config.server.host), config.server.port].join(':')
-        const url = `http://${host}/item/${item._id}/buy/${item.market.code}`
+        const url = `http://${host}/confirm/item/${item._id}/buy/${item.market.code}`
         const code = await QRCode.toDataURL(url, {width: 400})
         return {user, code, item}        
     }

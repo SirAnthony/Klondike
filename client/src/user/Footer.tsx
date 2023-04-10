@@ -58,28 +58,28 @@ export function UserFooter(props: FooterProps){
     const tab = location.pathname.startsWith('/ship') ? 'ship' :
         location.pathname.startsWith('/corp') ? 'corp' :
         location.pathname.startsWith('/lab') ? 'lab' :
-        location.pathname.startsWith('/org') ? 'org' : 'personal'
+        location.pathname.startsWith('/org') ? 'org' : 'profile'
     return <RB.Container className='app-footer'>
     <RB.TabContainer defaultActiveKey={tab}><RB.Row>
       <RB.Nav variant='tabs' defaultActiveKey={tab}>
         {has(InstitutionType.Corporation) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='corp' href={`/corp/${relation?.entity._id}`}>
-            {L('tab_corporation', relation?.entity.name)}
+          <RB.NavLink eventKey='corp' href={`/corp/${relation?._id}`}>
+            {L('tab_corporation', relation?.name)}
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         {has(InstitutionType.Corporation) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='lab' href={`/lab/${relation?.entity._id}`}>
-            {L('tab_lab', relation?.entity.name)}
+          <RB.NavLink eventKey='lab' href={`/lab/${relation?._id}`}>
+            {L('tab_lab', relation?.name)}
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         {has(InstitutionType.Organization) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='org' href={`/org/${relation?.entity._id}`}>
-            {L('tab_organization', relation?.entity.name)}
+          <RB.NavLink eventKey='org' href={`/org/${relation?._id}`}>
+            {L('tab_organization', relation?.name)}
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         {has(InstitutionType.Ship) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='ship' href={`/ship/${relation?.entity._id}`}>
-            {L('tab_ship', relation?.entity.name)}
+          <RB.NavLink eventKey='ship' href={`/ship/${relation?._id}`}>
+            {L('tab_ship', relation?.name)}
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         <RB.Col><RB.NavItem>
