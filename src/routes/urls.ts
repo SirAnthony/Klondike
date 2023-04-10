@@ -12,7 +12,7 @@ global.Intl = intl
 export const urls = {
 main: {prefix: '', router: MainRouter, urls: {
     '/': {func: 'base', template: 'base', methods: ['get']},
-    '/item/:id/code': {func: 'item_code', template: 'item_code', methods: ['get']}
+    '/item/:id/code': {func: 'item_code', template: 'item_code', methods: ['get']},
 }},
 corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: {
     '/items/:id': {func: 'items', methods: ['get']},
@@ -30,7 +30,8 @@ ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
 inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json: true}, urls: {
     '/:stype/:id/item/:itemid/pay/:target': {func: 'item_pay', methods: ['put']},
     '/:stype/:id/item/:itemid/sell': {func: 'item_sell', methods: ['put']},
-    '/:stype/:id/item/:itemid/delist': {func: 'item_delist', methods: ['put']}
+    '/:stype/:id/item/:itemid/delist': {func: 'item_delist', methods: ['put']},
+    '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['post']}
 }},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
     '/resource/:id': {func: 'resource_change', methods: ['post']},

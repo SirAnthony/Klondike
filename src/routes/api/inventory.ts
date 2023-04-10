@@ -79,6 +79,8 @@ export class InventoryApiRouter extends BaseRouter {
         const item = await ItemController.get(itemid)
         if (!item)
             throw 'Item not found'
+        if ([MarketType.Sale, MarketType.Protected].includes(+item.market?.type))
+            throw 'Wrong market status'
         const srcController = institutionController(+stype)
         const dstController = institutionController(+dtype)
         if (!srcController || !dstController)
@@ -95,6 +97,11 @@ export class InventoryApiRouter extends BaseRouter {
             owner: src.asOwner, item,
             action: LogAction.ItemPutSale
         })
+    }
+
+    @CheckIDParam()
+    async post_item_buy(ctx: RenderContext){
+
     }
 
     @CheckIDParam()

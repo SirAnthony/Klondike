@@ -1,3 +1,7 @@
+body, #root, .App {
+    min-height: 100%;
+}
+
 .App {
   text-align: center;
 }
@@ -345,4 +349,9 @@ input.form-control:focus, select.form-select:focus,
 
 input.form-control::placeholder, textarea.form-control::placeholder {
     color: var(--color-ui-text-shade);
+}
+
+.item-code {
+    padding: 40px;
+    text-align: center;
 }

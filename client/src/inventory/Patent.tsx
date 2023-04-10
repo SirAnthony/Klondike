@@ -2,7 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Patent, Corporation, InstitutionType} from '../common/entity'
 import {IDField} from '../util/components'
-import L from '../common/locale'
+import {default as L, LR} from './locale'
 import * as _ from 'lodash'
 
 type RowDescProps = {
@@ -10,12 +10,12 @@ type RowDescProps = {
 }
 export function PatentRowDesc(props: RowDescProps){
     return <RB.Row className={props.className}>
-      <RB.Col>{L('item_desc_id')}</RB.Col>
-      <RB.Col>{L('item_desc_name')}</RB.Col>
-      <RB.Col>{L('patent_desc_weight')}</RB.Col>
-      <RB.Col>{L('patent_desc_kind')}</RB.Col>
-      <RB.Col>{L('patent_desc_ownership')}</RB.Col>
-      <RB.Col>{L('item_desc_actions')}</RB.Col>
+      <RB.Col>{LR('item_desc_id')}</RB.Col>
+      <RB.Col>{LR('item_desc_name')}</RB.Col>
+      <RB.Col>{LR('patent_desc_weight')}</RB.Col>
+      <RB.Col>{LR('patent_desc_kind')}</RB.Col>
+      <RB.Col>{LR('patent_desc_ownership')}</RB.Col>
+      <RB.Col>{LR('item_desc_actions')}</RB.Col>
     </RB.Row>
 }
 
@@ -38,15 +38,15 @@ export function PatentRow(props: RowProps){
     const {patent, corp} = props
     const len = patent.owners.length
     const owners = patent.owners.reduce((p, f)=>p + +(f._id==corp._id), 0)
-    const ownership = patent.owners.length<2 ? L('patent_ownership_full') :
-        L(`patent_ownership_shared`)+` [${owners}/${len}]`
+    const ownership = patent.owners.length<2 ? LR('patent_ownership_full') :
+        LR(`patent_ownership_shared`)+` [${owners}/${len}]`
     const is_served = Patent.served(patent, corp)
     const cls = props.className+(is_served ? 'patent-served' : '')
     return <RB.Row key={`patent_${patent._id}`} className={cls}>
         <RB.Col><IDField item={patent} /></RB.Col>
         <RB.Col>{patent.name}</RB.Col>
-        <RB.Col>{L(`patent_weigth_${patent.weight}`)}</RB.Col>
-        <RB.Col>{L(`patent_kind_${patent.kind}`)}</RB.Col>
+        <RB.Col>{LR(`patent_weigth_${patent.weight}`)}</RB.Col>
+        <RB.Col>{LR(`patent_kind_${patent.kind}`)}</RB.Col>
         <RB.Col>
           <RB.OverlayTrigger placement='top' trigger={['hover', 'focus']}
             overlay={OwnerListPopover(patent)}>
@@ -96,26 +96,26 @@ export function PatentLabItem(props: RowProps){
     return <RB.Container className={`menu-list-box ${cls}`}><RB.Row><RB.Col><RB.Container>
       <RB.Row><IDField item={patent} /></RB.Row>
       <RB.Row>
-        <RB.Col>{L('item_desc_name')}</RB.Col>
+        <RB.Col>{LR('item_desc_name')}</RB.Col>
         <RB.Col>{patent.name}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <RB.Col>{L('patent_desc_kind')+' / '+L('patent_desc_weight')}</RB.Col>
-        <RB.Col>{L(`patent_kind_${patent.kind}`)+' / '+L(`patent_weigth_${patent.weight}`)}</RB.Col>
+        <RB.Col>{LR('patent_desc_kind')+' / '+LR('patent_desc_weight')}</RB.Col>
+        <RB.Col>{LR(`patent_kind_${patent.kind}`)+' / '+LR(`patent_weigth_${patent.weight}`)}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <RB.Col>{L('item_desc_owner')}</RB.Col>
+        <RB.Col>{LR('item_desc_owner')}</RB.Col>
         <RB.Col>{owners}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <RB.Col>{L('item_desc_data')}</RB.Col>
+        <RB.Col>{LR('item_desc_data')}</RB.Col>
         <RB.Col>{patent.data}</RB.Col>
       </RB.Row>
     </RB.Container></RB.Col><RB.Col><RB.Container>
       <RB.Row>
-        <RB.Col>{L('res_desc_kind')}</RB.Col>
-        <RB.Col>{L('res_required')}</RB.Col>
-        <RB.Col>{L('res_filled')}</RB.Col>
+        <RB.Col>{LR('res_desc_kind')}</RB.Col>
+        <RB.Col>{L('amount_required')}</RB.Col>
+        <RB.Col>{L('amount_filled')}</RB.Col>
       </RB.Row>
       {costs}
     </RB.Container></RB.Col></RB.Row></RB.Container>

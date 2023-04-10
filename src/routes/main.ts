@@ -5,7 +5,9 @@ import {RenderContext} from '../middlewares'
 import defines from '../../client/src/common/defines'
 import * as util from '../util/util'
 import {ItemController} from '../entity'
+import {IDMatch} from '../util/server'
 import * as QRCode from 'qrcode'
+import config from '../config'
 
 
 export class MainRouter extends BaseRouter {
@@ -26,7 +28,13 @@ export class MainRouter extends BaseRouter {
         const item = await ItemController.get(id)
         if (!item || item.market?.type!=MarketType.Sale)
             throw 'Not found'
-        const code = await QRCode.toDataURL(`/item/${item._id}/buy`)
+        const {entity} = user.relation||{}
+        const {to} = item.market||{}
+        if (!user.admin && to?._id && !IDMatch(to._id, entity._id))
+            throw 'Not found'
+        const host = [util.localhost_to_ip(config.server.host), config.server.port].join(':')
+        const url = `http://${host}/item/${item._id}/buy/${item.market.code}`
+        const code = await QRCode.toDataURL(url, {width: 400})
         return {user, code, item}        
     }
 }

@@ -25,6 +25,10 @@ class ListNavigator extends Menu<ListProps, ListState> {
     }
 }
 
+function ItemConfirmator(props: {user: entity.User}){
+    return null
+}
+
 function App() {
   const [user, setUser] = React.useState(null)
   const onUserUpdate = (u: entity.User)=>{ setUser(u) }
@@ -36,6 +40,7 @@ function App() {
     </RB.Container>
     <RR.Routes>
       <RR.Route path='/' element={<ListNavigator user={user} />} />
+      <RR.Route path='/item/*' element={<ItemConfirmator user={user} />} />
       <RR.Route path='/ship/*' element={<ShipNavigator user={user} />} />
       <RR.Route path='/corp/*' element={<CorpNavigator user={user} />} />
       <RR.Route path='/lab/*' element={<CorpNavigator user={user} />} />

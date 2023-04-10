@@ -3,14 +3,14 @@ import * as RB from 'react-bootstrap'
 import {Corporation, Item, ItemType, MarketType, User} from '../common/entity'
 import {Owner, Location, InstitutionType} from '../common/entity'
 import {Resource, ResourceType, Patent} from '../common/entity'
-import {ResourceSelect, TypeSelect, PatentTypeSelect} from './inputs'
-import {PatentWeightSelect, ArtifactTypeSelect} from './inputs'
-import {NumberInput, LocationSelect, OwnerSelect} from './inputs'
-import {MultiOwnerSelect, MultiResourceSelect} from './inputs'
-import {OwnerValueSelectTrigger, PatentSelectTrigger} from './popovers'
-import {IDField} from './components'
+import {ResourceSelect, TypeSelect, PatentTypeSelect} from '../util/inputs'
+import {PatentWeightSelect, ArtifactTypeSelect} from '../util/inputs'
+import {NumberInput, LocationSelect, OwnerSelect} from '../util/inputs'
+import {MultiOwnerSelect, MultiResourceSelect} from '../util/inputs'
+import {OwnerValueSelectTrigger, PatentSelectTrigger} from '../util/popovers'
+import {IDField} from '../util/components'
 import {ApiError, FormError} from '../common/errors'
-import L from '../common/locale'
+import {default as L, LR} from './locale'
 
 const column_layout = (fields = [])=>{
     const MAX_SUM = 12
@@ -37,6 +37,17 @@ const owners_exclude = (type: ItemType)=>{
     return []
 }
 
+function PopupButton(props: {url: string, desc: string, opt?: any}){
+    const opt = Object.assign({width: 500, height: 500, scrollbar: 'no', resizable: 'no'}, props.opt)
+    const onClick = ()=>{
+        const opt_str = Object.keys(opt).map(c=>`${c}=${opt[c]}`).join(',')
+        window.open(props.url, 'popup', opt_str)
+        return false
+    }
+    return <RB.Button onClick={onClick}>{props.desc}</RB.Button>
+
+}
+
 type ItemRowProps = {
     className?: string
     user: User
@@ -47,16 +58,16 @@ export function ItemRowDesc(props: ItemRowProps){
     const has = n=>props.fields?.includes(n)
     const lyt = column_layout(props.fields)
     return <RB.Row className={props.className}>
-      <RB.Col sm={lyt.id}>{L('item_desc_id')}</RB.Col>
-      <RB.Col sm={lyt.name}>{L('item_desc_name')}</RB.Col>
-      <RB.Col sm={lyt.type}>{L('item_desc_type')}</RB.Col>
-      <RB.Col sm={lyt.kind}>{L('res_desc_kind')}</RB.Col>
-      <RB.Col sm={lyt.owner}>{L('item_desc_owner')}</RB.Col>
-      <RB.Col sm={lyt.location}>{L('item_desc_location')}</RB.Col>
-      <RB.Col sm={lyt.value}>{L('res_desc_value')}</RB.Col>
-      <RB.Col sm={lyt.price}>{L('item_desc_price')}</RB.Col>
-      <RB.Col sm={lyt.data}>{L('item_desc_data')}</RB.Col>
-      <RB.Col sm={lyt.actions}>{L('item_desc_actions')}</RB.Col>
+      <RB.Col sm={lyt.id}>{LR('item_desc_id')}</RB.Col>
+      <RB.Col sm={lyt.name}>{LR('item_desc_name')}</RB.Col>
+      <RB.Col sm={lyt.type}>{LR('item_desc_type')}</RB.Col>
+      <RB.Col sm={lyt.kind}>{LR('res_desc_kind')}</RB.Col>
+      <RB.Col sm={lyt.owner}>{LR('item_desc_owner')}</RB.Col>
+      <RB.Col sm={lyt.location}>{LR('item_desc_location')}</RB.Col>
+      <RB.Col sm={lyt.value}>{LR('res_desc_value')}</RB.Col>
+      <RB.Col sm={lyt.price}>{LR('item_desc_price')}</RB.Col>
+      <RB.Col sm={lyt.data}>{LR('item_desc_data')}</RB.Col>
+      <RB.Col sm={lyt.actions}>{LR('item_desc_actions')}</RB.Col>
     </RB.Row>
 }
 
@@ -96,13 +107,16 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
             return null
         if (item.market?.type!=MarketType.Sale){
             return <OwnerValueSelectTrigger onClick={(owner, price)=>onSell(item, owner, price)}
-                desc={L('act_sell')} valDesc={L('item_desc_price')} exclude={owners_exclude(item.type)}/>
+                desc={L('act_sell')} valDesc={LR('item_desc_price')} exclude={owners_exclude(item.type)}/>
         }
-        return [
-            <span>{L('market_code')}</span>,
-            <span>{item.market?.code}</span>,
+        return <RB.Container><RB.Row>
+          <RB.Col>
+            <PopupButton url={`/item/${item._id}/code`} desc={L('act_show_code')} />
+          </RB.Col>
+          <RB.Col>
             <RB.Button onClick={()=>onDelist(item)}>{L('act_delist')}</RB.Button>
-        ]
+          </RB.Col>
+        </RB.Row></RB.Container>
     }
     btn_delete(){
         const {item, onDelete} = this.props
@@ -139,7 +153,7 @@ function ResourceCostCol(props: ItemProps){
         return <RB.Col sm={props.layout}>-</RB.Col>
     const res = resourceCost.map(v=>
       <div key={`res_cost_${item._id}_${v.kind}`}>
-        {L(`res_kind_${v.kind}`)+` [${v.provided|0}/${v.value}]`}
+        {LR(`res_kind_${v.kind}`)+` [${v.provided|0}/${v.value}]`}
       </div>)
     return <RB.Col sm={layout}>
       {res}
@@ -157,7 +171,7 @@ export function ItemRow(props: ItemProps){
         L(`patent_kind_${pt.kind}`)+'/'+L(`patent_weigth_${pt.weight}`) :
         L(`res_kind_${res.kind}`)
     const owner = item.type==ItemType.Patent ?
-        pt.owners.map(o=><div key={'d_'+o._id}>{`${o.name} (${L('patent_status_'+o.status)})`}</div>) :
+        pt.owners.map(o=><div key={'d_'+o._id}>{`${o.name} (${LR('patent_status_'+o.status)})`}</div>) :
         item.owner?.name||'-'
     return <RB.Row className={props.className}>
       <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
@@ -242,7 +256,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
           <ResourceSelect value={kind} onChange={kindChange} />
         </RB.Col>,
         <RB.Col sm={row_size} key='resource_value_select'>
-          <NumberInput placeholder={L('res_desc_value')} value={value} onChange={valChange} />
+          <NumberInput placeholder={LR('res_desc_value')} value={value} onChange={valChange} />
         </RB.Col>]
     }
     // coordinates
@@ -260,9 +274,9 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const massChange = mas=>this.stateChange({mass})
         const energyChange = energy=>this.stateChange({energy})
         return [<RB.Col sm={row_size} key='module_mass_input'>
-          <NumberInput placeholder={L('item_desc_mass')} value={mass} onChange={massChange} />
+          <NumberInput placeholder={LR('item_desc_mass')} value={mass} onChange={massChange} />
         </RB.Col>, <RB.Col sm={row_size} key='module_energy_input'>
-          <NumberInput placeholder={L('item_desc_energy')} value={energy} onChange={energyChange} />
+          <NumberInput placeholder={LR('item_desc_energy')} value={energy} onChange={energyChange} />
         </RB.Col>]
     }
     // patent
@@ -312,7 +326,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
           </RB.Col>
           {top_fields}
          <RB.Col sm={row_size}>
-            <NumberInput placeholder={L('item_desc_price')} value={price} onChange={priceChange} />
+            <NumberInput placeholder={LR('item_desc_price')} value={price} onChange={priceChange} />
           </RB.Col>
           <RB.Col sm={row_size}>
             <RB.Button disabled={this.errors.length} onClick={()=>this.create()}>
@@ -329,11 +343,11 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const locChange = location=>this.stateChange({location})
         return <RB.Row className='menu-input-row'>
           <RB.Col sm={2}>
-            <RB.FormControl as='textarea' rows={3} placeholder={L('item_desc_data')}
+            <RB.FormControl as='textarea' rows={3} placeholder={LR('item_desc_data')}
               value={data} onChange={dataChange} />
           </RB.Col>
           {this.hasField('name') && <RB.Col sm={2}>
-            <RB.FormControl placeholder={L('item_desc_name')}
+            <RB.FormControl placeholder={LR('item_desc_name')}
               value={name} onChange={nameChange} />
           </RB.Col>}
           {this.hasField('owner') && <RB.Col sm={4}>

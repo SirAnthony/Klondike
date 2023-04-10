@@ -3,7 +3,7 @@ import * as RB from 'react-bootstrap'
 import {Order, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Delimeter} from '../util/components'
-import {OrderRow, OrderRowDesc, OrderRowNew} from '../util/Order'
+import {OrderRow, OrderRowDesc, OrderRowNew} from '../inventory/Order'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 

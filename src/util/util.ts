@@ -1,3 +1,5 @@
+import * as os from 'os'
+
 
 function encode_uri_comp(s){
     return encodeURIComponent(s).replace(/%20/g, '+') }
@@ -84,4 +86,19 @@ export function flatten_object_dash(obj, prefix=''){
             ret[param] = val
     }
     return ret
+}
+
+export function localhost_to_ip(host){
+    if (host!='localhost')
+        return host
+    const interfaces = os.networkInterfaces()
+    for (let name in interfaces){
+        if (/^(lo|bridge|utun)/.test(name))
+            continue
+        for (let iface of interfaces[name]){
+            if (iface.family=='IPv4')
+                return iface.address
+        }
+    }
+    return host
 }

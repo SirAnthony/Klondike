@@ -1,5 +1,16 @@
-{% extends "base.html" %}
-{% block main %}
-<h2>Покупка {{ context.item.name }} за {{ context.item.market.price }}</h2>
-<img src="{{ context.code }}" />
-{% endblock %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <title>Klondike{% block title %}{% endblock %}</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <link rel="icon" href="{{ STATIC_URL }}/favicon.ico" type="image/x-icon" />
+  <style>{% include "style.css" %}</style>
+  {% if client_files.css %}<link href="/client/{{ client_files.css }}" rel="stylesheet">{% endif %}
+</head>
+<body>
+  <div class="item-code">
+    <h2>Покупка {{ context.item.name }} за {{ context.item.market.price }}</h2>
+    <img src="{{ context.code }}" />
+  </div>
+</body>
+</html>
