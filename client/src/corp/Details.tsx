@@ -3,20 +3,13 @@ import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {Corporation, InstitutionType, Order, User} from '../common/entity'
 import {Item, Patent, MarketType, Owner} from '../common/entity'
-import {ItemRow, ItemRowDesc} from '../inventory/Item'
-import {PatentLabItem, PatentRow, PatentRowDesc} from '../inventory/Patent'
-import {OrderRowCompact} from '../inventory/Order'
-import EventEmitter from '../common/events'
+import {ItemRow, ItemRowDesc} from '../inventory'
+import {PatentLabItem, PatentRow, PatentRowDesc} from '../inventory'
+import {OrderRowCompact} from '../inventory'
+import {InventoryEvents} from '../inventory'
 import * as util from '../common/util'
 import {default as L} from './locale'
 import {Delimeter} from '../util/components'
-
-const DetailsEvents = new EventEmitter()
-export enum EventType {reloadPatents, reloadItems, reloadOrders, reloadPrices}
-export const Events = Object.keys(EventType).filter(t=>isNaN(+t)).reduce((p, c)=>{
-    p[c] = ()=>DetailsEvents.emit(c)
-    return p
-}, {} as any)
 
 type OrderDetailsState = {
     orders?: Order[]
@@ -32,7 +25,7 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
     constructor(props){
         super(props)
         this.state = {}
-        DetailsEvents.on(EventType[EventType.reloadOrders], ()=>this.fetch())
+        InventoryEvents.onreloadOrders(()=>this.fetch())
     }
     get fetchUrl() { 
         const {corp} = this.props
@@ -75,7 +68,7 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     constructor(props){
         super(props)
         this.state = {}
-        DetailsEvents.on(EventType[EventType.reloadItems], ()=>this.fetch());
+        InventoryEvents.onreloadItems(()=>this.fetch());
         ['Sell', 'Delist', 'Pay'].forEach(cmd=>
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
@@ -106,7 +99,7 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         const res = await this.onItemAction(item, ()=>corp.type==InstitutionType.Research,
             `pay/${patent._id}`)
         if (res)
-            Events.reloadPatents()
+            InventoryEvents.reloadPatents()
     }
     async onDelist(item: Item){
         const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
@@ -117,22 +110,21 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         await this.onItemAction(item, check, 'sell', {
             data: {target: target._id, dtype: target.type, price: price}})
     }
-    rows(fields?: string[]){
+    rows(){
         const {items = []} = this.state
         const rows = items.filter(util.not_depleted).map(i=><ItemRow className='menu-list-row'
             onPay={this.onPay} onSell={this.onSell} onDelist={this.onDelist}
-            key={`item_row_${i._id}`} item={i} {...this.props} fields={fields}/>)
+            key={`item_row_${i._id}`} item={i} {...this.props}/>)
         return rows
     }
     render(){
-        const fields = ['kind', 'location', 'data']
         return <RB.Container>
           <RB.Row className='menu-list-title'>
             <RB.Col>{L('res_cur')}</RB.Col>
           </RB.Row>
           <Delimeter />
-          <ItemRowDesc {...this.props} fields={fields} />
-          {this.rows(fields)}
+          <ItemRowDesc className='menu-list-title' />
+          {this.rows()}
         </RB.Container>
     }
 }
@@ -148,7 +140,7 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
     constructor(props){
         super(props)
         this.state = {}
-        DetailsEvents.on(EventType[EventType.reloadPatents], ()=>this.fetch())
+        InventoryEvents.onreloadPatents(()=>this.fetch())
     }
     get fetchUrl() { 
         const {corp} = this.props

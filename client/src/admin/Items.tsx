@@ -6,6 +6,7 @@ import {ItemRow, ItemRowDesc, ItemRowNew} from '../inventory/Item'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 import {Delimeter} from '../util/components'
+import {InventoryEvents} from '../inventory'
 
 type ListState = {
     resources: Resource[]
@@ -80,6 +81,7 @@ class List extends UList<ListProps, ListState> {
             return void this.setState({err: res.err})
         this.setState({err: null})
         this.fetch()
+        InventoryEvents.reloadPrices()
     }
     resources(){
         const {showResources} = this.state
@@ -100,15 +102,13 @@ class List extends UList<ListProps, ListState> {
     }
     body(){
         const {list} = this.state
-        const fields = ['kind', 'owner', 'location', 'data']
         const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
-          onDelete={item=>this.deleteItem(item)} item={l} fields={fields} user={this.props.user} />)
+          onDelete={item=>this.deleteItem(item)} item={l} long={true} user={this.props.user} />)
         return [
           this.resources(),
           <Delimeter key='res_delimeter' />,
           this.newItem(),
-          <ItemRowDesc key='item_row_desc' className='menu-list-title'
-            fields={fields} user={this.props.user} />,
+          <ItemRowDesc key='item_row_desc' className='menu-list-title' long={true} />,
           <Delimeter key='res_delimeter2' />,
           ...rows
         ]

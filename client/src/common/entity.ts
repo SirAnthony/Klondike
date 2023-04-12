@@ -88,7 +88,9 @@ export class Resource extends Item {
     get cost(){
         return this.value * defines.price.res[this.kind] }
     get keys(){
-        return super.keys.concat('kind value'.split(' ')) }
+        return super.keys.concat('kind value'.split(' '))
+            .filter(f=>f!='price')
+    }
 }
 
 export class Coordinates extends Item {

@@ -5,21 +5,33 @@ import * as entities from './common/entity'
 import * as CError from './common/errors'
 
 export type ErrorState = {err?: CError.ApiError}
-type ItemState = {item?: any}
-export class Fetcher<P, S> extends React.PureComponent<P & {}, S & ErrorState & ItemState> {
+type FetcherState = {item?: any}
+type FetcherProps = {}
+export class Fetcher<P, S> extends React.PureComponent<P & FetcherProps, S & ErrorState & FetcherState> {
+    protected static _cache
+    protected setCache(data: any) { this.cacheClass && (this.cacheClass._cache = data) 	}
+    protected get cache(){ return this.cacheClass?._cache }
+    cacheClass: any
+
     fetching = false
     fetches = 0
     componentDidMount() { this.fetch() }
     async fetch(){
-        if (this.fetching)
-            return
-        this.fetching = true
+        const fetcher = this.cacheClass||this
+        if (fetcher.fetching)
+            return fetcher.requesters.push(this)
+        let cache: any
+        if (this.cacheClass && (cache = this.cache))
+            return void this.setState(cache);
+        (fetcher.requesters = fetcher.requesters||[]).push(this)
+        fetcher.fetching = true
         let data = await util.wget(this.fetchUrl, this.fetchOpt)
-        this.fetching = false
-        this.fetches++
+        fetcher.fetching = false
+        fetcher.fetches++
         let obj: any = Object.assign({err: data.err||this.state?.err},
             this.fetchState(data.data))
-        this.setState(obj)
+        this.setCache(obj)
+        fetcher.requesters?.forEach(f=>f.setState(obj))
     }
     get fetchUrl(){ return '' }
     get fetchOpt(){ return {} }

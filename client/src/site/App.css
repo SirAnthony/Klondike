@@ -214,7 +214,6 @@ div.menu-container-full, div.container-full {
 div .menu-list-row, .menu-list-title, .menu-input-row {
     width: 100%;
     padding: 6px;
-    margin-left: 0px;
     color: var(--color-ui-text);
 }
 

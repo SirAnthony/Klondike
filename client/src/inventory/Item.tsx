@@ -8,20 +8,22 @@ import {PatentWeightSelect, ArtifactTypeSelect} from '../util/inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from '../util/inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from '../util/inputs'
 import {OwnerValueSelectTrigger, PatentSelectTrigger} from '../util/popovers'
+import {PriceFetcher} from './Prices'
 import {IDField} from '../util/components'
 import {ApiError, FormError} from '../common/errors'
 import {default as L, LR} from './locale'
 
-const column_layout = (fields = [])=>{
+const long_fields = ['owner', 'location', 'data']
+const column_layout = (long: Boolean)=>{
     const MAX_SUM = 12
-    const res: any = Object.assign({id: 1, name: 1, type: 1, value: 1,
-        location: 1, price: 1, data: 1, owner: 1, actions: 1},
-        fields.reduce((p, c)=>{ p[c]=1; return p }, {}))
+    const fields = long ? long_fields : []
+    const res: any = Object.assign({id: 1, name: 1, type: 1, value: 1, kind: 1,
+        price: 1, actions: 1}, fields.reduce((p, c)=>{ p[c]=1; return p }, {}))
     let prio = 'actions data location owner id name type kind'.split(' ')
-    fields.forEach(f=>res[f]=1)
+        .filter(f=>long ? true : !long_fields.includes(f))
     let free = MAX_SUM - Object.keys(res).reduce((p, v)=>p+res[v], 0)
-    for (let i = free; i>0; --i)
-        res[prio.shift()] += 1
+    for (let i = free, j = 0; i>0; --i, ++j)
+        res[prio[j%prio.length]] += 1
     return res
 }
 
@@ -50,28 +52,28 @@ function PopupButton(props: {url: string, desc: string, opt?: any}){
 
 type ItemRowProps = {
     className?: string
-    user: User
-    fields?: string[]
+    long?: boolean
 }
 
 export function ItemRowDesc(props: ItemRowProps){
-    const has = n=>props.fields?.includes(n)
-    const lyt = column_layout(props.fields)
+    const {long} = props
+    const lyt = column_layout(long)
     return <RB.Row className={props.className}>
       <RB.Col sm={lyt.id}>{LR('item_desc_id')}</RB.Col>
       <RB.Col sm={lyt.name}>{LR('item_desc_name')}</RB.Col>
       <RB.Col sm={lyt.type}>{LR('item_desc_type')}</RB.Col>
       <RB.Col sm={lyt.kind}>{LR('res_desc_kind')}</RB.Col>
-      <RB.Col sm={lyt.owner}>{LR('item_desc_owner')}</RB.Col>
-      <RB.Col sm={lyt.location}>{LR('item_desc_location')}</RB.Col>
+      {long && <RB.Col sm={lyt.owner}>{LR('item_desc_owner')}</RB.Col>}
+      {long && <RB.Col sm={lyt.location}>{LR('item_desc_location')}</RB.Col>}
       <RB.Col sm={lyt.value}>{LR('res_desc_value')}</RB.Col>
       <RB.Col sm={lyt.price}>{LR('item_desc_price')}</RB.Col>
-      <RB.Col sm={lyt.data}>{LR('item_desc_data')}</RB.Col>
+      {long && <RB.Col sm={lyt.data}>{LR('item_desc_data')}</RB.Col>}
       <RB.Col sm={lyt.actions}>{LR('item_desc_actions')}</RB.Col>
     </RB.Row>
 }
 
 type ItemProps = {
+    user: User
     item: Item
     corp?: Corporation 
     layout?: number
@@ -160,12 +162,26 @@ function ResourceCostCol(props: ItemProps){
     </RB.Col>
 }
 
+type ItemPriceColProps = {
+    item: Item
+}
+type ItemPriceColState = {}
+class ItemPriceCol extends PriceFetcher<ItemPriceColProps, ItemPriceColState> {
+    render(){
+        const {item} = this.props
+        const {prices = {}} = this.state
+        const price = item.type == ItemType.Resource ? 
+            prices[(item as Resource).kind] * (item as Resource).value : item.price
+        return <span>{price}</span>
+    }
+}
+
 export function ItemRow(props: ItemProps){
-    const {item, user} = props
+    const {item, user, long} = props
     const obj = new (Item.class(item.type))(item)
     const res = item as Resource, pt = item as Patent
     const has = n=>obj.keys.includes(n)
-    const lyt = column_layout(obj.keys.filter(f=>!['_id', 'market'].includes(f)))
+    const lyt = column_layout(long)
     const kind = res.kind==undefined ? '-' :
         item.type==ItemType.Patent ?
         LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
@@ -178,12 +194,12 @@ export function ItemRow(props: ItemProps){
       <RB.Col sm={lyt.name}>{item.name}</RB.Col>
       <RB.Col sm={lyt.type}>{LR(`item_type_${item.type}`)}</RB.Col>
       <RB.Col sm={lyt.kind}>{kind}</RB.Col>
-      <RB.Col sm={lyt.owner}>{owner}</RB.Col>
-      <LocationCol {...props} layout={lyt.location} />
+      {long && <RB.Col sm={lyt.owner}>{owner}</RB.Col>}
+      {long && <LocationCol {...props} layout={lyt.location} />}
       {has('resourceCost') && <ResourceCostCol {...props} layout={lyt.value} />}
       {has('value') && <RB.Col sm={lyt.value}>{res.value|0}</RB.Col>}
-      <RB.Col sm={lyt.price}>{item.price}</RB.Col>
-      <RB.Col sm={lyt.data}>{res.data}</RB.Col>
+      <RB.Col sm={lyt.price}><ItemPriceCol item={item} /></RB.Col>
+      {long && <RB.Col sm={lyt.data}>{res.data}</RB.Col>}
       <ItemActions {...props} layout={lyt.actions} />
     </RB.Row>
 }
@@ -233,16 +249,14 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             item[k] = this.state[k]
         this.props.onCreate(item)
     }
-    get row_size(){
-        return 2
-    }
+    get row_size(){ return 2 }
     hasField(name: string){
         let cls = new (Item.class(this.state.type))()
         return cls.keys.includes(name)
     }
     get errors(){
         const item = new (Item.class(this.state.type))()
-        return item.keys.filter(k=>!['_id', 'market'].includes(k) &&
+        return item.keys.filter(k=>!['_id', 'market', 'owner', 'location'].includes(k) &&
             !this.state[k] && isNaN(this.state[k]))
     }
     get ownerExclude(){ return owners_exclude(this.state.type) }
@@ -311,7 +325,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const kindChange = kind=>this.stateChange({kind})
         return [<RB.Col sm={row_size} key='artifact_kind_select'>
           <ArtifactTypeSelect value={kind} onChange={kindChange} />
-        </RB.Col>]
+        </RB.Col>,
+        <RB.Col sm={row_size}></RB.Col>]
     }
     fields_top(){
         const {type, price} = this.state
@@ -325,8 +340,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             <TypeSelect value={type} onChange={typeChange}/>
           </RB.Col>
           {top_fields}
-         <RB.Col sm={row_size}>
-            <NumberInput placeholder={LR('item_desc_price')} value={price} onChange={priceChange} />
+          <RB.Col sm={row_size}>{this.hasField('price') &&
+            <NumberInput placeholder={LR('item_desc_price')} value={price} onChange={priceChange} />}
           </RB.Col>
           <RB.Col sm={row_size}>
             <RB.Button disabled={this.errors.length} onClick={()=>this.create()}>
