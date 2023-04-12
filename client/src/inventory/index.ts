@@ -1,3 +1,4 @@
+import EventEmitter from '../common/events'
 
 export {Balance} from './Balance'
 export {PriceDetails} from './Prices'
@@ -5,7 +6,6 @@ export {Confirmator} from './Confirmation'
 export {ItemRow, ItemRowDesc} from './Item'
 export {PatentLabItem, PatentRow, PatentRowDesc} from './Patent'
 export {OrderRowCompact} from './Order'
-import EventEmitter from '../common/events'
 
 export const InventoryEvents = new EventEmitter()
 export enum InventoryEventType {reloadPatents, reloadItems, reloadOrders, reloadPrices}
