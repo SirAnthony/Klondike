@@ -12,6 +12,7 @@ import {PriceFetcher} from './Prices'
 import {IDField} from '../util/components'
 import {ApiError, FormError} from '../common/errors'
 import {default as L, LR} from './locale'
+import defines from '../common/defines'
 
 const long_fields = ['owner', 'location', 'data']
 const column_layout = (long: Boolean)=>{
@@ -39,6 +40,11 @@ const owners_exclude = (type: ItemType)=>{
     return []
 }
 
+const item_base_price = (item: Item, prices: {ResourceType: number} = {} as any)=>{
+    return item.type == ItemType.Resource ? 
+        (prices[(item as Resource).kind]|0) * (item as Resource).value : item.price
+}
+
 function PopupButton(props: {url: string, desc: string, opt?: any}){
     const opt = Object.assign({width: 500, height: 500, scrollbar: 'no', resizable: 'no'}, props.opt)
     const onClick = ()=>{
@@ -47,7 +53,6 @@ function PopupButton(props: {url: string, desc: string, opt?: any}){
         return false
     }
     return <RB.Button onClick={onClick}>{props.desc}</RB.Button>
-
 }
 
 type ItemRowProps = {
@@ -72,6 +77,25 @@ export function ItemRowDesc(props: ItemRowProps){
     </RB.Row>
 }
 
+
+type ItemPriceInputProps = {
+    item: Item
+    onSell?: (item: Item, target: Owner, price: number)=>void
+}
+class ItemPriceInput extends PriceFetcher<ItemPriceInputProps, {}> {
+    render(){
+        const {item, onSell} = this.props
+        const base_price = item_base_price(item, this.state.prices)
+        const inputRange: [number, number] = [
+            base_price*defines.price.low_modifier,
+            base_price*defines.price.high_modifier
+        ]
+        return <OwnerValueSelectTrigger onClick={(owner, price)=>onSell(item, owner, price)}
+          inputRange={inputRange} desc={L('act_sell')} valDesc={LR('item_desc_price')}
+          exclude={owners_exclude(item.type)}/>
+    }
+}
+
 type ItemProps = {
     user: User
     item: Item
@@ -79,9 +103,8 @@ type ItemProps = {
     layout?: number
     onDelete?: (item: Item)=>void
     onPay?: (item: Item, patent: Patent)=>void
-    onSell?: (item: Item, target: Owner, price: number)=>void
     onDelist?: (item: Item)=>void
-} & ItemRowProps
+} & ItemPriceInputProps & ItemRowProps
 
 type ItemState = {
     err?: ApiError
@@ -107,10 +130,8 @@ class ItemActions extends React.Component<ItemProps, ItemState> {
         const {item, onSell, onDelist} = this.props
         if (!onSell || !this.is_admin && !(this.is_owner && item.market?.type!=MarketType.Protected))
             return null
-        if (item.market?.type!=MarketType.Sale){
-            return <OwnerValueSelectTrigger onClick={(owner, price)=>onSell(item, owner, price)}
-                desc={L('act_sell')} valDesc={LR('item_desc_price')} exclude={owners_exclude(item.type)}/>
-        }
+        if (item.market?.type!=MarketType.Sale)
+            return <ItemPriceInput item={item} onSell={onSell} />
         return <RB.Container><RB.Row>
           <RB.Col>
             <PopupButton url={`/item/${item._id}/code`} desc={L('act_show_code')} />
@@ -162,18 +183,9 @@ function ResourceCostCol(props: ItemProps){
     </RB.Col>
 }
 
-type ItemPriceColProps = {
-    item: Item
-}
-type ItemPriceColState = {}
-class ItemPriceCol extends PriceFetcher<ItemPriceColProps, ItemPriceColState> {
+class ItemPriceCol extends PriceFetcher<{item: Item}, {}> {
     render(){
-        const {item} = this.props
-        const {prices = {}} = this.state
-        const price = item.type == ItemType.Resource ? 
-            prices[(item as Resource).kind] * (item as Resource).value : item.price
-        return <span>{price}</span>
-    }
+        return <span>{item_base_price(this.props.item, this.state.prices)}</span> }
 }
 
 export function ItemRow(props: ItemProps){
@@ -203,7 +215,6 @@ export function ItemRow(props: ItemProps){
       <ItemActions {...props} layout={lyt.actions} />
     </RB.Row>
 }
-
 
 const TypeString = (t: ItemType = 0)=>ItemType[t].toLowerCase()
 

@@ -28,7 +28,9 @@ export default {
     price: {
         res: {
             // Resource prices per type
-        }
+        },
+        low_modifier: 0.8,
+        high_modifier: 1.2,
     },
     date: new Date('06.05.2523'),
 }

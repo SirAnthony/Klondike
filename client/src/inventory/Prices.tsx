@@ -10,11 +10,11 @@ type PriceDetailsState = {
     prices?: {ResourceType: number}
 }
 
-export class PriceFetcher<P, S> extends F.Fetcher<P, PriceDetailsState> {
+export class PriceFetcher<P, S> extends F.Fetcher<P, PriceDetailsState & S> {
     cacheClass = PriceFetcher
     constructor(props){
         super(props)
-        this.state = {}
+        this.state = {} as any
         InventoryEvents.onreloadPrices(()=>{
             this.cacheClass._cache = undefined
             this.fetch()
