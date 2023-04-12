@@ -83,6 +83,7 @@ const aliases = {
     'error_empty_select': 'Не выбрано',
     'error_value_high': 'Значение слишком велико',
     'error_value_low': 'Значение слишком мало',
+    'act_add': 'Добавить',
 }
 
 export function extend(obj: {string: string | ((...values: any[])=>string)}) {
