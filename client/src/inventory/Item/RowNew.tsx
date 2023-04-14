@@ -1,0 +1,194 @@
+import React from 'react'
+import * as RB from 'react-bootstrap'
+import {Item, ItemType} from '../../common/entity'
+import {Owner, Location} from '../../common/entity'
+import {ResourceType} from '../../common/entity'
+import {ResourceSelect, TypeSelect, PatentTypeSelect} from '../../util/inputs'
+import {PatentWeightSelect, ArtifactTypeSelect} from '../../util/inputs'
+import {NumberInput, LocationSelect, OwnerSelect} from '../../util/inputs'
+import {MultiOwnerSelect, MultiResourceSelect} from '../../util/inputs'
+import {ApiError, FormError} from '../../common/errors'
+import {default as L, LR} from '../locale'
+import * as iutil from './util'
+
+const TypeString = (t: ItemType = 0)=>ItemType[t].toLowerCase()
+
+type ItemRowNewProps = {
+    onCreate: (item: Item)=>void
+}
+type ItemRowNewState = {
+    type?: ItemType
+    name: string
+    owner?: Owner
+    location?: Location
+    price?: number
+    kind?: number
+    value?: number
+    data?: string
+    mass?: number
+    weight?: number
+    energy?: number
+    target?: Location
+    resourceCost?: {kind: ResourceType, value: number}[]
+    boosts?: {kind: string, value: number}[]
+    owners?: Owner[]
+    err?: ApiError
+}
+
+export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
+    constructor(props){
+        super(props)
+        this.state = {name: ''}
+    }
+    stateChange(obj: any){
+        this.setState(Object.assign({err: null}, obj)) }
+    create() {
+        const errors = this.errors
+        if (errors.length){
+            return this.setState({err: new FormError(errors.reduce((p, c)=>{
+                p[c] = 'field_error_noempty'
+                return p
+            }, {}))})
+        }
+        this.setState({err: null})
+        const item = new (Item.class(this.state.type))()
+        for (let k of item.keys)
+            item[k] = this.state[k]
+        this.props.onCreate(item)
+    }
+    get row_size(){ return 2 }
+    hasField(name: string){
+        let cls = new (Item.class(this.state.type))()
+        return cls.keys.includes(name)
+    }
+    get errors(){
+        const item = new (Item.class(this.state.type))()
+        return item.keys.filter(k=>!['_id', 'market', 'owner', 'location'].includes(k) &&
+            !this.state[k] && isNaN(this.state[k]))
+    }
+    get ownerExclude(){ return iutil.owners_exclude(this.state.type) }
+    // resource
+    fields_resource(){
+        const row_size = this.row_size
+        const {kind, value} = this.state
+        const kindChange = kind=>this.stateChange({kind})
+        const valChange = value=>this.stateChange({value})
+        return [<RB.Col sm={row_size} key='resource_kind_select'>
+          <ResourceSelect value={kind} onChange={kindChange} />
+        </RB.Col>,
+        <RB.Col sm={row_size} key='resource_value_select'>
+          <NumberInput placeholder={LR('res_desc_value')} value={value} onChange={valChange} />
+        </RB.Col>]
+    }
+    // coordinates
+    fields_coordinates(){
+        const {target} = this.state
+        const targetChange = target=>this.stateChange({target})
+        return [<RB.Col sm={4} key='coord_target_select'>
+          <LocationSelect onChange={targetChange} value={target} optName='item_desc_target' />
+        </RB.Col>]
+    }
+    // module
+    fields_module(){
+        const row_size = this.row_size
+        const {mass, energy} = this.state
+        const massChange = mas=>this.stateChange({mass})
+        const energyChange = energy=>this.stateChange({energy})
+        return [<RB.Col sm={row_size} key='module_mass_input'>
+          <NumberInput placeholder={LR('item_desc_mass')} value={mass} onChange={massChange} />
+        </RB.Col>, <RB.Col sm={row_size} key='module_energy_input'>
+          <NumberInput placeholder={LR('item_desc_energy')} value={energy} onChange={energyChange} />
+        </RB.Col>]
+    }
+    // patent
+    fields_patent(){
+        const row_size = this.row_size
+        const {kind, weight} = this.state
+        const kindChange = kind=>this.stateChange({kind})
+        const weightChange = weight=>this.stateChange({weight})
+        return [<RB.Col sm={row_size} key='patent_type_select'>
+          <PatentTypeSelect value={kind} onChange={kindChange} />
+        </RB.Col>,
+        <RB.Col sm={row_size} key='patent_weight_select'>
+          <PatentWeightSelect value={weight} onChange={weightChange} />
+        </RB.Col>]
+    }
+    rows_patent(){
+        const {owners, resourceCost} = this.state
+        const ownersChange = owners=>this.stateChange({owners})
+        const resChange = resourceCost=>this.stateChange({resourceCost})
+        return [
+          <MultiOwnerSelect value={owners} exclude={this.ownerExclude}
+            className='menu-input-row' key='multi_owner_select'
+            onChange={ownersChange} />,
+          <MultiResourceSelect value={resourceCost} onChange={resChange}
+            className='menu-input-row' key='multi_resource_select' />
+        ]
+    }
+    // artifact
+    fields_artifact(){
+        const row_size = this.row_size
+        const {kind} = this.state
+        const kindChange = kind=>this.stateChange({kind})
+        return [<RB.Col sm={row_size} key='artifact_kind_select'>
+          <ArtifactTypeSelect value={kind} onChange={kindChange} />
+        </RB.Col>,
+        <RB.Col sm={row_size}></RB.Col>]
+    }
+    fields_top(){
+        const {type, price} = this.state
+        const row_size = this.row_size 
+        const top_fields = (this[`fields_${TypeString(type)}`] || (()=>[])).call(this)
+        const typeChange = type=>this.stateChange({type})
+        const priceChange = price=>this.stateChange({price})
+        return <RB.Row className='menu-input-row'>
+          <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
+          <RB.Col sm={row_size}>
+            <TypeSelect value={type} onChange={typeChange}/>
+          </RB.Col>
+          {top_fields}
+          <RB.Col sm={row_size}>{this.hasField('price') &&
+            <NumberInput placeholder={LR('item_desc_price')} value={price} onChange={priceChange} />}
+          </RB.Col>
+          <RB.Col sm={row_size}>
+            <RB.Button disabled={this.errors.length} onClick={()=>this.create()}>
+              {L('act_create')}</RB.Button>
+          </RB.Col>
+        </RB.Row>
+    }
+    fields_bottom(){
+        const {type, name, data, owner, location} = this.state
+        const btm_fields = (this[`fields_${TypeString(type)}_b`] || (()=>[])).call(this)
+        const nameChange = ({target: {value}})=>this.stateChange({name: value})
+        const dataChange = ({target: {value}})=>this.stateChange({data: value})
+        const ownerChange = owner=>this.stateChange({owner})
+        const locChange = location=>this.stateChange({location})
+        return <RB.Row className='menu-input-row'>
+          <RB.Col sm={2}>
+            <RB.FormControl as='textarea' rows={3} placeholder={LR('item_desc_data')}
+              value={data} onChange={dataChange} />
+          </RB.Col>
+          {this.hasField('name') && <RB.Col sm={2}>
+            <RB.FormControl placeholder={LR('item_desc_name')}
+              value={name} onChange={nameChange} />
+          </RB.Col>}
+          {this.hasField('owner') && <RB.Col sm={4}>
+            <OwnerSelect value={owner} onChange={ownerChange} exclude={this.ownerExclude} />
+          </RB.Col>}
+          {this.hasField('location') && <RB.Col sm={4}>
+            <LocationSelect onChange={locChange} value={location} />
+          </RB.Col>}
+          {btm_fields}
+        </RB.Row>
+    }
+    render(){
+        const {type} = this.state
+        const rows = (this[`rows_${TypeString(type)}`] || (()=>[])).call(this)
+        return <RB.InputGroup>
+          {this.fields_top()}
+          {this.fields_bottom()}
+          {rows}
+        </RB.InputGroup>
+    }
+}
+
