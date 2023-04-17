@@ -34,6 +34,7 @@ const aliases = {
     'institution_type_2': 'Лаборатория',
     'institution_type_3': 'Корпорация',
     'institution_type_4': 'Корабль',
+    'item_desc__id': 'SSC-ID',
     'item_desc_id': 'SSC-ID',
     'item_desc_type': 'Тип',
     'item_desc_name': 'Название',

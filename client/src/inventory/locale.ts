@@ -29,6 +29,10 @@ load(mod, {
     'amount_required': 'Необходимо',
     'amount_filled': 'Предоставлено',
     'confirmation_needed': 'Подтвердите действие',
+    'location_desc_coord': 'координаты',
+    'location_desc_planet': 'планета',
+    'location_desc_system': 'система',
+    'location_desc_sector': 'сектор',
 })
 
 export function LR(str: string, ...args): string {

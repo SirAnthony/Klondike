@@ -42,33 +42,50 @@ export function ItemRowDesc(props: ItemRowTitleProps){
     </RB.Row>
 }
 
-export const ItemRow = React.forwardRef(function(props: ItemRowProps){
+export function ItemRow(props: ItemRowProps){
     const {item, long} = props
-    const obj = new (Item.class(item.type))(item)
-    const res = item as Resource, pt = item as Patent
-    const has = n=>obj.keys.includes(n)
-    const lyt = iutil.column_layout(long)
-    const kind = res.kind==undefined ? '-' :
-        item.type==ItemType.Patent ?
-        LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
-        LR(`res_kind_${res.kind}`)
-    const owner = item.type==ItemType.Patent ?
-        pt.owners.map(o=><div key={'d_'+o._id}>{`${o.name} (${LR('patent_status_'+o.status)})`}</div>) :
-        item.owner?.name||'-'
-    const [showInfo, setShowInfo] = React.useState(false)
-    const onRowClick = ()=>setShowInfo(!showInfo)
-    return <RB.Row className={props.className} onClick={onRowClick}>
-      <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
-      <RB.Col sm={lyt.name}>{item.name}</RB.Col>
-      <RB.Col sm={lyt.type}>{LR(`item_type_${item.type}`)}</RB.Col>
-      <RB.Col sm={lyt.kind}>{kind}</RB.Col>
-      {long && <RB.Col sm={lyt.owner}>{owner}</RB.Col>}
-      {long && <LocationCol {...props} layout={lyt.location} />}
-      {has('resourceCost') && <ResourceCostCol {...props} layout={lyt.value} />}
-      {has('value') && <RB.Col sm={lyt.value}>{res.value|0}</RB.Col>}
-      <ItemPriceCol item={item} layout={lyt.price} />
-      {long && <RB.Col sm={lyt.data}>{res.data}</RB.Col>}
-      <ItemActions {...props} layout={lyt.actions} />
-      {!long && <ItemPopoverOverlay item={item} show={showInfo} />}
-    </RB.Row>
-})
+    if (long)
+        return <ItemRowContent {...props} />
+    const ref = React.useRef(null)
+    return <RB.Row><RB.Col>
+      <ItemPopoverOverlay item={item} show={true} target={ref.current}>
+        <ItemRowContent ref={ref} {...props} />
+      </ItemPopoverOverlay>
+    </RB.Col></RB.Row>
+}
+
+class ItemRowContent extends React.Component<ItemRowProps, {}> {
+    kind(item: Item){
+        const res = item as Resource, pt = item as Patent
+        return res.kind==undefined ? '-' :
+            item.type==ItemType.Patent ?
+            LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
+            LR(`res_kind_${res.kind}`)
+    }
+    owner(item: Item){
+        const pt = item as Patent
+        return item.type==ItemType.Patent ? pt.owners.map(o=>
+            <div key={'d_'+o._id}>{`${o.name} (${LR('patent_status_'+o.status)})`}</div>) :
+            item.owner?.name||'-'
+    }
+    render(){
+        const {item, long} = this.props
+        const obj = new (Item.class(item.type))(item)
+        const res = item as Resource, pt = item as Patent
+        const has = n=>obj.keys.includes(n)
+        const lyt = iutil.column_layout(long)
+        return <RB.Row className={this.props.className}>
+          <RB.Col sm={lyt.id}><IDField item={item} /></RB.Col>
+          <RB.Col sm={lyt.name}>{item.name}</RB.Col>
+          <RB.Col sm={lyt.type}>{LR(`item_type_${item.type}`)}</RB.Col>
+          <RB.Col sm={lyt.kind}>{this.kind(item)}</RB.Col>
+          {long && <RB.Col sm={lyt.owner}>{this.owner(item)}</RB.Col>}
+          {long && <LocationCol {...this.props} layout={lyt.location} />}
+          {has('resourceCost') && <ResourceCostCol {...this.props} layout={lyt.value} />}
+          {has('value') && <RB.Col sm={lyt.value}>{res.value|0}</RB.Col>}
+          <ItemPriceCol item={item} layout={lyt.price} />
+          {long && <RB.Col sm={lyt.data}>{res.data}</RB.Col>}
+          <ItemActions {...this.props} layout={lyt.actions} />
+        </RB.Row>
+    }
+}
