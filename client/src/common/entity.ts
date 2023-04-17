@@ -32,7 +32,7 @@ export class Order extends ID {
     assignee: Owner
     static plan(o: Order){
         return o.resourceCost.reduce((p, r)=>
-            p+r.provided/(r.value||1), 0)/(o.resourceCost.length||1)
+            p+(r.provided|0)/(r.value||1), 0)/(o.resourceCost.length||1)
     }
     get plan(){ return Order.plan(this) }
     get keys(){ return 'resourceCost cycle assignee'.split(' ') }
