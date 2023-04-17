@@ -46,9 +46,9 @@ export function ItemRowDesc(props: ItemRowTitleProps){
 
 export function ItemRow(props: ItemRowProps){
     const {item, long} = props
+    const ref = React.useRef(null)
     if (long)
         return <ItemRowContent {...props} />
-    const ref = React.useRef(null)
     return <RB.Row><RB.Col>
       <ItemPopoverOverlay item={item} show={true} target={ref.current}>
         <ItemRowContent ref={ref} {...props} />
