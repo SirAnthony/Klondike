@@ -1,19 +1,50 @@
-import {BaseRouter, CheckRole, CheckIDParam} from '../base'
-import {CorpController, institutionController, LogController} from '../../entity'
+import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
+import {CorpController, institutionController, LogController, OrderController} from '../../entity'
 import {ItemController, UserController} from '../../entity'
 import {UserType, Patent, PatentStatus, InstitutionType, MarketType} from '../../../client/src/common/entity'
-import {Resource, LogAction} from '../../../client/src/common/entity'
+import {Resource, ResourceCost, Owner, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
+import {Time} from '../../util/time'
 import * as crypto from 'crypto'
 
 const POINTS_FOR_PATENT_PAY = 100
+
+async function pay_with_resource(resource: ItemController,
+    target: {resourceCost: ResourceCost[]}, owner: Owner, info: string){
+    const res = (resource as unknown) as Resource
+    const {value} = res
+    for (let k of target.resourceCost){
+        if (!res.value)
+            break
+        if (k.kind!=res.kind || k.value<=k.provided)
+            continue
+        let amount = Math.min(res.value, k.value-k.provided)
+        k.provided += amount
+        res.value -= amount
+    }
+    const used = value != res.value
+    // Resource is single-used
+    if (used) {
+        // Delist from market
+        res.market = null
+        await LogController.log({
+            name: 'resource_used', info,
+            owner: owner, item: res, points: 0,
+            data: {value}, action: LogAction.ResourceUsed
+        })
+        res.value = 0
+        // Should delete?
+        await resource.save()
+    }
+    return used
+}
 
 export class InventoryApiRouter extends BaseRouter {
 
     @CheckIDParam()
     @CheckRole(UserType.Scientist)
-    async put_item_pay(ctx: RenderContext){
+    async put_item_pay_patent(ctx: RenderContext){
         const {id, itemid, target} = ctx.aparams
         if (!itemid || !target)
             throw 'Required fields missing'
@@ -33,31 +64,8 @@ export class InventoryApiRouter extends BaseRouter {
             await patent.save()
             throw 'Wrong patent status'
         }
-        const res = (resource as unknown) as Resource
-        let {value} = res
-        for (let k of pt.resourceCost){
-            if (!res.value)
-                break
-            if (k.kind!=res.kind || k.value<=k.provided)
-                continue
-            let amount = Math.min(res.value, k.value-k.provided)
-            k.provided += amount
-            res.value -= amount
-        }
-        // Resource is single-used
-        if (value != res.value) {
-            // Delist from market
-            res.market = null
-            await LogController.log({
-                name: 'resource_used', info: `post_patent_pay`,
-                owner: corp.asOwner, item: res, points: 0,
-                data: {value}, action: LogAction.ResourceUsed
-            })
-            res.value = 0
-            // Should delete?
-            await resource.save()
-        }
-        await patent.save()
+        if (await pay_with_resource(resource, pt, corp.asOwner, 'post_patent_pay'))
+            await patent.save()
         // Patent closed
         if (!pt.resourceCost.some(k=>k.provided<k.value)){
             pt.owners.forEach(o=>o.status=PatentStatus.Ready)
@@ -68,6 +76,39 @@ export class InventoryApiRouter extends BaseRouter {
                 action: LogAction.PatentPaid
             })
         }
+    }
+
+    @CheckIDParam()
+    @CheckRole(UserType.Corporant)
+    async put_item_pay_order(ctx: RenderContext){
+        const {id, itemid} = ctx.aparams
+        if (!itemid)
+            throw 'Required fields missing'
+        // Always use corp controller
+        const corp = await CorpController.get(id)
+        const resource = await ItemController.get(itemid)
+        if (!IDMatch(resource.owner._id, corp._id))
+            throw 'Wrong owner of resource'
+        const order = await OrderController.find({
+            'assignee._id': corp._id, cycle: Time.cycle})
+        if (!order)
+            throw 'No order for corp'
+        order.resourceCost.forEach(k=>k.provided |= 0)
+        if (await pay_with_resource(resource, order, corp.asOwner, 'post_order_pay'))
+            await order.save()
+    }
+
+    @CheckIDParam()
+    @CheckAuthenticated()
+    async put_item_pay_loan(ctx: RenderContext){
+       const {stype, id, itemid} = ctx.aparams
+        if (!itemid)
+            throw 'Required fields missing'
+        const srcController = institutionController(+stype)
+        const src = await srcController.get(id)
+        const resource = await ItemController.get(itemid)
+        if (!IDMatch(resource.owner._id, src._id))
+            throw 'Wrong owner of resource'
     }
 
     @CheckIDParam()

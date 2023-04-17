@@ -10,12 +10,13 @@ import {InventoryEvents} from '../inventory'
 import * as util from '../common/util'
 import {default as L} from './locale'
 import {Delimeter} from '../util/components'
+import { TimeDetails } from 'src/inventory/Time'
 
 type OrderDetailsState = {
     orders?: Order[]
+    cycle: number
 }
 type OrderDetailsProps = {
-    cycle?: number
     corp: Corporation
     user: User
     full?: Boolean
@@ -24,8 +25,10 @@ type OrderDetailsProps = {
 export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState> {
     constructor(props){
         super(props)
-        this.state = {}
+        this.state = {cycle: 1}
         InventoryEvents.onreloadOrders(()=>this.fetch())
+        InventoryEvents.ontimeChanged(()=>
+            this.setState({cycle: TimeDetails.Time?.cycle}))
     }
     get fetchUrl() { 
         const {corp} = this.props
@@ -36,22 +39,17 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
         return {item: data, list, orders: list}
     }
     has(field: string){ return this.props.fields?.includes(field) }
-    planInfo(){
-        if (!this.has('plan'))
-            return null
-        const {cycle} = this.props, {orders} = this.state
-        const plan = (orders?.filter(o=>o.cycle==cycle).reduce(
-            (p, c)=>p+c.plan, 1)||1)/(orders?.length||1)
-        return <RB.Row>
-          <RB.Col>{L('order', cycle)}</RB.Col>
-          <RB.Col>{L('plan', plan*100)}</RB.Col>
-        </RB.Row>
-    }
-   render(){
-        const orders = this.state.orders?.map(order=><OrderRowCompact
+    render(){
+        const {cycle} = this.state
+        const cur_orders = this.state.orders?.filter(o=>o.cycle==cycle)||[]
+        const orders = cur_orders.map(order=><OrderRowCompact
             key={`order_row_compact_${order._id}`} order={order} />)
+        const plan = cur_orders.reduce((p, c)=>p+Order.plan(c), 0)/(orders.length||1)
         return <RB.Container>
-          {this.planInfo()}
+          <RB.Row>
+            <RB.Col>{L('order', cycle)}</RB.Col>
+            <RB.Col>{L('plan', (plan*100).toFixed(2))}</RB.Col>
+          </RB.Row>
           {orders}
         </RB.Container>
     }
@@ -69,7 +67,7 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         super(props)
         this.state = {}
         InventoryEvents.onreloadItems(()=>this.fetch());
-        ['Sell', 'Delist', 'Pay'].forEach(cmd=>
+        ['Sell', 'Delist', 'PatentPay', 'OrderPay', 'LoanPay'].forEach(cmd=>
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
     get fetchUrl() { 
@@ -94,12 +92,24 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         this.fetch()
         return true
     }
-    async onPay(item: Item, patent: Patent){
+    async onPatentPay(item: Item, patent: Patent){
         const {corp} = this.props
         const res = await this.onItemAction(item, ()=>corp.type==InstitutionType.Research,
-            `pay/${patent._id}`)
+            `pay/patent/${patent._id}`)
         if (res)
             InventoryEvents.reloadPatents()
+    }
+    async onOrderPay(item: Item){
+        const {corp} = this.props
+        const res = await this.onItemAction(item, ()=>corp.type==InstitutionType.Corporation,
+            `pay/order`)
+        if (res)
+            InventoryEvents.reloadOrders()
+    }
+    async onLoanPay(item: Item){
+        const res = await this.onItemAction(item, ()=>true, `pay/loan`)
+        if (res)
+            InventoryEvents.reloadLoans()
     }
     async onDelist(item: Item){
         const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
@@ -113,7 +123,8 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     rows(){
         const {items = []} = this.state
         const rows = items.filter(util.not_depleted).map(i=><ItemRow className='menu-list-row'
-            onPay={this.onPay} onSell={this.onSell} onDelist={this.onDelist}
+            onPatentPay={this.onPatentPay} onLoanPay={this.onLoanPay} onOrderPay={this.onOrderPay}
+            onSell={this.onSell} onDelist={this.onDelist}
             key={`item_row_${i._id}`} item={i} {...this.props}/>)
         return rows
     }
@@ -179,8 +190,8 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
         }
         const rows = patents.sort((a, b)=>+Patent.served(a, corp) - +Patent.served(b, corp))
             .map(i=><PatentRow onAction={onAction} key={`item_row_${i._id}`}
-              patent={i} {...this.props} />)
-        rows.unshift(<PatentRowDesc />)
+              patent={i} {...this.props} className='menu-list-row' />)
+        rows.unshift(<PatentRowDesc className='menu-list-title' />)
         return rows
     }
     render(){

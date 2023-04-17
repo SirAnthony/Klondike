@@ -9,6 +9,7 @@ export enum Codes {
     INCORRECT_REGISTRATION,
     INCORRECT_SELECTION,
     INCORRECT_BOOK_PASSWORD,
+    SERVER_ERROR,
     CLIENT_ERROR,
 }
 
@@ -19,6 +20,8 @@ export const Statuses = {
     [Codes.WRONG_USER]: 403,
     [Codes.INCORRECT_REGISTRATION]: 401,
     [Codes.INCORRECT_PARAM]: 422,
+    // Should not treat all errors as 400
+    [Codes.SERVER_ERROR]: 400,
 }
 
 export const Status = (code: Codes)=>Statuses[code]

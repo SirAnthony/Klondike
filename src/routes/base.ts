@@ -96,6 +96,8 @@ export class BaseRouter {
                     if (!opt.no_render)
                         await ctx.render(opt.template, ret)
                 } catch(e) {
+                    if (typeof e==='string')
+                        e = {code: Codes.SERVER_ERROR, message: e}
                     const err = ApiError.from(e), {status} = err
                     if (json) {
                         ctx.status = status

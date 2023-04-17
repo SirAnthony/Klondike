@@ -28,7 +28,9 @@ ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
     '/:id': {func: 'ship', methods: ['get']},
 }},
 inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json: true}, urls: {
-    '/:stype/:id/item/:itemid/pay/:target': {func: 'item_pay', methods: ['put']},
+    '/:stype/:id/item/:itemid/pay/patent/:target': {func: 'item_pay_patent', methods: ['put']},
+    '/:stype/:id/item/:itemid/pay/order': {func: 'item_pay_order', methods: ['put']},
+    '/:stype/:id/item/:itemid/pay/loan': {func: 'item_pay_loan', methods: ['put']},
     '/:stype/:id/item/:itemid/sell': {func: 'item_sell', methods: ['put']},
     '/:stype/:id/item/:itemid/delist': {func: 'item_delist', methods: ['put']},
     '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['post']}

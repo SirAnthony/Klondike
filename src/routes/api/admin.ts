@@ -82,7 +82,7 @@ export class AdminApiRouter extends BaseRouter {
         for (let k in data)
             item[k] = data[k]
         if (data.assignee?._id)
-            item.assignee = (await CorpController.get(data.assignee._id)).identifier
+            item.assignee = (await CorpController.get(data.assignee._id)).asOwner
         await item.save()
     }
 

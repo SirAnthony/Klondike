@@ -9,6 +9,12 @@ export type Location = Identifier & {
     pos: Pos
 }
 
+export type ResourceCost = {
+    kind: ResourceType,
+    value: number,
+    provided: number
+}
+
 export interface Identifier {
     _id?: string
     name: string
@@ -21,17 +27,15 @@ export class ID implements Identifier {
 export type Owner = ID & {type: InstitutionType}
 
 export class Order extends ID {
-    requests: {
-        kind: ResourceType
-        required: number
-        filled: number
-    }[]
+    resourceCost: ResourceCost[]
     cycle: number
-    assignee: ID
-    get plan(){ return this.requests.reduce((p, r)=>
-        p+r.filled/(r.required||1), 1)/(this.requests.length||1)
+    assignee: Owner
+    static plan(o: Order){
+        return o.resourceCost.reduce((p, r)=>
+            p+r.provided/(r.value||1), 0)/(o.resourceCost.length||1)
     }
-    get keys(){ return 'requests cycle assignee'.split(' ') }
+    get plan(){ return Order.plan(this) }
+    get keys(){ return 'resourceCost cycle assignee'.split(' ') }
     get class(){ return Order }
 }
 
@@ -118,7 +122,7 @@ export class Patent extends Item {
     kind: PatentType
     weight: PatentWeight
     owners: PatentOwner[]
-    resourceCost: {kind: ResourceType, value: number, provided: number}[]
+    resourceCost: ResourceCost[]
     get keys(){
         return super.keys.concat('kind weight owners resourceCost status'
             .split(' ')).filter(k=>!['location', 'owner'].includes(k))

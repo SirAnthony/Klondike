@@ -6,6 +6,7 @@ import EventEmitter from '../common/events'
 import {UserLogin, UserLoginNav} from './Login'
 import {UserRegister, UserRegisterNav} from './Register'
 import {default as L, LR} from './locale'
+import {TimeDetails} from '../inventory/Time';
 
 const BarEvents = new EventEmitter()
 export function requestReload(){
@@ -49,7 +50,7 @@ export class UserBar extends F.Fetcher<UserBarProps, UserBarState> {
         const user = this.state?.item
         const {reg, login} = this.state
         return <RB.Container><RB.Navbar>
-          <RB.Navbar.Brand href="/">{LR('site_title')}</RB.Navbar.Brand>
+          <div><TimeDetails /></div>
           <RB.Navbar.Toggle />
           <RB.Navbar.Collapse className='justify-content-end'>
             { !user && <UserLoginNav value={login} onClick={this.toggle_login}/> }

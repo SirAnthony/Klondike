@@ -23,12 +23,24 @@ export class ItemActions extends React.Component<ItemRowProps, ItemActionsState>
         const {user, item} = this.props
         return user && item && user._id == item.owner?._id
     }
-    btn_pay(){
-        const {item, corp, onPay} = this.props
-        if (!onPay || !this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
+    btn_patent_pay(){
+        const {item, corp, onPatentPay} = this.props
+        if (!onPatentPay || !this.is_admin && !(this.is_owner && corp.type==InstitutionType.Research))
             return null
-        return <PatentSelectTrigger item={item} corp={corp} desc={L('act_pay')}
-          onClick={patent=>onPay(item, patent)} />
+        return <PatentSelectTrigger item={item} corp={corp} desc={L('act_patent_pay')}
+          onClick={patent=>onPatentPay(item, patent)} />
+    }
+    btn_order_pay(){
+        const {item, corp, onOrderPay} = this.props
+        if (!onOrderPay || !this.is_admin && !(this.is_owner && corp.type==InstitutionType.Corporation))
+            return null
+        return <RB.Button onClick={()=>onOrderPay(item)}>{L('act_order_pay')}</RB.Button>
+    }
+    btn_loan_pay(){
+        const {item, onLoanPay} = this.props
+        if (!onLoanPay || !this.is_admin && !this.is_owner)
+            return null
+        return <RB.Button onClick={()=>onLoanPay(item)}>{L('act_loan_pay')}</RB.Button>
     }
     btn_sell(){
         const {item, onSell, onDelist} = this.props
@@ -55,7 +67,9 @@ export class ItemActions extends React.Component<ItemRowProps, ItemActionsState>
         if (!this.props.item)
             return null
         return <RB.Col sm={this.props.layout}>
-          {this.btn_pay()}
+          {this.btn_patent_pay()}
+          {this.btn_order_pay()}
+          {this.btn_loan_pay()}
           {this.btn_sell()}
           {this.btn_delete()}
         </RB.Col>

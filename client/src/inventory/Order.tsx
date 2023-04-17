@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Owner, Order, ResourceType, User, InstitutionType} from '../common/entity'
+import {Owner, Order, ResourceCost, User, InstitutionType} from '../common/entity'
 import {ResourceSelect, OwnerSelect, NumberInput} from '../util/inputs'
 import * as util from '../common/util'
 import {default as L, LR} from './locale'
@@ -14,8 +14,8 @@ type RowDescProps = {
 export function OrderRowDesc(props: RowDescProps){
     return <RB.Row className={props.className}>
       <RB.Col>{LR('res_desc_kind')}</RB.Col>
-      <RB.Col>{LR('res_required')}</RB.Col>
-      <RB.Col>{LR('res_filled')}</RB.Col>
+      <RB.Col>{L('res_required')}</RB.Col>
+      <RB.Col>{L('res_filled')}</RB.Col>
       <RB.Col sm={1}>{LR('cycle')}</RB.Col>
       <RB.Col sm={2}>{LR('assignee')}</RB.Col>
       <RB.Col sm={2}>{LR('item_desc_actions')}</RB.Col>
@@ -30,11 +30,11 @@ type RowProps = {
 } & RowDescProps
 export function OrderRow(props: RowProps){
     const {order} = props
-    let reqs = order.requests.map((r, i)=>
+    let reqs = order.resourceCost.map((r, i)=>
       <RB.Row key={`order_req_${order._id}_${i}`}>
         <RB.Col>{LR(`res_kind_${r.kind}`)}</RB.Col>
-        <RB.Col>{r.required}</RB.Col>
-        <RB.Col>{r.filled}</RB.Col>
+        <RB.Col>{r.value}</RB.Col>
+        <RB.Col>{r.provided}</RB.Col>
       </RB.Row>)
     const is_admin = props.user.admin
     const onClick = ()=>props.onDelete(order)
@@ -48,31 +48,28 @@ export function OrderRow(props: RowProps){
     </RB.Row>
 }
 
-function OrderReq(req: ResourceRow, _id) {
+function OrderReq(req: ResourceCost, _id) {
     if (!req)
         return [null]
     return [
       <RB.Col sm={4} key={`order_req_kind_${_id}`}>{LR(`res_kind_${req.kind}`)}</RB.Col>,
-      <RB.Col sm={1} key={`order_req_required_${_id}`}>{req.required}</RB.Col>,
-      <RB.Col sm={1} key={`order_req_filled_${_id}`}>{req.filled||0}</RB.Col>
+      <RB.Col sm={1} key={`order_req_required_${_id}`}>{req.value}</RB.Col>,
+      <RB.Col sm={1} key={`order_req_filled_${_id}`}>{req.provided||0}</RB.Col>
     ]
 }
 export function OrderRowCompact(props: RowProps){
-    const {order} = props, {requests} = order, rows = [];
-    for (let i=0; i<requests.length; i+=2)
-        rows.push([...OrderReq(requests[i], order._id+i), ...OrderReq(requests[i+1], order._id+(i+1))])
+    const {order} = props, {resourceCost} = order, rows = [];
+    for (let i=0; i<resourceCost.length; i+=2){
+        rows.push([...OrderReq(resourceCost[i], order._id+i),
+            ...OrderReq(resourceCost[i+1], order._id+(i+1))])
+    }
     return <RB.Row key={`order_row_${order._id}`}>{rows}</RB.Row>
 }
 
 type RowNewProps = {
     onCreate: (order: Order)=>void
 } & RowDescProps
-type ResourceRow = {
-    kind: ResourceType,
-    required?: number,
-    filled?: number
-}
-type ResourceRowID = ResourceRow & {_id: number}
+type ResourceRowID = ResourceCost & {_id: number}
 type RowNewState = {
     assignee?: Owner
     cycle: number
@@ -94,19 +91,19 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             return this.setState({err: new ClientError('Wrong owner')})
         if (!rows.length)
             return this.setState({err: new ClientError('Empty request')})
-        if (rows.find(r=>r.kind<0||!r.required))
+        if (rows.find(r=>r.kind<0||!r.value))
             return this.setState({err: new ClientError('Incorrect parameters')})
         const order = new Order()
         order.assignee = assignee
         order.cycle = cycle
-        order.requests = rows.map(r=>({kind: r.kind,
-            required: r.required, filled: r.filled}))
+        order.resourceCost = rows.map(r=>({kind: r.kind,
+            value: r.value, provided: r.provided}))
         this.props.onCreate(order)
     }
     addRow(){
         const rows = this.state.rows.map(r=>Object.assign({}, r))
         const _id = rows.reduce((p, r)=>r._id<p ? p : r._id, -1)+1
-        rows.push({_id, kind: null})
+        rows.push({_id, kind: null, value: null, provided: null})
         this.stateChange({rows})
     }
     changeRow(row: any){
@@ -126,11 +123,11 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             <ResourceSelect value={row.kind} onChange={type=>changeRow('kind', +type)} />
           </RB.Col>
           <RB.Col sm={2}>
-            <NumberInput placeholder={L('amount_required')} value={row.required}
+            <NumberInput placeholder={L('amount_required')} value={row.value}
                 onChange={val=>changeRow('required', val)} />
           </RB.Col>
           <RB.Col sm={2}>
-            <NumberInput placeholder={L('amount_filled')} value={row.filled}
+            <NumberInput placeholder={L('amount_filled')} value={row.provided}
                 onChange={val=>changeRow('filled', val)} />
           </RB.Col>
           <RB.Col sm={2}>

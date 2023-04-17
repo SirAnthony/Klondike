@@ -83,7 +83,7 @@ export class ApiRouter extends BaseRouter {
         const items: Item[] = await ItemController.all()
         let resources: Resource[] = items.filter(res_filter).map(f=>f as Resource)
         for (let item of resources)
-            prices[item.kind] = (prices[item.kind]+item.price)/2
+            prices[item.kind] = (prices[item.kind]+(item.price||prices[item.kind]))/2
         return {list: prices}
     }
 

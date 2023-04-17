@@ -21,7 +21,9 @@ export type ItemRowProps = {
     corp?: Corporation 
     layout?: number
     onDelete?: (item: Item)=>void
-    onPay?: (item: Item, patent: Patent)=>void
+    onPatentPay?: (item: Item, patent: Patent)=>void
+    onOrderPay?: (item: Item)=>void
+    onLoanPay?: (item: Item)=>void
     onDelist?: (item: Item)=>void
 } & ItemPriceInputProps & ItemRowTitleProps
 

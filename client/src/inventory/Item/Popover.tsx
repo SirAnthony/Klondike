@@ -19,7 +19,8 @@ type ItemRowKeyProps = {
 
 function ItemKeyLocation(props: {loc: Location}){
     const {loc} = props
-
+    if (!loc)
+      return <span>-</span>
     return <RB.Container>
       <RB.Row>
         <RB.Col>{L('location_desc_coord')}</RB.Col>
@@ -64,9 +65,13 @@ class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
   field_owner(){
       return this.col(this.props.item.owner?.name||'-') }
   field_location(){
-      return this.col(<ItemKeyLocation loc={this.props.item.location} />, 12) }
+      const size = this.props.item?.location ? 12 : this.col_size
+      return this.col(<ItemKeyLocation loc={this.props.item.location} />, size)
+  }
   field_target(){
-      return this.col(<ItemKeyLocation loc={(this.props.item as any).target} />, 12) } 
+      const size = this.props.item?.location ? 12 : this.col_size
+      return this.col(<ItemKeyLocation loc={(this.props.item as any).target} />, size)
+  } 
   field_generic(){
       return this.col(this.props.item[this.props.field]) }
   render(){
