@@ -1,5 +1,5 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
-import {UserController, ShipController, ItemController} from '../../entity'
+import {UserController, ShipController, ItemController, institutionController} from '../../entity'
 import {PlanetController, ResourceController} from '../../entity'
 import {PlanetInfo, Profile, UserType} from '../../../client/src/common/entity'
 import {ItemType, Item, Resource} from '../../../client/src/common/entity'
@@ -85,6 +85,19 @@ export class ApiRouter extends BaseRouter {
         for (let item of resources)
             prices[item.kind] = (prices[item.kind]+(item.price||prices[item.kind]))/2
         return {list: prices}
+    }
+
+    @CheckAuthenticated()
+    async get_balance(ctx: RenderContext){
+        const {user}: {user: UserController} = ctx.state
+        const {relation} = user
+        let institution = null
+        if (relation){
+            const srcController = institutionController(relation.type)
+            const src = await srcController.get(relation._id)
+            institution = src.credit
+        }
+        return {user: user.credit, relation, institution}
     }
 
     @CheckRole(UserType.Master)

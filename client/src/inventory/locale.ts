@@ -38,6 +38,12 @@ load(mod, {
     'location_desc_planet': 'планета',
     'location_desc_system': 'система',
     'location_desc_sector': 'сектор',
+    'balance_user': 'Личный счет:',
+    'balance_type_0': tpl`Счет пользователя ${0}:`,
+    'balance_type_1': tpl`Счет организации ${0}:`,
+    'balance_type_2': tpl`Счет лаборатории ${0}:`,
+    'balance_type_3': tpl`Счет корпорации ${0}:`,
+    'balance_type_4': tpl`Счет корабля ${0}:`,
 })
 
 export function LR(str: string, ...args): string {

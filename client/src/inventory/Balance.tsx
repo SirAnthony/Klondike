@@ -1,20 +1,59 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Institution, User, ID} from '../common/entity'
+import {Institution, Owner, User, ID} from '../common/entity'
 import {Delimeter} from '../util/components'
 import {NumberInput, OwnerSelect} from '../util/inputs'
 import {ErrorMessage} from '../util/errors'
 import {ClientError} from '../common/errors'
 import {Modal} from './modal'
+import {InventoryEvents} from '../inventory'
+import * as F from '../Fetcher'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
+import * as date from '../common/date'
 
-type BalanceProps = {
+type BalanceDetailsState = {
+    balance?: {
+        user: number
+        relation?: Owner
+        institution?: number
+    }
+}
+type BalanceDetailsProps = {}
+export class BalanceDetails extends F.Fetcher<BalanceDetailsProps, BalanceDetailsState> {
+    interval: NodeJS.Timer
+    constructor(props){
+        super(props)
+        this.state = {}
+        InventoryEvents.onreloadBalance(()=>this.fetch())
+        this.interval = setInterval(()=>this.fetch(), date.ms.MIN/2)
+    }
+    get fetchUrl(){ return '/api/balance' }
+    fetchState(data: any){
+        const time = new date.Time(data)
+        InventoryEvents.timeChanged()
+        return {item: data, time}
+    }
+    render(){
+        const {balance} = this.state
+        const {relation} = balance||{}
+        return <RB.Container className='nav-link'><RB.Row className='justify-content-center'>
+          <RB.Col sm={2}>{L('balance_user')}</RB.Col>
+          <RB.Col sm={2}>{balance?.user|0}</RB.Col>
+          {relation && <RB.Col sm={2}>
+            {L(`balance_type_${relation.type}`, relation.name)}
+          </RB.Col>}
+          {relation && <RB.Col sm={2}>{balance.institution|0}</RB.Col>}
+        </RB.Row></RB.Container>
+    }
+}
+
+type BudgetDetailsProps = {
     entity: Institution
     user: User
 }
 
-export function Balance(props: BalanceProps){
+export function BudgetDetails(props: BudgetDetailsProps){
     const {entity} = props
     const [credit, setCredit] = React.useState(entity.credit||0)
     const [transferee, setTransferee] = React.useState(null)

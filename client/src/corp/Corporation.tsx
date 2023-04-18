@@ -5,7 +5,8 @@ import {Corporation as ECorp, InstitutionType, User, ID} from '../common/entity'
 import {ControlBar} from '../util/controls'
 import {ItemDetails, OrderDetails} from './Details'
 import {PatentDetails} from './Details'
-import {PriceDetails, Balance} from '../inventory'
+import {RatingDetails} from './Rating'
+import {PriceDetails, BudgetDetails} from '../inventory'
 import {default as L} from './locale'
 
 type CorpProps = {
@@ -20,7 +21,7 @@ export function Corporation(props: CorpProps){
         <RB.Col className='menu-list-title'>{corp.name}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <Balance entity={props.corp} user={props.user} />
+        <BudgetDetails entity={props.corp} user={props.user} />
         <RB.Col className='menu-box'>
           <OrderDetails {...props} fields={['plan']} />
         </RB.Col>
@@ -35,6 +36,7 @@ export function Corporation(props: CorpProps){
       </RB.Row>
       <RB.Row>
         <RB.Col className='menu-box menu-box-col'>
+          <RatingDetails />
         </RB.Col>
         <RB.Col className='menu-box'>
           <PatentDetails {...props} />
@@ -53,7 +55,7 @@ export function Laboratory(props: CorpProps){
         <RB.Col className='menu-box-col'>
           <RB.Container>
             <RB.Row>
-              <Balance entity={props.corp} user={props.user} />
+              <BudgetDetails entity={props.corp} user={props.user} />
             </RB.Row>
             <RB.Row><RB.Col className='menu-box menu-box-col'>
               <PriceDetails {...props} />

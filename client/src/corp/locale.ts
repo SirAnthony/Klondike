@@ -11,6 +11,7 @@ load(mod, {
     'plan': tpl`Выполнение плана: ${0}%`,
     'res_cur': 'Собственность',
     'patent_cur': 'Доступные патенты',
+    'corporations_rating': 'Рейтинг корпораций',
 })
 
 export function LR(str: string, ...args): string {

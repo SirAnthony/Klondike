@@ -28,17 +28,17 @@ body, #root, .App {
   color: white;
 }
 
-a.nav-link, a.navbar-brand {
+div.nav-link, a.nav-link, a.navbar-brand {
     color: var(--color-ui-text);
     font-size: 12pt;
     padding: 0px 8px;
 }
 
-a.nav-link:hover, a.navbar-brand:hover {
+div.nav-link:hover, a.nav-link:hover, a.navbar-brand:hover {
     color: var(--color-ui-text-shade);
 }
 
-a.nav-link:focus, a.navbar-brand:focus,
+div.nav-link:focus, a.nav-link:focus, a.navbar-brand:focus,
 .navbar-nav a.nav-link.active, .navbar-nav .show>a.nav-link {
     color: var(--color-ui-text);
 }
