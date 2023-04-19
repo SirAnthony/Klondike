@@ -161,7 +161,6 @@ div.menu-container-full, div.container-full {
 
 .menu-box td:last-child, .menu-box th:last-child {
     border-right: none;
-    width: 85px;
 }
 
 .menu-box-head {
@@ -353,4 +352,17 @@ input.form-control::placeholder, textarea.form-control::placeholder {
 .item-code {
     padding: 40px;
     text-align: center;
+}
+
+.menu-table-rating th {
+    vertical-align: bottom;
+    text-align: center;
+}
+
+.menu-table-rating th span {
+    -ms-writing-mode: tb-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
 }

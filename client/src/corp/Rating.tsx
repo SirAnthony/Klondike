@@ -17,14 +17,14 @@ type RatingDetailsState = {
         cycle: number,
         owner: Owner,
         value: number
-    }[],
+    }[][],
     cycle: number
 }
 type RatingDetailsProps = {}
 export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsState> {
     constructor(props){
         super(props)
-        this.state = {rating: [], cycle: 0}
+        this.state = {rating: [], cycle: TimeDetails.Time.cycle|0}
         InventoryEvents.onreloadRating(()=>this.fetch())
         InventoryEvents.onreloadTime(()=>
             this.setState({cycle: TimeDetails.Time.cycle}))
@@ -33,39 +33,40 @@ export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsSt
     fetchState(data: any){
         return {item: data, rating: data.rating}
     }
-    body(columns: number){
+    body(){
         const {rating} = this.state
-        const ratings = _.groupBy(rating, ({owner})=>owner.name)
+        const corps = Object.keys(rating?.flat().map(f=>f.owner.name)
+            .reduce((p, c)=>{ p[c] = 1; return p }, {})||{}).sort();
         const rows = []
-        for (let k of Object.keys(ratings).sort()){
-            const r = _.groupBy(ratings[k], ({cycle})=>cycle)
-            const cols = Array(columns+1)
-            cols[0] = <td>{ratings[k][0]?.owner?.name}</td>
-            for (let i=1; i<=columns; i++)
-                cols[i] = <td>{r[i][0].value}</td>
+        for (let k=0; k<rating.length; k++){
+            const cols = [<td>{`C${k+1}`}</td>]
+            for (let c of rating[k])
+                cols.push(<td>{c.value}</td>)
             rows.push(<tr>{cols}</tr>)
         }
         return <tbody>{rows}</tbody>
     }
-    title(columns: number){
-        const cols = []
-        for (let i=0; i<=columns; i++)
-            cols.push(<th>{i ? `C${i}` : ''}</th>)
+    title(){
+        const {rating} = this.state
+        const cols = [<th></th>]
+        const corps = Object.keys(rating?.flat().map(f=>f.owner.name)
+            .reduce((p, c)=>{ p[c] = 1; return p }, {})||{}).sort();
+        for (let k of corps)
+            cols.push(<th><span>{k}</span></th>)
         return <thead>
-          {cols}
+          <tr>{cols}</tr>
         </thead>
     }
     render(){
         const {rating, cycle} = this.state
-        const max = rating.reduce((p, c)=>Math.max(c.cycle|0, p|0), cycle)
         return <RB.Container>
           <RB.Row className='menu-list-title'><RB.Col>
             {L('corporations_rating')}
           </RB.Col></RB.Row>
           <Delimeter />
-          <table>
-            {this.title(max)}
-            {this.body(max)}
+          <table className='menu-table-rating'>
+            {this.title()}
+            {this.body()}
           </table>
         </RB.Container>
     }

@@ -289,6 +289,10 @@ export enum LogAction {
     PatentPaid, PatentForwardFull, PatentForwardPart, PatentForwardLeftovers,
     ResourceUsed,
     ItemPutSale, ItemRemoveSale, ItemPurchase,
+    OrderClosed,
+    BonusRating,
+    MoneyLeftovers, ResourceLeftovers,
+    CycleRating,
 }
 export class LogEntry extends ID {
     action: LogAction

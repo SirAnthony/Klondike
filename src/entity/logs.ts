@@ -20,7 +20,7 @@ export class Controller extends LogDB {
 
     static async log(entry: LogEntry){
         const l = new Controller(entry)
-        l.ts = l.ts||Time.basicTime
+        l.ts = l.ts||Time.time
         await l.save()
     }
 

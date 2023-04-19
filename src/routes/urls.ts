@@ -21,6 +21,7 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/patents/:id': {func: 'patents', methods: ['get']},
     '/patent/forward/:id': {func: 'patent_forward', methods: ['post']},
     '/list': {func: 'list', methods: ['get']},
+    '/rating': {func: 'rating', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},
 ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {

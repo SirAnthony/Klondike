@@ -8,6 +8,7 @@ import {InstitutionType, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
+import {Rating} from '../../util/rating'
 
 const POINTS_FOR_PATENT = 100
 
@@ -126,5 +127,11 @@ export class CorpApiRouter extends BaseRouter {
         const filter = type ? {type: +type} : null
         const list = await controller.all(filter)
         return {list}
+    }
+
+    @CheckIDParam()
+    @CheckRole(UserType.Corporant)
+    async get_rating(ctx: RenderContext){
+        return {rating: await Rating.get()}
     }
 }
