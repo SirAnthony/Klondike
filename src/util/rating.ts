@@ -1,6 +1,9 @@
-import {CorpController, LogController} from "../entity"
+import {CorpController, LogController, OrderController} from "../entity"
+import {ConfigController} from '../entity'
 import {InstitutionType, Owner, LogAction} from '../../client/src/common/entity'
+import {Order} from '../../client/src/common/entity'
 import {Time} from "./time"
+import defines from '../defines'
 import * as date from '../../client/src/common/date'
 
 class Cache {
@@ -54,8 +57,11 @@ async function calcCycle(cycle: number){
         const owner = corp.asOwner, name = `cycle_${cycle}`
         const events = await LogController.all({'owner._id': corp._id,
             ts: {$gt: Time.cycleLength*(cycle-1), $lte: Time.cycleLength*cycle}})
-        const points = events.filter(f=>RatingActions.includes(f.action)).reduce(
+        let points = events.filter(f=>RatingActions.includes(f.action)).reduce(
             (p, c)=>p+c.points|0, 0)
+        const orders = await OrderController.all({'owner._id': owner._id, cycle})
+        const conf = await ConfigController.get()
+        orders.forEach(o=>points += Order.plan(o)>=0.5 ? conf.points.order.open : 0)
         const prev = await LogController.find({action: LogAction.CycleRating,
             'owner._id': owner._id, name})
         if (prev && prev.points!=points) {

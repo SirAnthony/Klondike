@@ -1,4 +1,4 @@
-import {Corporation, InstitutionType} from '../client/src/common/entity'
+import {Corporation, InstitutionType, ResourceSpecialityType, ResourceType} from '../client/src/common/entity'
 import {CorpController} from '../src/entity'
 
 export enum CorpAlias {AP = 'AP', R = 'R', WY = 'WY', USC = 'USC', EF = 'EF'}
@@ -17,26 +17,66 @@ const corps: CorpFixture[] = [new CorpFixture({
     alias: CorpAlias.AP,
     type: InstitutionType.Corporation,
     points: [],
+    resourceValue: {
+        [ResourceType.Alloy]: ResourceSpecialityType.Special,
+        [ResourceType.Crystal]: ResourceSpecialityType.Special,
+        [ResourceType.Energy]: ResourceSpecialityType.Common,
+        [ResourceType.Gas]: ResourceSpecialityType.Profile,
+        [ResourceType.Mineral]: ResourceSpecialityType.Common,
+        [ResourceType.Particle]: ResourceSpecialityType.Profile,
+    },
 }), new CorpFixture({
     name: 'Rakuza',
     alias: CorpAlias.R,
     type: InstitutionType.Corporation,
     points: [],
+    resourceValue: {
+        [ResourceType.Alloy]: ResourceSpecialityType.Special,
+        [ResourceType.Crystal]: ResourceSpecialityType.Profile,
+        [ResourceType.Energy]: ResourceSpecialityType.Common,
+        [ResourceType.Gas]: ResourceSpecialityType.Profile,
+        [ResourceType.Mineral]: ResourceSpecialityType.Common,
+        [ResourceType.Particle]: ResourceSpecialityType.Special,
+    },
 }), new CorpFixture({
     name: 'Wayne-Yuanti',
     alias: CorpAlias.WY,
     type: InstitutionType.Corporation,
     points: [],
+    resourceValue: {
+        [ResourceType.Alloy]: ResourceSpecialityType.Profile,
+        [ResourceType.Crystal]: ResourceSpecialityType.Profile,
+        [ResourceType.Energy]: ResourceSpecialityType.Common,
+        [ResourceType.Gas]: ResourceSpecialityType.Special,
+        [ResourceType.Mineral]: ResourceSpecialityType.Common,
+        [ResourceType.Particle]: ResourceSpecialityType.Special,
+    },
 }), new CorpFixture({
     name: 'Union Spacecraft Corporation, USC',
     alias: CorpAlias.USC,
     type: InstitutionType.Corporation,
     points: [],
+    resourceValue: {
+        [ResourceType.Alloy]: ResourceSpecialityType.Profile,
+        [ResourceType.Crystal]: ResourceSpecialityType.Special,
+        [ResourceType.Energy]: ResourceSpecialityType.Common,
+        [ResourceType.Gas]: ResourceSpecialityType.Special,
+        [ResourceType.Mineral]: ResourceSpecialityType.Common,
+        [ResourceType.Particle]: ResourceSpecialityType.Profile,
+    },
 }), new CorpFixture({
     name: 'Земная федерация',
     alias: CorpAlias.EF,
     type: InstitutionType.Research,
     points: [],
+    resourceValue: {
+        [ResourceType.Alloy]: ResourceSpecialityType.Profile,
+        [ResourceType.Crystal]: ResourceSpecialityType.Profile,
+        [ResourceType.Energy]: ResourceSpecialityType.Common,
+        [ResourceType.Gas]: ResourceSpecialityType.Profile,
+        [ResourceType.Mineral]: ResourceSpecialityType.Common,
+        [ResourceType.Particle]: ResourceSpecialityType.Profile,
+    },
 }),]
 
 class CorpControllerFixture extends CorpController {

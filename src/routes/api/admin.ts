@@ -1,5 +1,5 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, CorpController, PlanetController} from '../../entity'
+import {UserController, CorpController, PlanetController, ConfigController} from '../../entity'
 import {OrderController, ItemController, ResourceController} from '../../entity'
 import {ItemType, UserType, Resource, PatentOwner, PatentStatus, InstitutionType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
@@ -100,6 +100,13 @@ export class AdminApiRouter extends BaseRouter {
         const params: any = ctx.request.body
         const {time} = params
         Time.basicTime += (+time)|0
-    }   
+    }
+
+    @CheckRole(UserType.Master)
+    async post_config(ctx: RenderContext){
+        const params: any = ctx.request.body
+        const {config} = params
+        await ConfigController.save(config)
+    }
 
 }

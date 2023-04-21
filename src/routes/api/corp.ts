@@ -5,12 +5,12 @@ import {institutionController, LogController} from '../../entity'
 import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
 import {InstitutionType, LogAction} from '../../../client/src/common/entity'
+import {ConfigController} from '../../entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {Rating} from '../../util/rating'
-
-const POINTS_FOR_PATENT = 100
+import defines from '../../defines'
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -104,8 +104,10 @@ export class CorpApiRouter extends BaseRouter {
         })
         await item.save()
         // Calcluate points
+        const conf = await ConfigController.get()
+        const pts = conf.points.patent[patent.ownership][patent.weight]
         const points = ready.length != parts.length ? 0 :
-            POINTS_FOR_PATENT*ready.length/patent.owners.length
+            pts*ready.length/patent.owners.length
         if (points){
             await LogController.log({
                 name: 'patent_forward', info: 'post_patent_forward',

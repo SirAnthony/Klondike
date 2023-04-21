@@ -1,14 +1,14 @@
 import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
-import {CorpController, institutionController, LogController, OrderController} from '../../entity'
-import {ItemController, UserController} from '../../entity'
-import {UserType, Patent, PatentStatus, InstitutionType, MarketType} from '../../../client/src/common/entity'
+import {CorpController, institutionController, LogController} from '../../entity'
+import {ItemController, UserController, ConfigController} from '../../entity'
+import {OrderController} from '../../entity'
+import {UserType, Patent, PatentStatus, InstitutionType} from '../../../client/src/common/entity'
+import {MarketType} from '../../../client/src/common/entity'
 import {Resource, ResourceCost, Owner, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
 import * as crypto from 'crypto'
-
-const POINTS_FOR_PATENT_PAY = 100
 
 async function pay_with_resource(resource: ItemController,
     target: {resourceCost: ResourceCost[]}, owner: Owner, info: string){
@@ -69,7 +69,8 @@ export class InventoryApiRouter extends BaseRouter {
         // Patent closed
         if (!pt.resourceCost.some(k=>k.provided<k.value)){
             pt.owners.forEach(o=>o.status=PatentStatus.Ready)
-            const points = POINTS_FOR_PATENT_PAY
+            const conf = await ConfigController.get()
+            const points = conf.points.patent.pay
             await LogController.log({
                 name: 'patent_pay', info: 'post_patent_pay',
                 owner: corp.asOwner, item: patent, points,
@@ -89,13 +90,33 @@ export class InventoryApiRouter extends BaseRouter {
         const resource = await ItemController.get(itemid)
         if (!IDMatch(resource.owner._id, corp._id))
             throw 'Wrong owner of resource'
-        const order = await OrderController.find({
+        const orders = await OrderController.all({
             'assignee._id': corp._id, cycle: Time.cycle})
+        const res = (resource as any) as Resource
+        const order = orders.find(o=>o.resourceCost.some(k=>
+            k.kind==res.kind && k.provided>=k.value))
         if (!order)
             throw 'No order for corp'
         order.resourceCost.forEach(k=>k.provided |= 0)
         if (await pay_with_resource(resource, order, corp.asOwner, 'post_order_pay'))
             await order.save()
+        await LogController.log({
+            name: 'order_pay', info: 'put_item_pay_order',
+            owner: corp.asOwner, item: resource, order,
+            action: LogAction.OrderPay
+        })
+        if (!order.resourceCost.some(k=>k.provided<k.value)){
+            const conf = await ConfigController.get()
+            const points = order.resourceCost.reduce((p, c)=>{
+                const type = corp.resourceValue[c.kind]
+                return p+conf.points.order[type]
+            }, 0)
+            await LogController.log({
+                name: 'order_close', info: 'put_item_pay_order',
+                owner: corp.asOwner, item: resource, points, order,
+                action: LogAction.OrderClosed
+            })
+        }
     }
 
     @CheckIDParam()

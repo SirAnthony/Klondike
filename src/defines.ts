@@ -1,1 +1,2 @@
-export * from '../client/src/common/defines'
+import defines from '../client/src/common/defines'
+export default defines

@@ -1,5 +1,3 @@
-import defines from "./defines"
-
 export interface Pos {
     col: number
     row: number
@@ -89,8 +87,6 @@ export class Resource extends Item {
     type = ItemType.Resource
     kind: ResourceType
     value: number
-    get cost(){
-        return this.value * defines.price.res[this.kind] }
     get keys(){
         return super.keys.concat('kind value'.split(' '))
             .filter(f=>f!='price')
@@ -116,6 +112,7 @@ export class Module extends Item {
 export enum PatentType {Bio, Enginering, Planet}
 export enum PatentWeight {Minimal, Basic, Premium}
 export enum PatentStatus {Created, Ready, Served}
+export enum PatentOwnership {Partial, Full}
 export type PatentOwner = Owner & {status: PatentStatus}
 export class Patent extends Item {
     type = ItemType.Patent
@@ -127,6 +124,8 @@ export class Patent extends Item {
         return super.keys.concat('kind weight owners resourceCost status'
             .split(' ')).filter(k=>!['location', 'owner'].includes(k))
     }
+    get ownership(){ 
+        return this.fullOwnership ? PatentOwnership.Full : PatentOwnership.Partial }
     get fullOwnership(){ return this.owners.length < 2 }
     get shares(){ return 1/(this.owners.length||1) }
     static ready(p: Patent){
@@ -212,9 +211,10 @@ export class Organization extends Institution {
     }
 }
 
-
+export enum ResourceSpecialityType {Common, Special, Profile}
 export class Corporation extends Institution {
     type = InstitutionType.Corporation
+    resourceValue: {[k: number]: ResourceSpecialityType}
 }
 
 export class ResearchLab extends Institution {
@@ -289,7 +289,7 @@ export enum LogAction {
     PatentPaid, PatentForwardFull, PatentForwardPart, PatentForwardLeftovers,
     ResourceUsed,
     ItemPutSale, ItemRemoveSale, ItemPurchase,
-    OrderClosed,
+    OrderPay, OrderClosed,
     BonusRating,
     MoneyLeftovers, ResourceLeftovers,
     CycleRating,
@@ -300,6 +300,7 @@ export class LogEntry extends ID {
     info: string
     item?: Item
     institution?: Owner
+    order?: Order
     ts?: number
     points?: number
     data?: any

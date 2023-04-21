@@ -1,3 +1,4 @@
+
 export default {
     locale: 'RU-ru',
     styles: {
@@ -26,9 +27,6 @@ export default {
         radius: 25,
     },
     price: {
-        res: {
-            // Resource prices per type
-        },
         low_modifier: 0.8,
         high_modifier: 1.2,
     },

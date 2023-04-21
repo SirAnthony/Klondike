@@ -11,7 +11,7 @@ export {OrderRowCompact} from './Order'
 export const InventoryEvents = new EventEmitter()
 export enum InventoryEventType {reloadTime, reloadBalance, timeChanged,
     reloadPatents, reloadItems, reloadOrders, reloadPrices, reloadLoans,
-    reloadRating}
+    reloadRating, reloadConfig}
 Object.keys(InventoryEventType).filter(t=>isNaN(+t)).forEach(c=>{
     InventoryEvents[c] = ()=>InventoryEvents.emit(c)
     InventoryEvents[`on${c}`] = (...args)=>InventoryEvents.on(c, ...args)

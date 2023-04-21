@@ -11,6 +11,7 @@ load(mod, {
     'link_ships': 'Корабли',
     'link_corps': 'Корпорации',
     'link_users': 'Пользователи',
+    'action_save': 'Сохранить',
     'res_create': 'Создать ресурс',
     'res_show': 'Настройки базовых ресурсы',
     'server_time': 'Текущее время',

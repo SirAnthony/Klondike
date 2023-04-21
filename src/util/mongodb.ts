@@ -136,7 +136,7 @@ async function try_mongo(db: DB, cmd, selector?, update?, ...args){
     return res
 }
 
-export async function update(db: DB | string, selector, update, opt: any ={upsert: true}){
+export async function update(db: DB | string, selector, update, opt: any = {upsert: true}){
     db = await check_db(db)
     selector = selector||{}
     if (opt.del_undef)
@@ -219,7 +219,7 @@ async function ensure_index(db: DB | string, collection: string, index: string, 
     return await db.db.createIndex(collection, index, opt)
 }
 
-export async function create_collection(db: DB | string, collection: string, indexes: Array<string>, opt: mongo.CreateCollectionOptions){
+export async function create_collection(db: DB | string, collection: string, indexes?: Array<string>, opt?: mongo.CreateCollectionOptions){
     db = await check_db(db)
     const col = await db.db.createCollection(collection, opt)
     if (!indexes)

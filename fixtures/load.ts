@@ -4,6 +4,7 @@ import {default as ships} from './ships'
 import {default as planets} from './planets'
 import {default as users} from './users'
 import {default as resources} from './resources'
+import {default as config} from './config'
 
 async function load() {
     await corps()
@@ -11,6 +12,7 @@ async function load() {
     await planets()
     await users()
     await resources()
+    await config()
     exit(0)
 }
 

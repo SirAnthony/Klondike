@@ -45,6 +45,7 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
     '/order/:id/delete': {func: 'order', methods: ['delete']},
     '/orders/': {func: 'orders_list', methods: ['get']},
     '/time': {func: 'time', methods: ['put']},
+    '/config': {func: 'config', methods: ['post']},
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/time': {func: 'time', methods: ['get']},
@@ -56,6 +57,7 @@ api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/planets/': {func: 'planet_list', methods: ['get']},
     '/prices': {func: 'prices', methods: ['get']},
     '/users/': {func: 'users_list', methods: ['get']},
+    '/config': {func: 'config', methods: ['get']},
 }},
 auth: {prefix: '/auth', router: AuthRouter, urls: {
     '/info': {func: 'info', methods: ['get'], json: true},

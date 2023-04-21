@@ -1,6 +1,7 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, ItemController, institutionController} from '../../entity'
 import {PlanetController, ResourceController} from '../../entity'
+import {ConfigController} from '../../entity'
 import {PlanetInfo, Profile, UserType} from '../../../client/src/common/entity'
 import {ItemType, Item, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
@@ -104,5 +105,9 @@ export class ApiRouter extends BaseRouter {
     async get_users_list(ctx: RenderContext){
         const list = await UserController.all()
         return {list}
+    }
+
+    async get_config(ctx: RenderContext){
+        return await ConfigController.get()
     }
 }

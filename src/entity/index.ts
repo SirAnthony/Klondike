@@ -7,9 +7,11 @@ import {Controller as ResourceController} from './resources'
 import {Controller as OrderController} from './orders'
 import {Controller as ItemController} from './items'
 import {Controller as LogController} from './logs'
+import {Controller as ConfigController} from './config'
 
 export {UserController, ShipController, CorpController, PlanetController,
-    ResourceController, OrderController, ItemController, LogController}
+    ResourceController, OrderController, ItemController, LogController,
+    ConfigController}
 
 export function institutionController(type: InstitutionType){
     switch(type){
