@@ -2,7 +2,7 @@ import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, ItemController, institutionController} from '../../entity'
 import {PlanetController, ResourceController} from '../../entity'
 import {ConfigController} from '../../entity'
-import {PlanetInfo, Profile, UserType} from '../../../client/src/common/entity'
+import {PlanetInfo, UserType} from '../../../client/src/common/entity'
 import {ItemType, Item, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
@@ -19,25 +19,6 @@ export class ApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async get_time(ctx: RenderContext){
         return Time
-    }
-
-    @CheckAuthenticated()
-    async post_profile(ctx: RenderContext){
-        const {user}: {user: UserController} = ctx.state
-        const body =  ctx.request.body||{}
-        const data = Profile.fields.reduce((p, k)=>{
-            if (body[k])
-                p[k] = body[k]
-            return p
-        }, {});
-        const data_keys = Object.keys(data)
-        this.check_param(ctx, data_keys.length, 'profile', 'Empty response')
-        this.check_param(ctx, !Profile.static.some(k=>data_keys.includes(k)),
-            'profile', 'Cannot change')
-        for (let k in data)
-            user[k] = data[k]
-        await user.save()
-        return {done: 1, user}
     }
 
     // TODO: no checks at all

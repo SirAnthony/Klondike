@@ -3,13 +3,13 @@ import * as RR from 'react-router-dom'
 import * as RB from 'react-bootstrap'
 import {UserBar} from '../user/Bar'
 import {UserFooter} from '../user/Footer'
-import {UserProfile} from '../user/Profile'
 import * as entity from '../common/entity'
 import {Menu} from '../util/controls'
 import {Navigator as ShipNavigator} from '../ship'
 import {Navigator as CorpNavigator} from '../corp'
 import {Navigator as MapNavigator, ListNavigator as PlanetListNavigator} from '../map'
 import {Navigator as AdminNavigator} from '../admin'
+import {Navigator as UserProfileNavigator} from '../user/Profile'
 import {Confirmator} from '../inventory';
 import L from './locale'
 import './App.css';
@@ -44,7 +44,8 @@ function App() {
       <RR.Route path='/map/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planet/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
-      <RR.Route path='/account/profile' element={<UserProfile user={user} />} />
+      <RR.Route path='/profile' element={<UserProfileNavigator user={user} />} />
+      <RR.Route path='/profile/*' element={<UserProfileNavigator user={user} />} />
       { is_admin && <RR.Route path='/admin/*' element={<AdminNavigator user={user} />} />}
       { is_admin && <RR.Route path='/admin/' element={<AdminNavigator user={user} />} />}
     </RR.Routes>

@@ -1,7 +1,7 @@
 
 import {MainRouter, AuthRouter, AdminRouter} from '.'
 import {ApiRouter, CorpApiRouter, AdminApiRouter, ShipApiRouer} from './api'
-import {InventoryApiRouter} from './api'
+import {InventoryApiRouter, UserApiRouter} from './api'
 import {RenderContext} from '../middlewares'
 import {Environment} from 'nunjucks'
 import * as date from '../../client/src/common/date'
@@ -36,6 +36,9 @@ inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json
     '/:stype/:id/item/:itemid/delist': {func: 'item_delist', methods: ['put']},
     '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['post']}
 }},
+user_api: {prefix: '/api/user', router: UserApiRouter, opt: {json: true}, urls: {
+    '/profile/:id': {func: 'profile', methods: ['get', 'post']}
+}},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
     '/resource/:id': {func: 'resource_change', methods: ['post']},
     '/item/create': {func: 'item_change', methods: ['post']},
@@ -50,7 +53,6 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/time': {func: 'time', methods: ['get']},
     '/balance': {func: 'balance', methods: ['get']},
-    '/profile': {func: 'profile', methods: ['post']},
     '/item/:id': {func: 'item', methods: ['get']},
     '/planet/list': {func: 'planet_list_short', methods: ['get']},
     '/planet/:id': {func: 'planet', methods: ['get']},

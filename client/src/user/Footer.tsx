@@ -83,7 +83,7 @@ export function UserFooter(props: FooterProps){
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='personal' href={`/user/${user?._id}`}>
+          <RB.NavLink eventKey='personal' href={`/profile/${user?._id}`}>
             {L('tab_cabinet')}
           </RB.NavLink>
         </RB.NavItem></RB.Col>

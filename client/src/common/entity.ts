@@ -173,7 +173,7 @@ export class Institution extends ID {
     }
 }
 
-export const Profile = {
+export const ProfileFields = {
     fields: `email first_name last_name alias
         phone`.replace(/\s+/g, ' ').split(' '),
     static: ['email'],

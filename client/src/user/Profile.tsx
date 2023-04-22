@@ -1,17 +1,22 @@
 import React from 'react';
+import * as RR from 'react-router-dom'
 import * as RB from 'react-bootstrap'
 import * as util from '../common/util'
 import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
-import {User, Profile} from '../common/entity'
+import {User, ProfileFields} from '../common/entity'
+import {ControlBar} from '../util/controls'
+import * as F from '../Fetcher'
 import L from './locale'
 import EventEmitter from '../common/events'
 
 const ProfileEvents = new EventEmitter()
 
 type UserProfileProps = {
+    id?: string
     user: User
 }
+
 type UserProfileState = {
     err?: CError.ApiError
     changed: boolean
@@ -29,7 +34,7 @@ function ProfileField(props: ProfileFieldProps){
     const {name, field} = props
     const [edit, setEdit] = React.useState(false)
     const [value, setValue] = React.useState(props.value)
-    const changeEdit = !Profile.static.includes(name) && !edit ? ()=>setEdit(!edit) : null
+    const changeEdit = !ProfileFields.static.includes(name) && !edit ? ()=>setEdit(!edit) : null
     ProfileEvents.on('reset', ()=>setEdit(false))
     const change = ({target: {value}})=>{
         props.onChange(name, value)
@@ -67,6 +72,77 @@ function PasswordField(props){
     </RB.Row>
 }
 
+function ProfileInfo(props: UserProfileProps){
+    const {user} = props
+    return <RB.Container>
+      <RB.Row><RB.Col>
+        <img src={`/static/img/users/user.png`} alt='user' />
+      </RB.Col></RB.Row>
+      <RB.Row>
+        <RB.Col>{L('name')}</RB.Col>
+        <RB.Col>{user.fullName}</RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Col>{L('credit')}</RB.Col>
+        <RB.Col>{user.credit}</RB.Col>
+      </RB.Row>
+    </RB.Container>
+}
+
+function ProfileData(props: UserProfileProps){
+    const {user} = props
+    const {data} = user
+    let txt = data.replace(/\{([^:]+):([^}]+)\}/g,
+        '<a href="/profile/$2">$1</a>')
+    return <div dangerouslySetInnerHTML={({__html: txt})} />
+}
+
+export class UserProfile extends F.Fetcher<UserProfileProps, UserProfileState> {
+    get fetchUrl(){
+        const {id = ''} = this.props
+        return `/api/user/profile/${id}`
+    }
+    fetchState(data: any = {}){
+        const user = data?.user ? new User() : undefined
+        for (let k in data?.user||{})
+            user[k] = data.user[k]
+        return {item: data, user}
+    }
+    render(){
+        const {user} = this.state||{}
+        if (!user)
+            return <RB.Container>No user</RB.Container>
+        return <RB.Container className='menu-container'>
+      <ControlBar title={L('interface')} />
+        <RB.Row>
+          <RB.Col className='menu-box-clear'>
+            <ProfileInfo user={user} />
+          </RB.Col>
+          <RB.Col className='menu-box-col-clear'>
+            <ProfileData user={user} />
+          </RB.Col>
+        </RB.Row>
+      </RB.Container>
+    }
+}
+
+function UserProfileNavigator(props: {user: User}) {
+    const params = RR.useParams()
+    const {id} = params
+    return <UserProfile user={props.user} id={id} />
+}
+
+export function Navigator(props){
+    const {user} = props
+    return (<div>
+      <RR.Routes>
+        <RR.Route path='/' element={<UserProfileNavigator user={user} />} />
+        <RR.Route path='/:id' element={<UserProfileNavigator user={user} />} />
+      </RR.Routes>
+    </div>)
+}
+
+/*
 export class UserProfile extends React.Component<UserProfileProps, UserProfileState> {
     constructor(props: UserProfileProps){
         super(props)
@@ -116,8 +192,17 @@ export class UserProfile extends React.Component<UserProfileProps, UserProfileSt
         if (!user)
             return <RB.Container>No user</RB.Container>
         const fields = Profile.fields.map(f=>this.field(f))
-        return <RB.Container className='profile'>
-          {err && <ErrorMessage field={err} />}
+        return <RB.Container className='menu-container'>
+          <ControlBar title={L('interface')} />
+          <RB.Row>{err && <ErrorMessage field={err} />}</RB.Row>          
+          <RB.Row>
+            <RB.Col className='menu-box-clear'>
+              <ProfileInfo user={user} />
+            </RB.Col>
+            <RB.Col>
+
+            </RB.Col>
+          </RB.Row>
           <RB.Container className='center'>
             <RB.Row className='justify-content-center'><h3>Профиль</h3></RB.Row>
             {fields}
@@ -130,5 +215,4 @@ export class UserProfile extends React.Component<UserProfileProps, UserProfileSt
           </RB.Container>
         </RB.Container>
     }
-
-}
+}*/
