@@ -47,3 +47,5 @@ export const get_name = (data: any)=>typeof data==='object' ? data.name : data
 
 export const not_depleted = (item: Item)=>{
     return item.type!=ItemType.Resource || (item as Resource).value>0 }
+
+export const isEmpty = (s: string)=>!s && !isNaN(+s)

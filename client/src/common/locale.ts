@@ -77,6 +77,15 @@ const aliases = {
     'artifact_kind_0': 'Био-медицинский',
     'artifact_kind_1': 'Инженерный',
     'artifact_kind_2': 'Аномалия',
+    'user_desc_kind': 'Роль',
+    'user_kind_0': 'Нет',
+    'user_kind_1': 'Корпорант',
+    'user_kind_2': 'Капитан',
+    'user_kind_3': 'Механик',
+    'user_kind_4': 'Навигатор',
+    'user_kind_5': 'Ученый',
+    'user_kind_6': 'Охранник',
+    'user_kind_7': 'Мастер',
     'loc_desc_coord': 'Координаты (x:y)',
     'cycle': 'Цикл',
     'day_number': 'день',
@@ -85,6 +94,9 @@ const aliases = {
     'error_value_high': 'Значение слишком велико',
     'error_value_low': 'Значение слишком мало',
     'act_add': 'Добавить',
+    'act_edit': 'Редактировать',
+    'act_save': 'Сохранить',
+    'act_cancel': 'Отмена',
 }
 
 export function extend(obj: {string: string | ((...values: any[])=>string)}) {

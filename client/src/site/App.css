@@ -191,7 +191,7 @@ div.menu-container-full, div.container-full {
     padding: 5px;
 }
 
-.menu-box-clear div img {
+.menu-box-clear div img, .menu-box-desc img {
     width: 250px;
     height: 250px;
     margin: 20px 0px;
@@ -245,6 +245,13 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
     padding: 2px 5px;
     margin: 2px 3px;
     font-size: 9pt;
+}
+
+.menu-box-desc .row {
+    padding: 8px 0px;
+    margin: 10px 0px;
+    font-size: 10pt;
+    color: var(--color-ui-text);
 }
 
 .menu-list-box {

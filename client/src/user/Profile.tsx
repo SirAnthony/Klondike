@@ -72,29 +72,44 @@ function PasswordField(props){
     </RB.Row>
 }
 
-function ProfileInfo(props: UserProfileProps){
-    const {user} = props
-    return <RB.Container>
+type UserViewProfileProps = {
+    viewer: User
+} & UserProfileProps
+
+function ProfileInfo(props: UserViewProfileProps){
+    const {user, viewer} = props
+    return <RB.Container className='menu-box-desc'>
       <RB.Row><RB.Col>
         <img src={`/static/img/users/user.png`} alt='user' />
       </RB.Col></RB.Row>
       <RB.Row>
-        <RB.Col>{L('name')}</RB.Col>
+        <RB.Col>{L('desc_name')}</RB.Col>
         <RB.Col>{user.fullName}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <RB.Col>{L('credit')}</RB.Col>
-        <RB.Col>{user.credit}</RB.Col>
+        <RB.Col>{L('desc_role')}</RB.Col>
+        <RB.Col>{L(`desc_user_type_${user.kind}`)}</RB.Col>
       </RB.Row>
+      {(viewer.admin || viewer._id==user._id) && <RB.Row>
+        <RB.Col>{L('desc_credit')}</RB.Col>
+        <RB.Col>{user.credit|0}</RB.Col>
+      </RB.Row>}
     </RB.Container>
 }
 
-function ProfileData(props: UserProfileProps){
+function ProfileData(props: UserViewProfileProps){
     const {user} = props
-    const {data} = user
-    let txt = data.replace(/\{([^:]+):([^}]+)\}/g,
+    const {info} = user
+    const txt = info.replace(/\{([^:]+):([^}]+)\}/g,
         '<a href="/profile/$2">$1</a>')
-    return <div dangerouslySetInnerHTML={({__html: txt})} />
+    return <RB.Container>
+      <RB.Row>
+        <RB.Col className='menu-list-title'>{L('desc_data')}</RB.Col>
+      </RB.Row>
+      <RB.Row>
+        <RB.Col dangerouslySetInnerHTML={({__html: txt})} />
+      </RB.Row>
+    </RB.Container>
 }
 
 export class UserProfile extends F.Fetcher<UserProfileProps, UserProfileState> {
@@ -113,16 +128,19 @@ export class UserProfile extends F.Fetcher<UserProfileProps, UserProfileState> {
         if (!user)
             return <RB.Container>No user</RB.Container>
         return <RB.Container className='menu-container'>
-      <ControlBar title={L('interface')} />
-        <RB.Row>
-          <RB.Col className='menu-box-clear'>
-            <ProfileInfo user={user} />
-          </RB.Col>
-          <RB.Col className='menu-box-col-clear'>
-            <ProfileData user={user} />
-          </RB.Col>
-        </RB.Row>
-      </RB.Container>
+          <ControlBar title={L('interface')} />
+          <RB.Row>
+            <RB.Col className='menu-list-title'>{L('profile')}</RB.Col>
+          </RB.Row>
+          <RB.Row>
+            <RB.Col className='menu-box menu-box-col'>
+              <ProfileInfo user={user} viewer={this.props.user} />
+            </RB.Col>
+            <RB.Col className='menu-box'>
+              <ProfileData user={user} viewer={this.props.user} />
+            </RB.Col>
+          </RB.Row>
+        </RB.Container>
     }
 }
 

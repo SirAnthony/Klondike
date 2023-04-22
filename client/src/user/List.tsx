@@ -1,23 +1,106 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {User} from '../common/entity'
+import {User, UserType} from '../common/entity'
 import * as util from '../common/util'
 import {List as UList} from '../util/controls'
 import {ErrorMessage} from '../util/errors'
-import L from './locale'
+import {default as L, LR} from './locale'
+import {Delimeter} from '../util/components'
+import {TextInput, NumberInput, UserTypeSelect, OwnerSelect} from '../util/inputs'
 
-function UserRow(params: {user: User}) {
-    const {user} = params
+type UserSend = Omit<User, 'type' | 'admin' | 'displayName' | 'fullName'
+    | 'keys' | 'cost' | 'class'> & {password: string}
+
+type UserRowProps = {
+    user: User
+    onChange: (u: UserSend)=>void
+    onCancel?: ()=>void
+}
+
+function UserRowEdit(props: UserRowProps){
+    const {user, onChange, onCancel} = props
+    const [email, setEmail] = React.useState(user.email)
+    const [kind, setKind] = React.useState(user.kind)
+    const [password, setPassword] = React.useState(null)
+    const [name, setName] = React.useState(user.name)
+    const [first, setFirst] = React.useState(user.first_name)
+    const [last, setLast] = React.useState(user.last_name)
+    const [alias, setAlias] = React.useState(user.alias)
+    const [phone, setPhone] = React.useState(user.phone)
+    const [credit, setCredit] = React.useState(user.credit)
+    const [relation, setRelation] = React.useState(user.relation)
+    const [data, setData] = React.useState(user.data)
+    const onSubmit = ()=>onChange({email, kind, password, name,
+        first_name: first, last_name: last, alias, phone, credit,
+        relation, data})
+    return <RB.Row key={`user_edit_${user._id}`} className="menu-list-row">
+      <RB.Container>
+        <RB.Row className='menu-input-row'>
+          <RB.Col><TextInput value={email} onChange={setEmail}
+            placeholder={L('field_email')} /></RB.Col>
+          <RB.Col><TextInput value={password} onChange={setPassword}
+            placeholder={L('field_password')} type='password'/></RB.Col>
+          <RB.Col><UserTypeSelect value={kind} onChange={setKind} /></RB.Col>
+          <RB.Col><TextInput value={name} onChange={setName}
+            placeholder={L('desc_name')} /></RB.Col>
+          <RB.Col><TextInput value={first} onChange={setFirst}
+            placeholder={L('field_first_name')} /></RB.Col>
+          <RB.Col><TextInput value={last} onChange={setLast}
+            placeholder={L('field_last_name')} /></RB.Col>
+          <RB.Col><TextInput value={alias} onChange={setAlias}
+            placeholder={L('field_alias')} /></RB.Col>
+          <RB.Col><TextInput value={phone} onChange={setPhone}
+            placeholder={L('field_phone')} /></RB.Col>
+          <RB.Col><NumberInput value={credit} onChange={setCredit}
+            placeholder={L('field_credit')}/></RB.Col>
+        </RB.Row>
+        <RB.Row className='menu-input-row'>
+          <RB.Col>
+            <TextInput as='textarea' rows={10} placeholder={L('desc_data')}
+              value={data} onChange={setData} />
+          </RB.Col>
+          <RB.Col sm={4}>
+            <OwnerSelect value={relation} onChange={setRelation} />
+          </RB.Col>
+          <RB.Col sm={2}>
+            <RB.Button onClick={onSubmit}>{LR('act_save')}</RB.Button>
+            <RB.Button onClick={onCancel}>{LR('act_cancel')}</RB.Button>
+          </RB.Col>
+        </RB.Row>
+      </RB.Container>
+    </RB.Row>
+}
+
+function UserRow(props: UserRowProps) {
+    const {user} = props
+    const [showData, setShowData] = React.useState(false)
+    const [showEdit, setShowEdit] = React.useState(false)
+    if (showEdit)
+        return <UserRowEdit {...props} onCancel={()=>setShowEdit(false)} />
     return <RB.Row key={`user_${user._id}`} className="menu-list-row">
-      <RB.Col><RB.NavLink href={`/profile/${user._id}`}>{user.name}</RB.NavLink></RB.Col>
-      <RB.Col>{user.fullName}</RB.Col>
-      <RB.Col>{L(`desc_user_type_${user.kind}`)}</RB.Col>
-      <RB.Col>{user.phone}</RB.Col>
+      <RB.Container>
+        <RB.Row>
+          <RB.Col><RB.NavLink href={`/profile/${user._id}`}>{user.name}</RB.NavLink></RB.Col>
+          <RB.Col>{User.fullName(user)}</RB.Col>
+          <RB.Col>{LR(`user_kind_${user.kind}`)}</RB.Col>
+          <RB.Col>{user.phone}</RB.Col>
+          <RB.Col>{user.credit}</RB.Col>
+          <RB.Col>
+            <RB.Button onClick={()=>setShowData(!showData)}>{L('act_show_data')}</RB.Button>
+            <RB.Button onClick={()=>setShowEdit(true)}>{LR('act_edit')}</RB.Button>
+          </RB.Col>
+        </RB.Row>
+        {showData && <RB.Row>
+          <RB.Col>{user.info}</RB.Col>
+        </RB.Row>}
+      </RB.Container>
     </RB.Row>
 }
 
 type UserListState = {
     list?: User[]
+    filter_text?: string
+    filter_kind?: UserType
 }
 type UserListProps = {
     user: User
@@ -32,16 +115,44 @@ export default class List extends UList<UserListProps, UserListState> {
     L = L
     get closeLink() { return '/admin/' }
     get fetchUrl() { return `/api/users/` }
+    get list(){
+        const {list, filter_text, filter_kind} = this.state
+        const fk = (u: User)=>isNaN(filter_kind) || u.kind==filter_kind
+        const ft = (u: User)=>util.isEmpty(filter_text) ||
+            [User.fullName(u), u.phone].some(v=>
+            (new RegExp(filter_text, 'i')).test(v))
+        return list?.filter(u=>fk(u) && ft(u))||[]
+    }
+    async onChange(u: UserSend){
+
+    }
     body(){
         if (!this.props.user?.admin)
             return [<ErrorMessage message={this.L('error_restricted')} />]
-        const {list} = this.state
-        const rows = list.map(l=><UserRow key={`user_list_${l._id}`} user={l} />)
-        return [<RB.Row key={'user_list_title'} className="menu-list-title">
+        const {filter_text, filter_kind} = this.state
+        const rows = this.list.map(l=>
+            <UserRow key={`user_list_${l._id}`} user={l} onChange={u=>this.onChange(u)} />)
+        return [
+          <RB.Row className='menu-input-row'>
+            <RB.Col>{L('desc_filter')}</RB.Col>
+            <RB.Col>
+              <RB.FormControl placeholder={L('desc_filter_text_placeholder')}
+                value={filter_text}
+                onChange={({target: {value}})=>this.setState({filter_text:
+                  !util.isEmpty(value) ? value : undefined})} />
+            </RB.Col>
+            <RB.Col>
+              <UserTypeSelect value={filter_kind}
+                onChange={v=>this.setState({filter_kind: !isNaN(+v) ? v : undefined })} />
+            </RB.Col>
+          </RB.Row>,
+          <RB.Row key={'user_list_title'} className="menu-list-title">
             <RB.Col>{L('desc_name')}</RB.Col>
-            <RB.Col>{L('desc_alias')}</RB.Col>
+            <RB.Col>{L('desc_fullname')}</RB.Col>
             <RB.Col>{L('desc_role')}</RB.Col>
             <RB.Col>{L('desc_phone')}</RB.Col>
-        </RB.Row>, ...rows]
+            <RB.Col>{L('desc_credit')}</RB.Col>
+            <RB.Col>{L('desc_actions')}</RB.Col>
+        </RB.Row>, <Delimeter />, ...rows]
     }
 }

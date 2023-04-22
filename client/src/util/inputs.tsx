@@ -1,23 +1,43 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, PatentWeight, ArtifactType} from '../common/entity'
+import {ItemType, ResourceType, PatentType, PatentWeight, ArtifactType, UserType} from '../common/entity'
 import {Patent, Corporation, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
 import {TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
 import {ApiStackError} from '../common/errors'
+import * as util from '../common/util'
 import L from '../common/locale'
 import * as _ from 'lodash'
 
-type InputProps = {
+type TextInputProps = {
+    value: string
+    placeholder: string
+    as?: React.ElementType<any>
+    rows?: number
+    type?: string
+    onChange: (l: string)=>void
+    err?: ApiStackError
+}
+
+export function TextInput(props: TextInputProps){
+    const empty = util.isEmpty(props.value)
+    const val =  empty ? undefined : props.value
+    const onChange = ({target: {value}})=>props.onChange(!util.isEmpty(value) ? val : value)
+    const cls = props.err ? 'input-error' : ''
+    return <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val}
+      className={cls} as={props.as} rows={props.rows} type={props.type} onChange={onChange} />
+}
+
+type NumberInputProps = {
     value: number
     placeholder: string
     onChange: (l: number)=>void
     err?: ApiStackError
 }
 
-export function NumberInput(props: InputProps){
+export function NumberInput(props: NumberInputProps){
     const empty = typeof props.value==='undefined'
     const val =  empty ? undefined : +props.value
     const onChange = ({target: {value}})=>props.onChange(isNaN(+value) ? val : +value)
@@ -32,6 +52,7 @@ export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_d
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
 export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
+export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
 
 export function PatentSelect(props: {value?: Patent, corp: Corporation,
     item: Item, onChange: (p: Patent)=>void}){

@@ -3,7 +3,7 @@ import * as RB from 'react-bootstrap'
 import {Item, ItemType} from '../../common/entity'
 import {Owner, Location} from '../../common/entity'
 import {ResourceType} from '../../common/entity'
-import {ResourceSelect, TypeSelect, PatentTypeSelect} from '../../util/inputs'
+import {ResourceSelect, TypeSelect, PatentTypeSelect, TextInput} from '../../util/inputs'
 import {PatentWeightSelect, ArtifactTypeSelect} from '../../util/inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from '../../util/inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from '../../util/inputs'
@@ -159,18 +159,17 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_bottom(){
         const {type, name, data, owner, location} = this.state
         const btm_fields = (this[`fields_${TypeString(type)}_b`] || (()=>[])).call(this)
-        const nameChange = ({target: {value}})=>this.stateChange({name: value})
         const dataChange = ({target: {value}})=>this.stateChange({data: value})
         const ownerChange = owner=>this.stateChange({owner})
         const locChange = location=>this.stateChange({location})
         return <RB.Row className='menu-input-row'>
           <RB.Col sm={2}>
-            <RB.FormControl as='textarea' rows={3} placeholder={LR('item_desc_data')}
-              value={data} onChange={dataChange} />
+            <TextInput as='textarea' rows={3} placeholder={LR('item_desc_data')}
+              value={data} onChange={data=>this.stateChange({data})} />
           </RB.Col>
           {this.hasField('name') && <RB.Col sm={2}>
-            <RB.FormControl placeholder={LR('item_desc_name')}
-              value={name} onChange={nameChange} />
+            <TextInput value={name} onChange={name=>this.stateChange({name})}
+              placeholder={LR('item_desc_name')} />
           </RB.Col>}
           {this.hasField('owner') && <RB.Col sm={4}>
             <OwnerSelect value={owner} onChange={ownerChange} exclude={this.ownerExclude} />

@@ -189,14 +189,16 @@ export class User extends Institution {
     email: string
     phone: string
     relation: Owner
+    info?: string
     get admin(){ return this.kind == UserType.Master }
     get displayName(){
         return this.alias || [this.first_name,
             this.last_name].filter(Boolean).join(' ')
     }
-    get fullName(){
-        return [this.first_name, this.alias ? `(${this.alias})` : '',
-            this.last_name].filter(Boolean).join(' ')
+    get fullName(){ return User.fullName(this) }
+    static fullName(u: User){
+        return [u.first_name, u.alias ? `(${u.alias})` : '',
+            u.last_name].filter(Boolean).join(' ')
     }
     get keys(){
         return super.keys.concat(`kind alias first_name last_name email

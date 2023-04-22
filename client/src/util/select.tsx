@@ -19,6 +19,7 @@ type SelectProps = {
 }
 export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     L: (string)=>string
+    top_enabled = false
     constructor(props){
         super(props)
         this.state = {value: props.value} as any
@@ -47,8 +48,8 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
             const name = typeof opt=='string' ? opt : opt.name
             return <option key={`opt_${id}_${o}`} value={id}>{name}</option>
         })
-        opts.unshift(<option key={`opt_name`} disabled={true} value={this.defaultValue}>
-            {this.L(optName||this.optName)}</option>)
+        opts.unshift(<option key={`opt_name`} disabled={!this.top_enabled}
+            value={this.defaultValue}>{this.L(optName||this.optName)}</option>)
         return opts
     }
     render(){
@@ -67,9 +68,10 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     }
 }
 
-export function TypedSelect<T>(T: T, key: string, opt: string){
+export function TypedSelect<T>(T: T, key: string, opt: string, top_enabled?: boolean){
     return class TypedSelect extends Select<{exclude?: number[]}, {}> {
         L = L
+        top_enabled = top_enabled
         get optName(){ return opt }
         getValue(value){ return +value }
         async fetch(){

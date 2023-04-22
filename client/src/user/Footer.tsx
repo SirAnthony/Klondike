@@ -43,8 +43,8 @@ function ShipPane(props: FooterProps){
     </RB.Row></RB.TabPane>
 }
 
-function PersonalPane(props: FooterProps){
-    return <RB.TabPane eventKey='personal'><RB.Row>
+function ProfilePane(props: FooterProps){
+    return <RB.TabPane eventKey='profile'><RB.Row>
       <RB.Col><RB.Button>Personal</RB.Button></RB.Col>
     </RB.Row></RB.TabPane>
 }
@@ -83,7 +83,7 @@ export function UserFooter(props: FooterProps){
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='personal' href={`/profile/${user?._id}`}>
+          <RB.NavLink eventKey='profile' href={`/profile/${user?._id}`}>
             {L('tab_cabinet')}
           </RB.NavLink>
         </RB.NavItem></RB.Col>
@@ -94,7 +94,7 @@ export function UserFooter(props: FooterProps){
         <LabPane {...props} />
         <OrgPane {...props} />
         <ShipPane {...props} />
-        <PersonalPane {...props} />
+        <ProfilePane {...props} />
       </RB.TabContent></RB.Col>
     </RB.Row></RB.TabContainer>
     </RB.Container>
