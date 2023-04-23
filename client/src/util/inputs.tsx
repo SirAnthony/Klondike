@@ -9,11 +9,14 @@ import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
 import {ApiStackError} from '../common/errors'
 import * as util from '../common/util'
 import L from '../common/locale'
+import config from '../common/config'
 import * as _ from 'lodash'
 
 type TextInputProps = {
     value: string
     placeholder: string
+    name?: string
+    described?: string
     as?: React.ElementType<any>
     rows?: number
     type?: string
@@ -21,13 +24,20 @@ type TextInputProps = {
     err?: ApiStackError
 }
 
+export function LoginInput(props: TextInputProps){
+    return <RB.InputGroup>
+      <TextInput {...props} />
+      <RB.InputGroup.Text id={props.described}>{`@${config.server.domain}`}</RB.InputGroup.Text>
+    </RB.InputGroup>
+}
+
 export function TextInput(props: TextInputProps){
-    const empty = util.isEmpty(props.value)
-    const val =  empty ? undefined : props.value
-    const onChange = ({target: {value}})=>props.onChange(!util.isEmpty(value) ? val : value)
+    const onChange = ({target: {value}})=>props.onChange(value)
     const cls = props.err ? 'input-error' : ''
-    return <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val}
-      className={cls} as={props.as} rows={props.rows} type={props.type} onChange={onChange} />
+    return <RB.FormControl name={props.name} placeholder={props.placeholder}
+      className={cls} as={props.as} rows={props.rows} type={props.type}
+      aria-label={props.placeholder} aria-describedby={props.described}
+      value={props.value} onChange={onChange} />
 }
 
 type NumberInputProps = {

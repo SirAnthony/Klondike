@@ -356,6 +356,13 @@ input.form-control::placeholder, textarea.form-control::placeholder {
     color: var(--color-ui-text-shade);
 }
 
+.input-group .input-group-text {
+    background: var(--color-ui-box-light);
+    border-color: var(--color-ui-border);
+    color: var(--color-ui-text);
+    font-size: 10pt;
+}
+
 .item-code {
     padding: 40px;
     text-align: center;

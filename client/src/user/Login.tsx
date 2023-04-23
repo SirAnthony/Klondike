@@ -5,6 +5,7 @@ import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
 import {UserBar} from './Bar'
 import L from './locale'
+import {LoginInput, TextInput} from '../util/inputs';
 
 type UserLoginProps = {
     parent: UserBar
@@ -37,16 +38,16 @@ export function UserLoginNav(props: {value: Boolean, onClick: (val: Boolean)=>vo
 function UserLoginEmail(props: {onSubmit: (data: EmailProps)=>void}){
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
-    const change = tgt=>({target: {value}})=>tgt(value)
     const submit = (ev)=>{
         ev.preventDefault(); props.onSubmit({email, password}) }
     return <RB.Form autoComplete='on'><RB.Row>
-      <RB.Col sm={4}><RB.Form.Control type='text' name='login_email'
-        placeholder={L('field_email')} value={email} onChange={change(setEmail)}>
-      </RB.Form.Control></RB.Col>
-      <RB.Col sm={4}><RB.Form.Control type='password' name='login_password'
-        placeholder={L('field_password')} value={password} onChange={change(setPassword)}>
-      </RB.Form.Control></RB.Col>
+      <RB.Col sm={4}>
+        <LoginInput name='login_email' placeholder={L('field_email')}
+          value={email} onChange={setEmail} /></RB.Col>
+      <RB.Col sm={4}>
+        <TextInput type='password' name='login_password' placeholder={L('field_password')}
+          value={password} onChange={setPassword} />
+      </RB.Col>
       <RB.Col sm={2}><RB.Button onClick={submit}>{L('button_signin')}</RB.Button></RB.Col>
     </RB.Row></RB.Form>
 }

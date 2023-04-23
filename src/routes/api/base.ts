@@ -16,7 +16,6 @@ export class ApiRouter extends BaseRouter {
         return {user}
     }
 
-    @CheckRole(UserType.Master)
     async get_time(ctx: RenderContext){
         return Time
     }

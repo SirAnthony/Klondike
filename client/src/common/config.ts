@@ -5,6 +5,7 @@ export default Object.assign({
     server: {
         host: 'localhost',
         port: '2523',
+        domain: 'klondike.in',
     },
     locale: 'ru-RU',
 }, secrets)

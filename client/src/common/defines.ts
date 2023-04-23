@@ -5,6 +5,7 @@ export default {
         color: {
             ui_box: '#007f7f',
             ui_box_hover: '#006363',
+            ui_box_light: '#488',
             ui_border: '#0ff',
             ui_border_light: '#ccc',
             ui_text: '#fff',

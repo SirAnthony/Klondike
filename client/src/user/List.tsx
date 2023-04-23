@@ -6,53 +6,54 @@ import {List as UList} from '../util/controls'
 import {ErrorMessage} from '../util/errors'
 import {default as L, LR} from './locale'
 import {Delimeter} from '../util/components'
-import {TextInput, NumberInput, UserTypeSelect, OwnerSelect} from '../util/inputs'
+import {LoginInput, TextInput, NumberInput} from '../util/inputs'
+import {UserTypeSelect, OwnerSelect} from '../util/inputs'
+import {ApiStackError, ClientError} from '../common/errors'
 
 type UserSend = Omit<User, 'type' | 'admin' | 'displayName' | 'fullName'
     | 'keys' | 'cost' | 'class'> & {password: string}
 
 type UserRowProps = {
-    user: User
+    user?: User
+    add?: boolean
+    err?: ApiStackError,
     onChange: (u: UserSend)=>void
     onCancel?: ()=>void
 }
 
 function UserRowEdit(props: UserRowProps){
     const {user, onChange, onCancel} = props
-    const [email, setEmail] = React.useState(user.email)
-    const [kind, setKind] = React.useState(user.kind)
+    const [email, setEmail] = React.useState(user?.email)
+    const [kind, setKind] = React.useState(user?.kind)
     const [password, setPassword] = React.useState(null)
-    const [name, setName] = React.useState(user.name)
-    const [first, setFirst] = React.useState(user.first_name)
-    const [last, setLast] = React.useState(user.last_name)
-    const [alias, setAlias] = React.useState(user.alias)
-    const [phone, setPhone] = React.useState(user.phone)
-    const [credit, setCredit] = React.useState(user.credit)
-    const [relation, setRelation] = React.useState(user.relation)
-    const [data, setData] = React.useState(user.data)
+    const [name, setName] = React.useState(user?.name)
+    const [first, setFirst] = React.useState(user?.first_name)
+    const [last, setLast] = React.useState(user?.last_name)
+    const [alias, setAlias] = React.useState(user?.alias)
+    const [phone, setPhone] = React.useState(user?.phone)
+    const [credit, setCredit] = React.useState(user?.credit)
+    const [relation, setRelation] = React.useState(user?.relation)
+    const [data, setData] = React.useState(user?.data)
     const onSubmit = ()=>onChange({email, kind, password, name,
         first_name: first, last_name: last, alias, phone, credit,
         relation, data})
-    return <RB.Row key={`user_edit_${user._id}`} className="menu-list-row">
+    return <RB.Row key={`user_edit_${user?._id||'new'}`} className="menu-input-row">
+      {props.err && <ErrorMessage field={props.err} />}
       <RB.Container>
         <RB.Row className='menu-input-row'>
-          <RB.Col><TextInput value={email} onChange={setEmail}
-            placeholder={L('field_email')} /></RB.Col>
+          <RB.Col sm={3}><LoginInput value={email} onChange={setEmail}
+            placeholder={L('field_email')}/></RB.Col>
           <RB.Col><TextInput value={password} onChange={setPassword}
             placeholder={L('field_password')} type='password'/></RB.Col>
           <RB.Col><UserTypeSelect value={kind} onChange={setKind} /></RB.Col>
           <RB.Col><TextInput value={name} onChange={setName}
             placeholder={L('desc_name')} /></RB.Col>
-          <RB.Col><TextInput value={first} onChange={setFirst}
-            placeholder={L('field_first_name')} /></RB.Col>
-          <RB.Col><TextInput value={last} onChange={setLast}
-            placeholder={L('field_last_name')} /></RB.Col>
-          <RB.Col><TextInput value={alias} onChange={setAlias}
-            placeholder={L('field_alias')} /></RB.Col>
           <RB.Col><TextInput value={phone} onChange={setPhone}
             placeholder={L('field_phone')} /></RB.Col>
-          <RB.Col><NumberInput value={credit} onChange={setCredit}
-            placeholder={L('field_credit')}/></RB.Col>
+          <RB.Col>
+            <RB.Button onClick={onSubmit}>{LR(props.add ? 'act_add' : 'act_save')}</RB.Button>
+            {onCancel && <RB.Button onClick={onCancel}>{LR('act_cancel')}</RB.Button>}
+          </RB.Col>
         </RB.Row>
         <RB.Row className='menu-input-row'>
           <RB.Col>
@@ -60,11 +61,31 @@ function UserRowEdit(props: UserRowProps){
               value={data} onChange={setData} />
           </RB.Col>
           <RB.Col sm={4}>
-            <OwnerSelect value={relation} onChange={setRelation} />
-          </RB.Col>
-          <RB.Col sm={2}>
-            <RB.Button onClick={onSubmit}>{LR('act_save')}</RB.Button>
-            <RB.Button onClick={onCancel}>{LR('act_cancel')}</RB.Button>
+            <RB.Container>
+              <RB.Row className='menu-input-row'>
+                {L('desc_form_data')}
+              </RB.Row>
+              <RB.Row className='menu-input-row'>
+                <RB.Col><TextInput value={first} onChange={setFirst}
+                  placeholder={L('field_first_name')} /></RB.Col>
+                <RB.Col><TextInput value={last} onChange={setLast}
+                  placeholder={L('field_last_name')} /></RB.Col>
+              </RB.Row>
+              <RB.Row className='menu-input-row'>
+                <RB.Col><TextInput value={alias} onChange={setAlias}
+                  placeholder={L('field_alias')} /></RB.Col>
+                <RB.Col><NumberInput value={credit} onChange={setCredit}
+                  placeholder={L('desc_credit')}/></RB.Col>
+              </RB.Row>
+              <RB.Row className='menu-input-row'>
+                <RB.Col>
+                  <OwnerSelect value={relation} onChange={setRelation} />
+                </RB.Col>
+              </RB.Row>
+              <RB.Row className='menu-input-row'>
+                {L('desc_form_tooltip')}
+              </RB.Row>
+            </RB.Container>
           </RB.Col>
         </RB.Row>
       </RB.Container>
@@ -123,16 +144,29 @@ export default class List extends UList<UserListProps, UserListState> {
             (new RegExp(filter_text, 'i')).test(v))
         return list?.filter(u=>fk(u) && ft(u))||[]
     }
-    async onChange(u: UserSend){
-
+    async onChange(target: string, u: UserSend){
+        const {user} = this.props
+        this.setState({err: null})
+        const empty = user.keys.concat(['password'])
+            .filter(k=>!['_id', 'type', 'relation'].includes(k))
+            .filter(k=>!u[k]).join(' ')
+        if (empty)
+            return this.setState({err: new ClientError(`Missing ${empty}`)})
+        const ret = await util.wget(`/api/admin/users/${target}`, {
+            method: 'POST', data: {data: u}})
+        if (ret.err)
+            return this.setState({err: ret.err})
+        this.fetch()        
     }
     body(){
         if (!this.props.user?.admin)
             return [<ErrorMessage message={this.L('error_restricted')} />]
-        const {filter_text, filter_kind} = this.state
-        const rows = this.list.map(l=>
-            <UserRow key={`user_list_${l._id}`} user={l} onChange={u=>this.onChange(u)} />)
+        const {filter_text, filter_kind, err} = this.state
+        const rows = this.list.map(l=><UserRow key={`user_list_${l._id}`} err={err}
+            user={l} onChange={u=>this.onChange(`${u._id}/set`, u)} />)
         return [
+          <UserRowEdit onChange={u=>this.onChange('add', u)} add={true} err={err} />,
+          <Delimeter />,
           <RB.Row className='menu-input-row'>
             <RB.Col>{L('desc_filter')}</RB.Col>
             <RB.Col>

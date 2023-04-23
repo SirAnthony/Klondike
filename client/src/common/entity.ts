@@ -203,6 +203,7 @@ export class User extends Institution {
     get keys(){
         return super.keys.concat(`kind alias first_name last_name email
             phone relation`.replace(/\s+/g, ' ').split(' '))
+            .filter(k=>!['cost', 'points'].includes(k))
     }
 }
 
