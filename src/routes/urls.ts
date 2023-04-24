@@ -23,7 +23,7 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/:id': {func: 'corp', methods: ['get']},
 }},
 ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
-    '/flights': {func: 'fligths', methods: ['get']},
+    '/flights': {func: 'flights', methods: ['get']},
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'ship', methods: ['get']},
 }},

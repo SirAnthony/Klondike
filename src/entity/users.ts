@@ -39,6 +39,7 @@ export type VKProfile = {
     username: string
 }
 
+const Cache = new Map()
 export class Controller extends UserDB {
     private static DB = new Entity<UserDB>('users')
 
