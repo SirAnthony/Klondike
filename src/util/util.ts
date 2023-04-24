@@ -72,7 +72,7 @@ export function clear_email(email: string){
     email = email.trim().toLowerCase()
     let [username, domain] = email.split('@')
     username = username.replace(/\./g, '').split('+')[0]
-    return `${username}@${domain}`
+    return [username, domain].filter(Boolean).join('@')
 }
 
 export function flatten_object_dash(obj, prefix=''){
