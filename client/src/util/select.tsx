@@ -68,14 +68,14 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     }
 }
 
-export function TypedSelect<T>(T: T, key: string, opt: string, top_enabled?: boolean){
+export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: boolean){
     return class TypedSelect extends Select<{exclude?: number[]}, {}> {
         L = L
         top_enabled = top_enabled
         get optName(){ return opt }
         getValue(value){ return +value }
         async fetch(){
-            const list = Object.keys(T).filter(k=>
+            const list = Object.keys(TO).filter(k=>
                 !isNaN(+k) && !this.props.exclude?.includes(+(k)))
             this.setState(this.fetchState({list}))
         }

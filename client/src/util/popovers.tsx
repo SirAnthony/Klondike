@@ -57,7 +57,7 @@ export function OwnerValueSelectTrigger(props: OwnerSelectProps){
     const btn = <RB.Popover>
       <RB.PopoverBody>
         <OwnerSelect value={owner} onChange={setOwner} exclude={exclude}
-          filter={source ? v=>!(v.type==source.type&&v._id==source._id) : undefined} />
+          filter={source ? v=>!(+v.type===+source.type&&''+v._id===''+source._id) : undefined} />
         <RangeWarning value={value} range={inputRange} />
         <NumberInput value={value} onChange={setValue} placeholder={valDesc} />
         <RB.Row className='menu-input-row'>
