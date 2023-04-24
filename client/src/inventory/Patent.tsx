@@ -3,10 +3,9 @@ import * as RB from 'react-bootstrap'
 import {Patent, Corporation, InstitutionType} from '../common/entity'
 import {MarketType, Owner} from '../common/entity'
 import {IDField} from '../util/components'
-import {ItemPriceInput} from './Item/components'
+import {ItemOwnerCol, ItemPriceInput} from './Item/components'
 import {PopupButton} from '../util/buttons'
 import {default as L, LR} from './locale'
-import * as _ from 'lodash'
 
 type RowDescProps = {
     className?: string
@@ -23,11 +22,9 @@ export function PatentRowDesc(props: RowDescProps){
 }
 
 const OwnerListPopover = (patent: Patent)=>{
-    const owners = _.uniqBy(patent.owners, p=>p._id).map(o=>
-        <span key={`corp_name_${o._id}`}>{o.name}</span>)
     return <RB.Popover id={`popover_corps_${patent._id}`}>
       <RB.PopoverBody>
-        {owners}
+        <ItemOwnerCol item={patent} layout={null} />
       </RB.PopoverBody>
     </RB.Popover>
 }
@@ -94,8 +91,6 @@ export function PatentActions(props: RowProps){
 
 export function PatentLabItem(props: RowProps){
     const {patent} = props
-    const owners = _.uniqBy(patent.owners, p=>p._id).map(o=>
-        <span key={`corp_name_${o._id}`}>{o.name}</span>)
     const rowClass = r=>(r.provided|0)>=r.value ? 'resource-full' : ''
     const costs = patent.resourceCost.map(r=><RB.Row className={rowClass(r)}>
       <RB.Col>{LR(`res_kind_${r.kind}`)}</RB.Col>
@@ -115,7 +110,7 @@ export function PatentLabItem(props: RowProps){
       </RB.Row>
       <RB.Row>
         <RB.Col>{LR('item_desc_owner')}</RB.Col>
-        <RB.Col>{owners}</RB.Col>
+        <ItemOwnerCol item={patent} layout={null} />
       </RB.Row>
       <RB.Row>
         <RB.Col>{LR('item_desc_data')}</RB.Col>

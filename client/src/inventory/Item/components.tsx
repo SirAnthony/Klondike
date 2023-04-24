@@ -6,6 +6,7 @@ import {PriceFetcher} from '../Prices'
 import {default as L, LR} from '../locale'
 import * as iutil from './util'
 import defines from '../../common/defines'
+import * as _ from 'lodash'
 
 type ItemComponentProps = {
     item: Item
@@ -28,7 +29,7 @@ export function ItemOwnerCol(props: ItemComponentProps){
     const pt_owner = (o: PatentOwner)=>`${o.name} (${LR('patent_status_'+o.status)})`
     const owner = (o: Owner)=>o?.name||'-'
     const fn = item.type==ItemType.Patent ? pt_owner : owner
-    const owners = [].concat(item.owner, (item as any).owners).filter(Boolean)
+    const owners = _.uniqBy([].concat(item.owner, (item as any).owners).filter(Boolean), p=>p._id)
     const items = owners.map(o=><div key={'d_'+o._id}>{fn(o)}</div>)
     if (!items.length)
         items.push(<div key='d_missing_owner'>-</div>)
