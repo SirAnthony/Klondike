@@ -23,7 +23,7 @@ export class AuthRouter extends BaseRouter {
         return {title: 'Login'}
     }
 
-    @CheckParam({email: 'email', password: 'password'})
+    @CheckParam({email: 'string', password: {type: 'password', min: 2}})
     post_login(ctx: RenderContext, next){
         return new Promise((resolve, reject)=>{
             passport.authenticate('local', (err, user, info)=>{
@@ -51,13 +51,14 @@ export class AuthRouter extends BaseRouter {
         return {title: 'Create Account'}
     }
 
-    @CheckParam({email: 'email', password: 'password', phone: 'string'})
+    @CheckParam({email: 'string', phone: 'string',
+        password: {type: 'password', min: 2}})
     async post_signup(ctx: RenderContext){
         const params: any = ctx.request.body;
         params.email = util.clear_email(params.email)
         this.check_param(ctx, params.password==params.confirm, 'confirm',
             'field_error_notmatch')
-        this.check_param(ctx, params.password.length>=6, 'password',
+        this.check_param(ctx, params.password.length>=2, 'password',
             'field_error_tooshort')
         this.check_param(ctx, [params.alias, params.first_name,
             params.last_name].filter(Boolean).length>1,
