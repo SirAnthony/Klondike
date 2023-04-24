@@ -1,10 +1,10 @@
-import * as conf from './config'
+import config from './config'
 import {ApiError} from './errors'
 import {Item, ItemType, Resource} from './entity'
 import axios from 'axios'
 
 export const url = (path: string)=>{
-    let {server} = conf.default
+    let {server} = config
     if (!path.startsWith('/'))
         path = '/'+path
     let host = array_join([server.host, server.port], ':')

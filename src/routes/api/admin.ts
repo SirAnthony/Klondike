@@ -144,8 +144,8 @@ export class AdminApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async post_config(ctx: RenderContext){
         const params: any = ctx.request.body
-        const {config} = params
-        await ConfigController.save(config)
+        const {conf} = params
+        await ConfigController.save(conf)
     }
 
 }

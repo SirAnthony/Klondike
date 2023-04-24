@@ -4,7 +4,7 @@ import {Config} from '../common/config'
 import {InventoryEvents, InventoryEventType as IET} from '../inventory'
 
 type ConfigState = {
-    config: Config
+    conf: Config
 }
 
 export class ConfigFetcher<P, S> extends F.Fetcher<P, ConfigState & S> {
@@ -19,6 +19,6 @@ export class ConfigFetcher<P, S> extends F.Fetcher<P, ConfigState & S> {
     }
     get fetchUrl() { return '/api/config' }
     fetchState(data: any = {}){
-        return {item: data, config: data.data}
+        return {item: data, conf: data.data}
     }
 }

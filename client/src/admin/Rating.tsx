@@ -1,5 +1,4 @@
 import React from 'react';
-import * as RR from 'react-router-dom'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {User} from '../common/entity'
@@ -11,8 +10,8 @@ import L from './locale'
 import {ErrorMessage} from '../util/errors';
 import {ConfigFetcher} from '../site/Config';
 import {Config} from '../common/config'
-import { NumberInput } from 'src/util/inputs';
-import { InventoryEvents } from 'src/inventory';
+import {NumberInput} from 'src/util/inputs';
+import {InventoryEvents} from 'src/inventory';
 
 type TimeControlProps = {}
 type TimeContolState = {
@@ -130,19 +129,19 @@ type ConfigControlProps = {}
 export class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
     L = L
     fetchState(data: any = {}){
-        return {item: data, config: data}
+        return {item: data, conf: data}
     }
     async onSubmit(){
-        const {config} = this.state
+        const {conf} = this.state
         const ret = await util.wget('/api/admin/config', {method: 'POST',
-            data: {config}})
+            data: {conf}})
         if (ret.err)
             return this.setState({err: ret.err})
         InventoryEvents.reloadConfig()      
     }
     render(){
-        const {config, err} = this.state
-        if (!config)
+        const {conf, err} = this.state
+        if (!conf)
             return <span>Not found</span>
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
@@ -153,25 +152,25 @@ export class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigContr
           </RB.Row>
           <RB.Row className='menu-list-row'>
             <RB.Col>patent_close</RB.Col>
-            <RB.Col><NumberInput value={config.points.patent_close}
+            <RB.Col><NumberInput value={conf.points.patent_close}
               placeholder='patent_close' onChange={val=>{
-                const obj = Object.assign({}, config)
+                const obj = Object.assign({}, conf)
                 obj.points.patent_close = val
-                this.setState({config: obj})
+                this.setState({conf: obj})
               }}
              /></RB.Col>
             <RB.Col>patent_pay</RB.Col>
-            <RB.Col><NumberInput value={config.points.patent_close}
+            <RB.Col><NumberInput value={conf.points.patent_close}
               placeholder='patent_pay' onChange={val=>{
-                const obj = Object.assign({}, config)
+                const obj = Object.assign({}, conf)
                 obj.points.patent_pay = val
-                this.setState({config: obj})
+                this.setState({conf: obj})
               }}
              /></RB.Col>            
         </RB.Row>
-        {PatentConfigChange(config, c=>this.setState({config: c}))}
-        <OrderSpecialityChange conf={config}
-          onChange={c=>this.setState({config: c})} />
+        {PatentConfigChange(conf, c=>this.setState({conf: c}))}
+        <OrderSpecialityChange conf={conf}
+          onChange={c=>this.setState({conf: c})} />
       </RB.Container>
     }
 }
