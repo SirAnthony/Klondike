@@ -2,12 +2,13 @@ import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
 import {CorpController, institutionController, LogController} from '../../entity'
 import {ItemController, UserController, ConfigController} from '../../entity'
 import {OrderController} from '../../entity'
-import {UserType, Patent, PatentStatus, InstitutionType} from '../../../client/src/common/entity'
-import {MarketType} from '../../../client/src/common/entity'
+import {UserType, Patent, PatentStatus, InstitutionType, Coordinates} from '../../../client/src/common/entity'
+import {MarketType, ItemType} from '../../../client/src/common/entity'
 import {Resource, ResourceCost, Owner, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
+import * as rating from '../../util/rating'
 import * as crypto from 'crypto'
 
 async function pay_with_resource(resource: ItemController,
@@ -148,11 +149,13 @@ export class InventoryApiRouter extends BaseRouter {
         if (!srcController || !dstController)
             throw 'No source or target type'
         const src = await srcController.get(id)
-        if (!IDMatch(item.owner._id, src._id))
+        const owners = [].concat((item as any).owners, item.owner)
+        if (!owners.some(o=>IDMatch(o._id, src._id)))
             throw 'Cannot sell foreign item'
         const dst = await dstController.get(target)
         const code = crypto.randomBytes(10).toString('hex');
-        item.market = {type: MarketType.Sale, price: +price, code, to: dst.asOwner}
+        item.market = {type: MarketType.Sale, price: +price, code,
+            from: src.asOwner, to: dst.asOwner}
         await item.save()
         await LogController.log({
             name: 'item_sell', info: 'put_item_sell',
@@ -180,12 +183,40 @@ export class InventoryApiRouter extends BaseRouter {
         if (!srcController)
             throw 'No source type'
         const src = await srcController.get(id)
-        if (item.market.to && !IDMatch(item.market.to._id, src._id))
+        const market = item.market
+        if ((src.credit|0)<market.price)
+            throw 'Not enough credit'
+        if (market.to && !IDMatch(market.to._id, src._id))
             throw 'Cannot act on foreign item'
-        const dst = await (institutionController(item.owner.type)).get(item.owner._id)
+        const dst = await (institutionController(market.from.type)).get(market.from._id)
         dst.credit = dst.credit|0 + item.market.price
-        item.owner = src.asOwner
+        src.credit = src.credit|0 - item.market.price
+        if (item.type==ItemType.Patent) {
+            const pt = (item as unknown) as Patent
+            const status = Patent.served(pt, src) ?
+                PatentStatus.Served : PatentStatus.Ready
+            const prevOwners = pt.owners.map(o=>Object.assign({}, o))
+            pt.owners = pt.owners.filter(o=>!IDMatch(o._id, dst._id) &&
+                !IDMatch(o._id, src._id)).concat(
+                {status: status, ...src.asOwner})
+            const points = await rating.patent_points(pt, src, prevOwners)
+            if (points) {
+                await LogController.log({
+                    name: 'patent_forward', info: 'post_item_buy',
+                    owner: src.asOwner, item: pt, points,
+                    // If patent was sold & already served once
+                    // it cannot have FullOwnership, part already calculated
+                    action: LogAction.PatentForwardPart,
+                })
+            }
+        } if (item.type==ItemType.Coordinates) {
+            const pt = (item as unknown) as Coordinates
+            pt.owners = pt.owners.filter(o=>!(o.type==src.type && IDMatch(o._id, src._id)))
+                .concat(src.asOwner)
+        } else {
+            item.owner = src.asOwner }
         item.market = null
+        await src.save()
         await dst.save()
         await item.save()
         await LogController.log({
@@ -210,7 +241,8 @@ export class InventoryApiRouter extends BaseRouter {
         if (!srcController)
             throw 'No source type'
         const src = await srcController.get(id)
-        if (!IDMatch(item.owner._id, src._id))
+        const owners = [].concat((item as any).owners, item.owner)
+        if (!owners.some(o=>IDMatch(o._id, src._id)))
             throw 'Cannot act on foreign item'
         item.market = null
         await item.save()
@@ -219,5 +251,36 @@ export class InventoryApiRouter extends BaseRouter {
             owner: src.asOwner, item,
             action: LogAction.ItemRemoveSale
         })
+    }
+
+    @CheckIDParam()
+    @CheckRole([UserType.Captain, UserType.Corporant, UserType.Scientist])
+    async get_items_list(ctx: RenderContext){
+        const {stype, id} = ctx.aparams
+        const srcController = institutionController(+stype)
+        if (!srcController)
+            throw 'No source type'
+        const src = await srcController.get(id)
+        const list = await ItemController.all({
+            $or: [{'owner._id': src._id}, {'owners._id': src._id}],
+            type: {$ne: ItemType.Patent}})
+        return {list}
+    }
+
+    @CheckIDParam()
+    @CheckRole([UserType.Corporant, UserType.Scientist])
+    async get_patents_list(ctx: RenderContext){
+        const {stype, id} = ctx.aparams
+        const srcController = institutionController(+stype)
+        if (!srcController)
+            throw 'No source type'
+        const src = await srcController.get(id)
+        const filter: any = {type: ItemType.Patent}
+        if (src.type!=InstitutionType.Research) {
+            Object.assign(filter, {'owners._id': src._id,
+                'owners.status': {$exists: true, '$ne': PatentStatus.Created}})
+        }
+        const list = await ItemController.all(filter)
+        return {list}
     }
 } 

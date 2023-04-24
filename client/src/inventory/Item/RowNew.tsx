@@ -86,7 +86,17 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const targetChange = target=>this.stateChange({target})
         return [<RB.Col sm={4} key='coord_target_select'>
           <LocationSelect onChange={targetChange} value={target} optName='item_desc_target' />
+
         </RB.Col>]
+    }
+    rows_coordinates(){
+        const {owners} = this.state
+        const ownersChange = owners=>this.stateChange({owners})
+        return [
+          <MultiOwnerSelect value={owners} exclude={this.ownerExclude}
+            className='menu-input-row' key='multi_owner_select'
+            onChange={ownersChange} />,
+        ]
     }
     // module
     fields_module(){

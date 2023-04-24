@@ -1,7 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Patent, Corporation, InstitutionType} from '../common/entity'
+import {MarketType, Owner} from '../common/entity'
 import {IDField} from '../util/components'
+import {ItemPriceInput} from './Item/components'
+import {PopupButton} from '../util/buttons'
 import {default as L, LR} from './locale'
 import * as _ from 'lodash'
 
@@ -33,6 +36,7 @@ type RowProps = {
     corp: Corporation
     patent: Patent
     onAction?: (action: string, patent: Patent)=>()=>void
+    onSell?: (item: Patent, target: Owner, price: number)=>void
 } & RowDescProps
 export function PatentRow(props: RowProps){
     const {patent, corp} = props
@@ -59,8 +63,15 @@ export function PatentRow(props: RowProps){
     </RB.Row>
 }
 
+export function PatentSellButton(props: RowProps){
+  const {corp, patent, onSell} = props
+  if (patent.market?.type!=MarketType.Sale)
+      return <ItemPriceInput item={patent} noRange={true} onSell={onSell} source={corp} />
+  return <PopupButton url={`/item/${patent._id}/code`} desc={L('act_show_code')} />
+}
+
 export function PatentActions(props: RowProps){
-    const {patent, corp, onAction} = props
+    const {patent, corp, onAction, onSell} = props
     if (corp.type==InstitutionType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>
     const is_served = Patent.served(patent, corp)
@@ -71,8 +82,7 @@ export function PatentActions(props: RowProps){
       </RB.Col></RB.Row>}
       <RB.Row>
         {!is_served && <RB.Col>
-          <RB.Button onClick={onAction('sell', patent)}>
-            {L('act_sell')}</RB.Button>
+          <PatentSellButton {...props} />
         </RB.Col>}
         <RB.Col>
           <RB.Button onClick={onAction('product', patent)}>

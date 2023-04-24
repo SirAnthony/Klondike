@@ -5,12 +5,10 @@ import {institutionController, LogController} from '../../entity'
 import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
 import {InstitutionType, LogAction} from '../../../client/src/common/entity'
-import {ConfigController} from '../../entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
-import {Rating} from '../../util/rating'
-import defines from '../../defines'
+import * as rating from '../../util/rating'
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -26,15 +24,6 @@ export class CorpApiRouter extends BaseRouter {
         const {user}: {user: UserController} = ctx.state
         const corp = await CorpController.get(id)
         return {corp}
-    }
-
-    @CheckIDParam()
-    @CheckRole(UserType.Corporant)
-    async get_items(ctx: RenderContext) {
-        const {id} = ctx.params;
-        const corp = await CorpController.get(id)
-        const list = await ItemController.all({'owner._id': corp._id})
-        return {list}
     }
 
     @CheckIDParam()
@@ -72,20 +61,6 @@ export class CorpApiRouter extends BaseRouter {
     
     @CheckIDParam()
     @CheckRole(UserType.Corporant)
-    async get_patents(ctx: RenderContext){
-        const {id} = ctx.params
-        const corp = await CorpController.get(id)
-        const filter: any = {type: ItemType.Patent}
-        if (corp.type!=InstitutionType.Research) {
-            Object.assign(filter, {'owners._id': corp._id,
-                'owners.status': {$exists: true, '$ne': PatentStatus.Created}})
-        }
-        const list = await ItemController.all(filter)
-        return {list}
-    }
-
-    @CheckIDParam()
-    @CheckRole(UserType.Corporant)
     async post_patent_forward(ctx: RenderContext){
         const {id, requester} = ctx.aparams
         if (!id || !requester)
@@ -94,9 +69,8 @@ export class CorpApiRouter extends BaseRouter {
         const patent = new Patent(item)
         const owner = await CorpController.get(requester)
         if (!patent.owners.some(o=>IDMatch(o._id, owner._id)))
-            throw new ApiError(Codes.WRONG_USER, 'Not an owner')
-        const parts = patent.owners.filter(o=>IDMatch(o._id, owner._id))
-        const ready = parts.filter(p=>p.status==PatentStatus.Ready);
+            throw new ApiError(Codes.WRONG_USER, 'Not an owner');
+        const prevOwners = patent.owners.map(o=>Object.assign({}, o));
         // Serve parts
         ((item as any) as Patent).owners.forEach(o=>{
             if (IDMatch(o._id, owner._id))
@@ -104,10 +78,7 @@ export class CorpApiRouter extends BaseRouter {
         })
         await item.save()
         // Calcluate points
-        const conf = await ConfigController.get()
-        const pts = conf.points.patent[patent.ownership][patent.weight]
-        const points = ready.length != parts.length ? 0 :
-            pts*ready.length/patent.owners.length
+        const points = await rating.patent_points(patent, owner, prevOwners);
         if (points){
             await LogController.log({
                 name: 'patent_forward', info: 'post_patent_forward',
@@ -134,6 +105,6 @@ export class CorpApiRouter extends BaseRouter {
     @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async get_rating(ctx: RenderContext){
-        return {rating: await Rating.get()}
+        return {rating: await rating.Rating.get()}
     }
 }

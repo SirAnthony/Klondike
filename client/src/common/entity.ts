@@ -1,3 +1,5 @@
+import { filter } from "lodash"
+
 export interface Pos {
     col: number
     row: number
@@ -54,6 +56,7 @@ export class Item extends ID {
         type: MarketType
         price: number
         code: string
+        from: Owner
         to?: Owner
     }
     get keys(){ 
@@ -96,8 +99,11 @@ export class Resource extends Item {
 export class Coordinates extends Item {
     type = ItemType.Coordinates
     target: Location 
+    owners: Owner[]
     get keys(){
-        return super.keys.concat('target'.split(' ')) }
+        return super.keys.concat('target owners'.split(' '))
+            .filter(k=>!['owner'].includes(k))
+    }
 }
 
 export class Module extends Item {

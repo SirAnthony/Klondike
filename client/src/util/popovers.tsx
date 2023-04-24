@@ -41,11 +41,12 @@ type OwnerSelectProps = {
     valDesc: string
     placement?: any
     exclude: InstitutionType[]
+    source?: Owner
     inputRange?: [number, number]
     onClick: (owner: Owner, value: number)=>void
 }
 export function OwnerValueSelectTrigger(props: OwnerSelectProps){
-    const {desc, valDesc, exclude, inputRange} = props
+    const {desc, valDesc, exclude, source, inputRange} = props
     const [owner, setOwner] = React.useState(null)
     const [value, setValue] = React.useState(null)
     const checkRange = (val: number)=>!inputRange ||
@@ -55,10 +56,13 @@ export function OwnerValueSelectTrigger(props: OwnerSelectProps){
     const onClick = ()=>check() && props.onClick(owner, value)
     const btn = <RB.Popover>
       <RB.PopoverBody>
-        <OwnerSelect value={owner} onChange={setOwner} exclude={exclude} />
+        <OwnerSelect value={owner} onChange={setOwner} exclude={exclude}
+          filter={source ? v=>!(v.type==source.type&&v._id==source._id) : undefined} />
         <RangeWarning value={value} range={inputRange} />
         <NumberInput value={value} onChange={setValue} placeholder={valDesc} />
-        <RB.Button disabled={!check()} onClick={onClick}>{desc}</RB.Button>
+        <RB.Row className='menu-input-row'>
+          <RB.Button disabled={!check()} onClick={onClick}>{desc}</RB.Button>
+        </RB.Row>
       </RB.PopoverBody>
     </RB.Popover>
     return <RB.OverlayTrigger placement={props.placement||'top'} trigger={'click'}

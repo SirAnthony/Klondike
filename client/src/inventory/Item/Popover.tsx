@@ -1,13 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, Item, ItemType, User} from '../../common/entity'
-import {Resource, Patent, Location} from '../../common/entity'
-import {LocationCol, ResourceCostCol, ItemPriceCol} from './components'
-import {ItemPriceInputProps} from './components'
-import {ItemActions} from './Actions'
+import {Item, ItemType, Owner} from '../../common/entity'
+import {Location} from '../../common/entity'
+import {ItemOwnerCol, ItemPriceCol} from './components'
 import {IDField} from '../../util/components'
 import {default as L, LR} from '../locale'
-import * as iutil from './util'
 
 type ItemPopoverProps = {
     item: Item
@@ -42,50 +39,53 @@ function ItemKeyLocation(props: {loc: Location}){
 }
 
 class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
-  get col_size(){ return null }
-  col(element: React.ReactElement | string, size?: number){
-      return <RB.Col sm={size||this.col_size}>{element}</RB.Col>
-  }
-  get prefix(){
-      const {item} = this.props
-      return item.type == ItemType.Resource ? 'res' :
-          item.type == ItemType.Patent ? 'patent' :
-          item.type == ItemType.Artifact ? 'artifact' : 'item'
-  }
-  field__id(){
-      return this.col(<IDField item={this.props.item} />) }
-  field_type(){
-      return this.col(LR(`item_type_${this.props.item.type}`)) }
-  field_kind(){
-      const {item} = this.props
-      return this.col(LR(`${this.prefix}_kind_${(item as any).kind}`))
-  }
-  field_price(){
-      return <ItemPriceCol item={this.props.item} layout={this.col_size} /> }
-  field_owner(){
-      return this.col(this.props.item.owner?.name||'-') }
-  field_location(){
-      const size = this.props.item?.location ? 12 : this.col_size
-      return this.col(<ItemKeyLocation loc={this.props.item.location} />, size)
-  }
-  field_target(){
-      const size = this.props.item?.location ? 12 : this.col_size
-      return this.col(<ItemKeyLocation loc={(this.props.item as any).target} />, size)
-  } 
-  field_generic(){
-      return this.col(this.props.item[this.props.field]) }
-  render(){
-      const {item, field} = this.props
-      if (['market'].includes(field))
-          return null
-      const desc = (this[`field_${field}`]||this.field_generic).call(this)
-      const prefix = !['kind', 'value', 'weight', 'ownership'].includes(field) ?
-          'item' : this.prefix
-      return <RB.Row>
-        <RB.Col>{LR(`${prefix}_desc_${field}`)}</RB.Col>
-        {desc}
-      </RB.Row>
-  }
+    get col_size(){ return null }
+    col(element: React.ReactElement | string, size?: number){
+        return <RB.Col sm={size||this.col_size}>{element}</RB.Col>
+    }
+    get prefix(){
+        const {item} = this.props
+        return item.type == ItemType.Resource ? 'res' :
+            item.type == ItemType.Patent ? 'patent' :
+            item.type == ItemType.Artifact ? 'artifact' : 'item'
+    }
+    field__id(){
+        return this.col(<IDField item={this.props.item} />) }
+    field_type(){
+        return this.col(LR(`item_type_${this.props.item.type}`)) }
+    field_kind(){
+        const {item} = this.props
+        return this.col(LR(`${this.prefix}_kind_${(item as any).kind}`))
+    }
+    field_price(){
+        return <ItemPriceCol item={this.props.item} layout={this.col_size} /> }
+    field_owner(){
+        return <ItemOwnerCol item={this.props.item} layout={this.col_size} /> }
+    field_owners(){
+        return <ItemOwnerCol item={this.props.item} layout={this.col_size} /> }
+    field_location(){
+        const size = this.props.item?.location ? 12 : this.col_size
+        return this.col(<ItemKeyLocation loc={this.props.item.location} />, size)
+    }
+    field_target(){
+        const size = this.props.item?.location ? 12 : this.col_size
+        return this.col(<ItemKeyLocation loc={(this.props.item as any).target} />, size)
+    } 
+    field_generic(){
+        return this.col(this.props.item[this.props.field]) }
+    render(){
+        const {item, field} = this.props
+        // Do not show multiowners
+        if (['market', 'owners'].includes(field))
+            return null
+        const desc = (this[`field_${field}`]||this.field_generic).call(this)
+        const prefix = !['kind', 'value', 'weight', 'ownership'].includes(field) ?
+            'item' : this.prefix
+        return <RB.Row>
+          <RB.Col>{LR(`${prefix}_desc_${field}`)}</RB.Col>
+          {desc}
+        </RB.Row>
+    }
 }
 
 export function ItemPopover(props: ItemPopoverProps){

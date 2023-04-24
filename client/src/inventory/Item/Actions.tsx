@@ -43,11 +43,11 @@ export class ItemActions extends React.Component<ItemRowProps, ItemActionsState>
         return <RB.Button onClick={()=>onLoanPay(item)}>{L('act_loan_pay')}</RB.Button>
     }
     btn_sell(){
-        const {item, onSell, onDelist} = this.props
+        const {item, corp, onSell, onDelist} = this.props
         if (!onSell || !this.is_admin && !(this.is_owner && item.market?.type!=MarketType.Protected))
             return null
         if (item.market?.type!=MarketType.Sale)
-            return <ItemPriceInput item={item} onSell={onSell} />
+            return <ItemPriceInput item={item} onSell={onSell} source={corp} />
         return <RB.Container><RB.Row>
           <RB.Col>
             <PopupButton url={`/item/${item._id}/code`} desc={L('act_show_code')} />

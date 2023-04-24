@@ -1,8 +1,10 @@
 import {CorpController, LogController, OrderController} from "../entity"
 import {ConfigController} from '../entity'
 import {InstitutionType, Owner, LogAction} from '../../client/src/common/entity'
+import {Patent, PatentStatus, PatentOwner} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
 import {Time} from "./time"
+import {IDMatch} from '../util/server'
 import defines from '../defines'
 import * as date from '../../client/src/common/date'
 
@@ -90,4 +92,15 @@ export const Rating = {
     get: getForAll,
     getCycle: getForCycle,
     calc: calcCycle
+}
+
+// Need proper calculations
+export async function patent_points(patent: Patent, owner: Owner, prevOwners: PatentOwner[]){
+    const parts = patent.owners.filter(o=>IDMatch(o._id, owner._id))
+    const ready = parts.filter(p=>p.status==PatentStatus.Ready);
+    const conf = await ConfigController.get()
+    const pts = conf.points.patent[patent.ownership][patent.weight]
+    const points = ready.length != parts.length ? 0 :
+        pts*ready.length/patent.owners.length
+    return points
 }

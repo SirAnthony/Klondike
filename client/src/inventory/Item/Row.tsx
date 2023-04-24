@@ -1,9 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Corporation, Item, ItemType, User} from '../../common/entity'
-import {Resource, Patent} from '../../common/entity'
+import {Resource, Patent, Owner, PatentOwner} from '../../common/entity'
 import {LocationCol, ResourceCostCol, ItemPriceCol} from './components'
-import {ItemPriceInputProps} from './components'
+import {ItemOwnerCol, ItemPriceInputProps} from './components'
 import {ItemActions} from './Actions'
 import {ItemPopoverOverlay} from './Popover'
 import {IDField} from '../../util/components'
@@ -64,12 +64,6 @@ class ItemRowContent extends React.Component<ItemRowProps, {}> {
             LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
             LR(`res_kind_${res.kind}`)
     }
-    owner(item: Item){
-        const pt = item as Patent
-        return item.type==ItemType.Patent ? pt.owners.map(o=>
-            <div key={'d_'+o._id}>{`${o.name} (${LR('patent_status_'+o.status)})`}</div>) :
-            item.owner?.name||'-'
-    }
     render(){
         const {item, long} = this.props
         const obj = new (Item.class(item.type))(item)
@@ -81,10 +75,12 @@ class ItemRowContent extends React.Component<ItemRowProps, {}> {
           <RB.Col sm={lyt.name}>{item.name}</RB.Col>
           <RB.Col sm={lyt.type}>{LR(`item_type_${item.type}`)}</RB.Col>
           <RB.Col sm={lyt.kind}>{this.kind(item)}</RB.Col>
-          {long && <RB.Col sm={lyt.owner}>{this.owner(item)}</RB.Col>}
+          {long && <ItemOwnerCol {...this.props} layout={lyt.owner} />}
           {long && <LocationCol {...this.props} layout={lyt.location} />}
           {has('resourceCost') && <ResourceCostCol {...this.props} layout={lyt.value} />}
-          {has('value') && <RB.Col sm={lyt.value}>{res.value|0}</RB.Col>}
+          {!has('resourceCost') && <RB.Col sm={lyt.value}>
+            {'value' in res ? res.value|0 : 1}
+          </RB.Col>}
           <ItemPriceCol item={item} layout={lyt.price} />
           {long && <RB.Col sm={lyt.data}>{res.data}</RB.Col>}
           <ItemActions {...this.props} layout={lyt.actions} />

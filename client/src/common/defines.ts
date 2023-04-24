@@ -12,6 +12,7 @@ export default {
             ui_text_shade: '#ddd',
             ui_input: '#077',
             ui_input_focus: '#007070',
+            ui_input_disabled: '#005f9f',
             ui_error: '#f00',
             hex_border: '#005f9f',
             hex_fill: '#488',

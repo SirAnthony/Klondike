@@ -39,6 +39,7 @@ const aliases = {
     'item_desc_type': 'Тип',
     'item_desc_name': 'Название',
     'item_desc_owner': 'Владелец',
+    'item_desc_owners': 'Владелец',
     'item_desc_price': 'Цена',
     'item_desc_actions': 'Действия',
     'item_desc_location': 'Расположение',

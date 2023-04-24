@@ -339,6 +339,14 @@ div.popover-body .form-select {
     margin-bottom: 7px;
 }
 
+div.popover-body .menu-input-row {
+    margin-left: 0px;
+}
+
+div.popover-body .menu-input-row button {
+    margin: 0px auto;
+}
+
 input.form-control, select.form-select, textarea.form-control {
     color: var(--color-ui-text);
     border: solid var(--color-ui-border) 1px;
@@ -346,10 +354,20 @@ input.form-control, select.form-select, textarea.form-control {
     font-size: 10pt;
 }
 
-input.form-control:focus, select.form-select:focus,
-    textarea.form-control:focus {
+button.btn.disabled, button.btn:disabled, fieldset:disabled button.btn,
+input.form-control.disabled, input.form-control:disabled,
+select.form-select.disabled, select.form-select:disabled,
+textarea.form-control.disabled, textarea.form-control:disabled {
+    border: solid var(--color-ui-border-light) 1px;
+    background-color: var(--color-ui-input-disabled);
+}
+
+button.btn:focus, button.btn:hover,
+input.form-control:focus,
+select.form-select:focus, textarea.form-control:focus {
     color: var(--color-ui-text);
     background-color: var(--color-ui-input-focus);
+    border: solid var(--color-ui-box-hover) 1px;
 }
 
 input.form-control::placeholder, textarea.form-control::placeholder {

@@ -62,17 +62,17 @@ type ItemDetailsProps = {
     corp: Corporation
     user: User
 }
-export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
+class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     constructor(props){
         super(props)
-        this.state = {}
         InventoryEvents.onreloadItems(()=>this.fetch());
-        ['Sell', 'Delist', 'PatentPay', 'OrderPay', 'LoanPay'].forEach(cmd=>
+        ['Sell', 'Delist'].forEach(cmd=>
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
+    target: string
     get fetchUrl() { 
         const {corp} = this.props
-        return `/api/corp/items/${corp._id}`
+        return `/api/inventory/${corp.type}/${corp._id}/${this.target}`
     }
     fetchState(data: any = {}){
         const {list} = data
@@ -92,6 +92,26 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         this.fetch()
         return true
     }
+    async onDelist(item: Item){
+        const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
+        await this.onItemAction(item, check, 'delist')
+    }
+    async onSell(item: Item, target: Owner, price: number){
+        const check = ()=>![MarketType.Protected, MarketType.Sale].includes(item.market?.type)
+        await this.onItemAction(item, check, 'sell', {
+            data: {target: target._id, dtype: target.type, price: price}})
+    }
+}
+
+export class ItemDetails extends ItemDetailsBase {
+    target = 'items'
+    constructor(props){
+        super(props)
+        this.state = {}
+        InventoryEvents.onreloadItems(()=>this.fetch());
+        ['PatentPay', 'OrderPay', 'LoanPay'].forEach(cmd=>
+            this[`on${cmd}`] = this[`on${cmd}`].bind(this))
+    }
     async onPatentPay(item: Item, patent: Patent){
         const {corp} = this.props
         const res = await this.onItemAction(item, ()=>corp.type==InstitutionType.Research,
@@ -110,15 +130,6 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         const res = await this.onItemAction(item, ()=>true, `pay/loan`)
         if (res)
             InventoryEvents.reloadLoans()
-    }
-    async onDelist(item: Item){
-        const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
-        await this.onItemAction(item, check, 'delist')
-    }
-    async onSell(item: Item, target: Owner, price: number){
-        const check = ()=>![MarketType.Protected, MarketType.Sale].includes(item.market?.type)
-        await this.onItemAction(item, check, 'sell', {
-            data: {target: target._id, dtype: target.type, price: price}})
     }
     rows(){
         const {items = []} = this.state
@@ -140,35 +151,24 @@ export class ItemDetails extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     }
 }
 
-type PatentDetailsState = {
-    patents?: Patent[]
-}
-type PatentDetailsProps = {
-    corp: Corporation
-    user: User
-}
-export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsState> {
+export class PatentDetails extends ItemDetailsBase {
+    target = 'patents'
     constructor(props){
         super(props)
         this.state = {}
-        InventoryEvents.onreloadPatents(()=>this.fetch())
+        InventoryEvents.onreloadPatents(()=>this.fetch());
+        ['Action'].forEach(cmd=>
+            this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
-    get fetchUrl() { 
-        const {corp} = this.props
-        return `/api/corp/patents/${corp._id}`
-    }
-    fetchState(data: any = {}){
-        const {list} = data
-        return {item: data, list, patents: list}
+    onAction(name: string, patent: Patent){
+        return async ()=>{
+            if (await this[`action_${name}`](patent))
+                this.fetch()
+        }
     }
     async action_forward(patent: Patent){
         const {corp} = this.props
         let ret = util.wget(`/api/corp/patent/forward/${corp._id}`, {method: 'PUT',
-            data: {_id: patent._id, requester: corp._id}});
-    }
-    async action_sell(patent: Patent){
-        const {corp} = this.props
-        let ret = util.wget(`/api/corp/patent/sell/${corp._id}`, {method: 'PUT',
             data: {_id: patent._id, requester: corp._id}});
     }
     async action_product(patent: Patent){
@@ -177,20 +177,16 @@ export class PatentDetails extends F.Fetcher<PatentDetailsProps, PatentDetailsSt
             data: {_id: patent._id, requester: corp._id}});
     }
     rows(){
-        const {patents = []} = this.state
+        const {items = []} = this.state
         const {corp} = this.props
-        const onAction = (name, patent)=>(async ()=>{
-            if (await this[`action_${name}`](patent))
-                this.fetch()
-        })
         if (corp.type==InstitutionType.Research){
-            return patents.sort((a, b)=>+Patent.ready(a) - +Patent.ready(b)).map(i=>
-                <PatentLabItem onAction={onAction} key={`item_lab_${i._id}`}
-                  patent={i} {...this.props} />)
+            return items.sort((a: Patent, b: Patent)=>+Patent.ready(a) - +Patent.ready(b)).map(i=>
+                <PatentLabItem onAction={this.onAction} key={`item_lab_${i._id}`}
+                patent={i as Patent} {...this.props} />)
         }
-        const rows = patents.sort((a, b)=>+Patent.served(a, corp) - +Patent.served(b, corp))
-            .map(i=><PatentRow onAction={onAction} key={`item_row_${i._id}`}
-              patent={i} {...this.props} className='menu-list-row' />)
+        const rows = items.sort((a: Patent, b: Patent)=>+Patent.served(a, corp) - +Patent.served(b, corp))
+            .map(i=><PatentRow onAction={this.onAction} onSell={this.onSell} key={`item_row_${i._id}`}
+              patent={i as Patent} {...this.props} className='menu-list-row' />)
         rows.unshift(<PatentRowDesc className='menu-list-title' />)
         return rows
     }
