@@ -162,7 +162,7 @@ export class Institution extends ID {
     data: string
     cost: number
     get keys(){
-        return '_id name type data cost points'.split(' ')
+        return '_id name type data cost'.split(' ')
     }
     get class(){ return Institution.class(this.type) }
     static class(type: InstitutionType){
@@ -209,7 +209,7 @@ export class User extends Institution {
     get keys(){
         return super.keys.concat(`kind alias first_name last_name email
             phone relation info`.replace(/\s+/g, ' ').split(' '))
-            .filter(k=>!['cost', 'points'].includes(k))
+            .filter(k=>!['cost'].includes(k))
     }
 }
 

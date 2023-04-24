@@ -16,7 +16,6 @@ const corps: CorpFixture[] = [new CorpFixture({
     name: 'Amalgam Pharmaceuticals',
     alias: CorpAlias.AP,
     type: InstitutionType.Corporation,
-    points: [],
     resourceValue: {
         [ResourceType.Alloy]: ResourceSpecialityType.Special,
         [ResourceType.Crystal]: ResourceSpecialityType.Special,
@@ -29,7 +28,6 @@ const corps: CorpFixture[] = [new CorpFixture({
     name: 'Rakuza',
     alias: CorpAlias.R,
     type: InstitutionType.Corporation,
-    points: [],
     resourceValue: {
         [ResourceType.Alloy]: ResourceSpecialityType.Special,
         [ResourceType.Crystal]: ResourceSpecialityType.Profile,
@@ -42,7 +40,6 @@ const corps: CorpFixture[] = [new CorpFixture({
     name: 'Wayne-Yuanti',
     alias: CorpAlias.WY,
     type: InstitutionType.Corporation,
-    points: [],
     resourceValue: {
         [ResourceType.Alloy]: ResourceSpecialityType.Profile,
         [ResourceType.Crystal]: ResourceSpecialityType.Profile,
@@ -55,7 +52,6 @@ const corps: CorpFixture[] = [new CorpFixture({
     name: 'Union Spacecraft Corporation, USC',
     alias: CorpAlias.USC,
     type: InstitutionType.Corporation,
-    points: [],
     resourceValue: {
         [ResourceType.Alloy]: ResourceSpecialityType.Profile,
         [ResourceType.Crystal]: ResourceSpecialityType.Special,
@@ -68,7 +64,6 @@ const corps: CorpFixture[] = [new CorpFixture({
     name: 'Земная федерация',
     alias: CorpAlias.EF,
     type: InstitutionType.Research,
-    points: [],
     resourceValue: {
         [ResourceType.Alloy]: ResourceSpecialityType.Profile,
         [ResourceType.Crystal]: ResourceSpecialityType.Profile,

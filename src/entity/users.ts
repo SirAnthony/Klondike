@@ -58,6 +58,8 @@ export class Controller extends UserDB {
         data.created = data.created || new Date()
         data.info = await uutil.process_data(data.data)
         data.updated = new Date()
+        if (data._id)
+            Cache.set(+data._id, data)
         return await Controller.DB.save(data)
     }
 
@@ -85,7 +87,14 @@ export class Controller extends UserDB {
         if (data instanceof Controller)
             return data
         if (data instanceof ObjectId || typeof data == 'string')
-            data = await Controller.DB.get(data)
+        {
+            if (Cache.has(+data))
+                data = Cache.get(+data)
+            else {
+                data = await Controller.DB.get(data)
+                Cache.set(+data._id, data)
+            }
+        }
         return new Controller(data, fields)
     }
 

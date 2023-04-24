@@ -8,6 +8,7 @@ class CorporationDB extends Corporation {
     updated: Date
 }
 
+const Cache = new Map()
 export class Controller extends CorporationDB {
     private static DB = new Entity<CorporationDB>('corps')
     protected constructor(data, fields?){
@@ -23,14 +24,22 @@ export class Controller extends CorporationDB {
         const data = this as CorporationDB
         data.created = data.created || new Date()
         data.updated = new Date()
+        if (data._id)
+            Cache.set(+data._id, data)
         return await Controller.DB.save(data)
     }
 
     static async get(data: Controller | CorporationDB | Corporation | ObjectId | string, fields?){
         if (data instanceof Controller)
             return data
-        if (data instanceof ObjectId || typeof data == 'string')
-            data = await Controller.DB.get(data)
+        if (data instanceof ObjectId || typeof data == 'string'){
+            if (Cache.has(+data))
+                data = Cache.get(+data)
+            else {
+                data = await Controller.DB.get(data)
+                Cache.set(+data._id, data)
+            }
+        }
         return new Controller(data, fields)
     }
 
