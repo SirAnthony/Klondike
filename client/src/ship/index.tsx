@@ -3,7 +3,6 @@ import * as RR from 'react-router-dom'
 import List from './List'
 import ShipDetails from './Details';
 import {User} from '../common/entity'
-import L from './locale'
 
 function ShipDetailsNavigator(props: {user: User}) {
     const params = RR.useParams()

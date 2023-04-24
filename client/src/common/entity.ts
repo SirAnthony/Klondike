@@ -223,7 +223,7 @@ export class Organization extends Institution {
 export enum ResourceSpecialityType {Common, Special, Profile}
 export class Corporation extends Institution {
     type = InstitutionType.Corporation
-    resourceValue: {[k: number]: ResourceSpecialityType}
+    resourceValue: {[k in ResourceType]: ResourceSpecialityType}
 }
 
 export class ResearchLab extends Institution {
@@ -264,6 +264,16 @@ export class Ship extends Institution {
             integrity mass engine speed movement size attack defence 
             crew modules img`.replace(/\s+/g, ' ').split(' '))
     }
+}
+
+export enum FlightType {Planetary, Drone}
+export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked}
+export class Flight extends ID {
+    ts: number
+    ship?: ID
+    type: FlightType
+    target: Location
+    status: FlightStatus
 }
 
 export type PlanetShip = {

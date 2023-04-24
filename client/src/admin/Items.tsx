@@ -1,15 +1,18 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, Resource, User} from '../common/entity'
+import {Item, Resource, ResourceType, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {ItemRow, ItemRowDesc, ItemRowNew} from '../inventory/Item'
+import {NumberInput} from '../util/inputs';
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
+import {ConfigFetcher} from '../site/Config';
+import {Config} from '../common/config'
 import {Delimeter} from '../util/components'
+import {ErrorMessage} from '../util/errors';
 import {InventoryEvents} from '../inventory'
 
 type ListState = {
-    resources: Resource[]
     showResources: Boolean
 }
 type ListProps = {
@@ -21,38 +24,62 @@ export function ListNavigator(props: {user: User}){
     return <List user={user} />
 }
 
-
-type ResourceFields = {_id: string, data: string, price: number}
-function ResourceInput(props: {res: Resource, onChange: (res: ResourceFields)=>void}){
-    const {res} = props
-    const [textData, setTextData] = React.useState(res.data)
-    const [price, setPrice] = React.useState(res.price)
-    const onChange = ()=>props.onChange({_id: res._id, data: textData, price})
-    return <RB.Row className='menu-input-row'><RB.InputGroup>
-      <RB.Col>{LR(`res_kind_${res.kind}`)}</RB.Col>
-      <RB.Col sm={1}>{LR('item_desc_price')}</RB.Col>
-      <RB.Col>
-        <RB.FormControl placeholder={LR('item_desc_price')} value={price}
-          onChange={({target: {value}})=>setPrice(+value)} />
-      </RB.Col>
-      <RB.Col sm={1}>{LR('item_desc_data')}</RB.Col>
-      <RB.Col>
-        <RB.FormControl as='textarea' rows={1} placeholder={LR('item_desc_data')}
-          value={textData} onChange={({target: {value}})=>setTextData(value)} />
-      </RB.Col>
-      <RB.Col>
-        <RB.Button onClick={onChange}>{LR('act_change')}</RB.Button>
-      </RB.Col>
-    </RB.InputGroup></RB.Row>
+type ConfigControlState = {}
+type ConfigControlProps = {}
+class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
+    L = L
+    res_row(cycle: number, data: {[k in ResourceType]: number}){
+        const {item} : {item?: Config} = this.state
+        const onChange = (k: ResourceType, val: number)=>{
+            const obj = Object.assign({}, item)
+            item.price.res[cycle][k] = val
+            this.setState({item: obj})
+        }
+        const cols = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=>[
+          <RB.Col sm={1}>{LR(`res_kind_${k}`)}</RB.Col>,
+          <RB.Col>
+            <NumberInput value={item.price.res[cycle][k]} placeholder={LR(`res_kind_${k}`)}
+                onChange={val=>onChange(+k, val)}/>     
+          </RB.Col>])
+        return <RB.Row className='menu-list-row'>
+            <RB.Col sm={1}>{LR('cycle')+' '+cycle}</RB.Col>
+            {cols}
+        </RB.Row>
+    }
+    add_res_row(){
+        const {item}: {item?: Config} = this.state
+        if (!item)
+            return
+        (item.price.res = item.price.res||[]).push(
+            Object.assign({}, item.price.res[0]))
+        this.setState({item: Object.assign({}, item)})
+    }
+    render(){
+        const {item, err} = this.state
+        if (!item)
+            return <span>Not found</span>
+        const {res = []} = (item as Config).price
+        const res_rows = res.map((r, i)=>this.res_row(i, r))
+        return <RB.Container>
+          {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
+          <RB.Row className='menu-input-row'>
+            <RB.Col>{L('config_setup_prices')}</RB.Col>
+            <RB.Col sm={2}><RB.Button onClick={()=>this.add_res_row()}>
+              {L('act_add_cycle')}
+            </RB.Button></RB.Col>
+            <RB.Col sm={3}><RB.Button onClick={()=>this.onSubmit()}>
+              {L('act_save')}
+            </RB.Button></RB.Col>
+          </RB.Row>
+          {res_rows}
+        </RB.Container>
+    }
 }
+
 
 class List extends UList<ListProps, ListState> {
     L = L
     get fetchUrl() { return `/api/admin/items/` }
-    fetchState(data: any = {}){
-        const {list, resources} = data
-        return {item: data, list, resources}
-    }
     get containerClass() { return 'menu-container-full' }
     async createItem(item: Item){
         let data = new item.class()
@@ -74,27 +101,6 @@ class List extends UList<ListProps, ListState> {
             return this.setState({err: res.err})
         this.fetch()
     }
-    async changeResource(data: ResourceFields){
-        const res = await util.wget(`/api/admin/resource/${data._id}`,
-            {method: 'POST', data})
-        if (res.err)
-            return void this.setState({err: res.err})
-        this.setState({err: null})
-        this.fetch()
-        InventoryEvents.reloadPrices()
-    }
-    resources(){
-        const {showResources} = this.state
-        const toggleResources = ()=>this.setState({showResources: !showResources})
-        const rows = this.state.resources?.map(r=><ResourceInput res={r}
-           key={`res_input_${r._id}`} onChange={(data)=>this.changeResource(data)} />)
-        return <RB.Container key='resource_container'>
-          <RB.Button onClick={toggleResources}>
-            {L('res_show')+' '+(showResources ? '⇑' : '⇓')}
-          </RB.Button>
-          {showResources && rows}
-        </RB.Container>
-    }
     newItem(){
         return <RB.Container key='new_item_ctrl'>
           <ItemRowNew onCreate={(item: Item)=>this.createItem(item)} />
@@ -104,8 +110,13 @@ class List extends UList<ListProps, ListState> {
         const {list} = this.state
         const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
           onDelete={item=>this.deleteItem(item)} item={l} long={true} user={this.props.user} />)
+        const {showResources} = this.state
+        const toggleResources = ()=>this.setState({showResources: !showResources})
         return [
-          this.resources(),
+          <RB.Button onClick={toggleResources}>
+            {L('res_show')+' '+(showResources ? '⇑' : '⇓')}
+          </RB.Button>,
+          showResources ? <ConfigControl /> : null,
           <Delimeter key='res_delimeter' />,
           this.newItem(),
           <ItemRowDesc key='item_row_desc' className='menu-list-title' long={true} />,

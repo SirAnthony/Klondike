@@ -1,12 +1,12 @@
 import {ConfigController} from '../src/entity'
 import * as entity from '../client/src/common/entity'
+import {Config} from '../client/src/common/config'
 
-const config = {
+const config : Config = {
     points: {
-        patent_close: 100,
-        patent_pay: 100,
         patent: {
             pay: 100,
+            close: 0,
             [entity.PatentOwnership.Full]: {
                 [entity.PatentWeight.Minimal]: -10,
                 [entity.PatentWeight.Basic]: 10,
@@ -26,9 +26,14 @@ const config = {
         }
     },
     price: {
-        res: {
-
-        }
+        res: [{
+            [entity.ResourceType.Alloy]: 200,
+            [entity.ResourceType.Crystal]: 200,
+            [entity.ResourceType.Energy]: 30,
+            [entity.ResourceType.Gas]: 200,
+            [entity.ResourceType.Mineral]: 200,
+            [entity.ResourceType.Particle]: 200,
+        }]
     }
 }
 
@@ -41,6 +46,8 @@ export default async function load() {
     catch (err){
         try { await ConfigController.create() } catch { } }
     const s = prev || Fixtures
+    if (!Array.isArray(s.price.res))
+        s.price.res = Fixtures.price.res
     await ConfigController.save(s)
 
 }

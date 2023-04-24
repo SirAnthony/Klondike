@@ -1,8 +1,8 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
-import {UserController, ShipController, ItemController, institutionController} from '../../entity'
-import {PlanetController, ResourceController} from '../../entity'
+import {UserController, ShipController, ItemController, institutionController, LogController} from '../../entity'
+import {PlanetController} from '../../entity'
 import {ConfigController} from '../../entity'
-import {PlanetInfo, UserType} from '../../../client/src/common/entity'
+import {PlanetInfo, UserType, LogAction} from '../../../client/src/common/entity'
 import {ItemType, Item, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
@@ -57,14 +57,17 @@ export class ApiRouter extends BaseRouter {
     @CheckRole(UserType.Corporant)
     async get_prices(ctx: RenderContext){
         const prices = {}
-        const res = await ResourceController.all()
-        for (let k of res)
-            prices[k.kind] = k.price
-        const res_filter = f=>f.type == ItemType.Resource
-        const items: Item[] = await ItemController.all()
-        let resources: Resource[] = items.filter(res_filter).map(f=>f as Resource)
-        for (let item of resources)
-            prices[item.kind] = (prices[item.kind]+(item.price||prices[item.kind]))/2
+        const conf = await ConfigController.get()
+        const cycle = Time.cycle
+        const res = conf.price.res[cycle]
+        for (let k in res)
+            prices[k] = res[k]
+        const entries = await LogController.all({'item.type': ItemType.Resource,
+            action: LogAction.ItemPurchase, ts: Time.cycleInterval(cycle)})
+        for (let l of entries){
+            const res = l.item as Resource
+            prices[res.kind] = (prices[res.kind]+(res.price/res.value||prices[res.kind]))/2
+        }
         return {list: prices}
     }
 

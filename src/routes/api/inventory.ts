@@ -71,7 +71,7 @@ export class InventoryApiRouter extends BaseRouter {
         if (!pt.resourceCost.some(k=>k.provided<k.value)){
             pt.owners.forEach(o=>o.status=PatentStatus.Ready)
             const conf = await ConfigController.get()
-            const points = conf.points.patent.pay
+            const points = +conf.points.patent.pay
             await LogController.log({
                 name: 'patent_pay', info: 'post_patent_pay',
                 owner: corp.asOwner, item: patent, points,
@@ -189,8 +189,9 @@ export class InventoryApiRouter extends BaseRouter {
         if (market.to && !IDMatch(market.to._id, src._id))
             throw 'Cannot act on foreign item'
         const dst = await (institutionController(market.from.type)).get(market.from._id)
-        dst.credit = dst.credit|0 + item.market.price
-        src.credit = src.credit|0 - item.market.price
+        const price = item.market.price
+        dst.credit = dst.credit|0 + price
+        src.credit = src.credit|0 - price
         if (item.type==ItemType.Patent) {
             const pt = (item as unknown) as Patent
             const status = Patent.served(pt, src) ?
@@ -221,7 +222,7 @@ export class InventoryApiRouter extends BaseRouter {
         await item.save()
         await LogController.log({
             name: 'item_buy', info: 'post_item_buy',
-            owner: src.asOwner, item,
+            owner: src.asOwner, item: Object.assign({price}, item.asObject),
             action: LogAction.ItemPurchase
         })
     }

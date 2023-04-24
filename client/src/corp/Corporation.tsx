@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation as ECorp, InstitutionType, User, ID} from '../common/entity'
+import {Corporation as ECorp, InstitutionType, User} from '../common/entity'
 import {ControlBar} from '../util/controls'
 import {ItemDetails, OrderDetails} from './Details'
 import {PatentDetails} from './Details'

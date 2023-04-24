@@ -1,12 +1,11 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController, ConfigController, institutionController} from '../../entity'
-import {OrderController, ItemController, ResourceController} from '../../entity'
+import {OrderController, ItemController} from '../../entity'
 import {UserType, PatentOwner, PatentStatus} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {Time} from '../../util/time'
 import * as util from '../../../client/src/common/util'
-import * as uutil from '../../util/user'
 
 export class AdminApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -17,9 +16,7 @@ export class AdminApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Master)
     async get_items_list(ctx: RenderContext){
-        const list = await ItemController.all()
-        const resources = await ResourceController.all()
-        return {list, resources}
+        return {list: await ItemController.all()}
     }
 
     @CheckRole(UserType.Master)
@@ -57,16 +54,6 @@ export class AdminApiRouter extends BaseRouter {
         if (!item)
             throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
         return await item.delete()
-    }
-
-    @CheckRole(UserType.Master)
-    async post_resource_change(ctx: RenderContext){
-        const {id} = ctx.params
-        const data: any = ctx.request.body
-        let item = await ResourceController.get(id)
-        for (let k in data)
-            item[k] = data[k]
-        await item.save()
     }
 
     @CheckRole(UserType.Master)

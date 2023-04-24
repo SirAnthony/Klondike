@@ -58,7 +58,7 @@ async function calcCycle(cycle: number){
     {
         const owner = corp.asOwner, name = `cycle_${cycle}`
         const events = await LogController.all({'owner._id': corp._id,
-            ts: {$gt: Time.cycleLength*(cycle-1), $lte: Time.cycleLength*cycle}})
+            ts: Time.cycleInterval(cycle)})
         let points = events.filter(f=>RatingActions.includes(f.action)).reduce(
             (p, c)=>p+c.points|0, 0)
         const orders = await OrderController.all({'owner._id': owner._id, cycle})

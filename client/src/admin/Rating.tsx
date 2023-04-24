@@ -6,12 +6,13 @@ import {Menu as UMenu} from '../util/controls'
 import * as util from '../common/util'
 import * as date from '../common/date'
 import * as entity from '../common/entity'
-import L from './locale'
+import {default as L, LR} from './locale'
 import {ErrorMessage} from '../util/errors';
 import {ConfigFetcher} from '../site/Config';
 import {Config} from '../common/config'
 import {NumberInput} from 'src/util/inputs';
 import {InventoryEvents} from 'src/inventory';
+import {Delimeter} from 'src/util/components';
 
 type TimeControlProps = {}
 type TimeContolState = {
@@ -70,48 +71,52 @@ function PatentWeigthChange(props: {conf: Config,
     type: entity.PatentOwnership, onChange: (c: Config)=>void}){
     const {conf, type, onChange} = props
     const keys = Object.keys(entity.PatentWeight).filter(f=>!isNaN(+f))
-    const cols = keys.map(k=>[<RB.Col>
-        {`points.patent.${type}.${k}`}
-      </RB.Col>,
+    const cols = keys.map(k=>[
+      <RB.Col>{LR(`patent_weigth_${k}`)}</RB.Col>,
       <RB.Col>
         <NumberInput value={conf.points.patent[type][k]}
-          placeholder={`points.patent.${type}.${k}`} onChange={val=>{
+          placeholder={LR(`patent_weigth_${k}`)} onChange={val=>{
             const obj = Object.assign({}, conf)
             obj.points.patent[type][k] = val
             onChange(obj)
           }}/>
       </RB.Col>
     ]).flat()
-    return <RB.Row>{cols}</RB.Row>
+    return <RB.Row className='menu-list-row'>{cols}</RB.Row>
 }
 
 function PatentConfigChange(conf: Config, onChange: (c: Config)=>void){
     return [<RB.Row className='menu-list-row'>
       <RB.Col>
-        {`points.patent.pay`}
+        {L(`points.patent.pay`)}
       </RB.Col>
       <RB.Col>
-        <NumberInput value={conf.points.patent.pay}
-          placeholder={`points.patent.pay`} onChange={val=>{
+        <NumberInput value={+conf.points.patent.pay}
+          placeholder={L(`points.patent.pay`)} onChange={val=>{
             const obj = Object.assign({}, conf)
             obj.points.patent.pay = val
             onChange(obj)
           }}/>
       </RB.Col>
     </RB.Row>,
+    <RB.Row className='menu-input-row'>
+      <RB.Col>{L(`points.patent`, LR('patent_ownership_full'))}</RB.Col>
+    </RB.Row>,
     <PatentWeigthChange conf={conf} type={entity.PatentOwnership.Full} onChange={onChange} />,
+    <RB.Row className='menu-input-row'>
+      <RB.Col>{L(`points.patent`, LR('patent_ownership_shared'))}</RB.Col>
+    </RB.Row>,
     <PatentWeigthChange conf={conf} type={entity.PatentOwnership.Partial} onChange={onChange} />]
 }
 
 function OrderSpecialityChange(props: {conf: Config, onChange: (c: Config)=>void}){
     const {conf, onChange} = props
-    const keys = Object.keys(entity.PatentWeight).filter(f=>!isNaN(+f)).concat(['open'])
-    const cols = keys.map(k=>[<RB.Col>
-        {`points.order.${k}`}
-      </RB.Col>,
+    const keys = Object.keys(entity.ResourceSpecialityType).filter(f=>!isNaN(+f)).concat(['open'])
+    const cols = keys.map(k=>[
+      <RB.Col>{LR(`res_spec_value_${k}`)}</RB.Col>,
       <RB.Col>
         <NumberInput value={conf.points.order[k]}
-          placeholder={`points.order.${k}`} onChange={val=>{
+          placeholder={LR(`res_spec_value_${k}`)} onChange={val=>{
             const obj = Object.assign({}, conf)
             obj.points.order[k] = val
             onChange(obj)
@@ -125,53 +130,27 @@ function OrderSpecialityChange(props: {conf: Config, onChange: (c: Config)=>void
 
 type ConfigControlState = {}
 type ConfigControlProps = {}
-
-export class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
+class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
     L = L
-    fetchState(data: any = {}){
-        return {item: data, conf: data}
-    }
-    async onSubmit(){
-        const {conf} = this.state
-        const ret = await util.wget('/api/admin/config', {method: 'POST',
-            data: {conf}})
-        if (ret.err)
-            return this.setState({err: ret.err})
-        InventoryEvents.reloadConfig()      
-    }
     render(){
-        const {conf, err} = this.state
-        if (!conf)
+        const {item, err} = this.state
+        if (!item)
             return <span>Not found</span>
+        const setConf = conf=>this.setState({conf})
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
-          <RB.Row className='menu-list-row'>
-            <RB.Col><RB.Button onClick={()=>this.onSubmit()}>
+          <RB.Row className='menu-input-row'>
+            <RB.Col>{L('config_setup_points')}</RB.Col>
+            <RB.Col sm={3}><RB.Button onClick={()=>this.onSubmit()}>
               {L('action_save')}
             </RB.Button></RB.Col>
           </RB.Row>
-          <RB.Row className='menu-list-row'>
-            <RB.Col>patent_close</RB.Col>
-            <RB.Col><NumberInput value={conf.points.patent_close}
-              placeholder='patent_close' onChange={val=>{
-                const obj = Object.assign({}, conf)
-                obj.points.patent_close = val
-                this.setState({conf: obj})
-              }}
-             /></RB.Col>
-            <RB.Col>patent_pay</RB.Col>
-            <RB.Col><NumberInput value={conf.points.patent_close}
-              placeholder='patent_pay' onChange={val=>{
-                const obj = Object.assign({}, conf)
-                obj.points.patent_pay = val
-                this.setState({conf: obj})
-              }}
-             /></RB.Col>            
-        </RB.Row>
-        {PatentConfigChange(conf, c=>this.setState({conf: c}))}
-        <OrderSpecialityChange conf={conf}
-          onChange={c=>this.setState({conf: c})} />
-      </RB.Container>
+          {PatentConfigChange(item, setConf)}
+          <RB.Row className='menu-input-row'>
+            <RB.Col>{L('points.order')}</RB.Col>
+          </RB.Row>
+          <OrderSpecialityChange conf={item} onChange={setConf} />
+        </RB.Container>
     }
 }
 
@@ -185,8 +164,9 @@ export class Navigator extends UMenu<MenuProps, MenuState> {
     L = L
     body(){
         return [<RB.Row>
-           <TimeControl /> 
+          <TimeControl />
         </RB.Row>,
+        <Delimeter />,
         <RB.Row>
           <ConfigControl />
         </RB.Row>

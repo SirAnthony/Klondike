@@ -1,7 +1,8 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, ShipController} from '../../entity'
+import {UserController, ShipController, FlightController} from '../../entity'
 import {UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
+import {Time} from '../../util/time'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 
 export class ShipApiRouer extends BaseRouter {
@@ -25,6 +26,13 @@ export class ShipApiRouer extends BaseRouter {
             user.kind == UserType.Captain ? {'captain._id': user._id} :
             {'owner._id': user._id}
         const list = await ShipController.all(filter)
+        return {list}
+    }
+
+    @CheckRole([UserType.Guard, UserType.Captain])
+    async get_flights(ctx: RenderContext){
+        const list = await FlightController.all({
+            ts: Time.cycleInterval(Time.cycle)})
         return {list}
     }
 }

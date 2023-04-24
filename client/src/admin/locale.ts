@@ -11,13 +11,21 @@ load(mod, {
     'link_ships': 'Корабли',
     'link_corps': 'Корпорации',
     'link_users': 'Пользователи',
-    'action_save': 'Сохранить',
+    'act_save': 'Сохранить',
     'res_create': 'Создать ресурс',
     'res_show': 'Настройки базовых ресурсы',
     'server_time': 'Текущее время',
     'server_cycle': 'Текущий цикл',
     'time_increase': tpl`Добавить ${0} ч.`,
     'time_decrease': tpl`Уменьшить на ${0} ч.`,
+    // config
+    'config_setup_points': 'Настройки очков рейтинга',
+    'points.patent.pay': 'Оплата патента лабораторией',
+    'points.patent': tpl`Очки за закрытие патента. ${0} владение`,
+    'points.order': 'Очки за закрытие заказа',
+    'res_spec_value_open': 'Открытый',
+    'config_setup_prices': 'Настройки цен',
+    'act_add_cycle': 'Добавить цикл',
 })
 
 export function LR(str: string, ...args): string {

@@ -23,6 +23,7 @@ corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: 
     '/:id': {func: 'corp', methods: ['get']},
 }},
 ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
+    '/flights': {func: 'fligths', methods: ['get']},
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'ship', methods: ['get']},
 }},
@@ -40,7 +41,6 @@ user_api: {prefix: '/api/user', router: UserApiRouter, opt: {json: true}, urls: 
     '/profile/:id': {func: 'profile', methods: ['get', 'post']}
 }},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
-    '/resource/:id': {func: 'resource_change', methods: ['post']},
     '/item/create': {func: 'item_change', methods: ['post']},
     '/item/:id/delete': {func: 'item', methods: ['delete']},
     '/items/': {func: 'items_list', methods: ['get']},

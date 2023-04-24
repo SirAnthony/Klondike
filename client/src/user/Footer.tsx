@@ -1,9 +1,8 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
-import * as F from '../Fetcher'
-import {User, InstitutionType, ID} from '../common/entity'
-import {default as L, LR} from './locale'
+import {User, InstitutionType} from '../common/entity'
+import {default as L} from './locale'
 
 export type FooterProps = {
     user: User
@@ -54,7 +53,7 @@ export function UserFooter(props: FooterProps){
     const location = RR.useLocation()
     const {user} = props
     const {relation} = user||{}
-    const has = (r: InstitutionType)=>user?.admin || r==relation?.type
+    const has = (r: InstitutionType)=>user?.admin || +r===+relation?.type
     const tab = location.pathname.startsWith('/ship') ? 'ship' :
         location.pathname.startsWith('/corp') ? 'corp' :
         location.pathname.startsWith('/lab') ? 'lab' :
