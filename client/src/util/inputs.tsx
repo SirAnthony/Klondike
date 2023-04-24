@@ -25,9 +25,10 @@ type TextInputProps = {
 }
 
 export function LoginInput(props: TextInputProps){
+    const {server} = config
     return <RB.InputGroup>
       <TextInput {...props} />
-      <RB.InputGroup.Text id={props.described}>{`@${config.server.domain}`}</RB.InputGroup.Text>
+      <RB.InputGroup.Text id={props.described}>{`@${server.domain}`}</RB.InputGroup.Text>
     </RB.InputGroup>
 }
 
