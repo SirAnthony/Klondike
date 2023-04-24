@@ -1,5 +1,3 @@
-import React from 'react'
-import * as RB from 'react-bootstrap'
 import {Item, ItemTypePrefix} from '../common/entity'
 
 export function IDField(props: {item: Item}){

@@ -68,16 +68,16 @@ export class UserLogin extends React.Component<UserLoginProps, UserLoginState> {
     }
     errorField(name){
         const {err} = this.state
-        if (!err.valid || !err.stack || err.code != CError.Codes.INCORRECT_PARAM)
+        if (!err.valid || !err.stack || +err.code!==CError.Codes.INCORRECT_PARAM)
             return null
-        const field = err.stack.find((f: CError.FormValidationError)=>f.field==name)
+        const field = err.stack.find((f: CError.FormValidationError)=>f.field===name)
         return field ? <ErrorMessage field={field} /> : null
     }
     errorRow(){
         const {err} = this.state
         if (!err)
             return null
-        const valid = err.code != CError.Codes.INCORRECT_PARAM
+        const valid = +err.code!==CError.Codes.INCORRECT_PARAM
         const fields = valid ? [] : ['email', 'password']
         const errors = fields.map(t=>
             <RB.Col sm={4} key={"login_"+t}>{this.errorField(t)}</RB.Col>)

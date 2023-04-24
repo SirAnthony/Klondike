@@ -1,7 +1,7 @@
 import React from 'react'
 import * as F from '../Fetcher'
 import {Config} from '../common/config'
-import {InventoryEvents, InventoryEventType as IET} from '../inventory'
+import {InventoryEvents} from '../inventory'
 
 type ConfigState = {
     conf: Config

@@ -1,5 +1,4 @@
 import React from 'react'
-import * as RR from 'react-router-dom'
 import * as RB from 'react-bootstrap'
 import {CloseButton} from './buttons'
 import {ErrorMessage} from './errors'
