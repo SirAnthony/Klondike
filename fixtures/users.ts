@@ -1,5 +1,5 @@
 import {User, InstitutionType, UserType} from '../client/src/common/entity'
-import {CorpController, ShipController, UserController} from '../src/entity/index'
+import {CorpController, ShipController, UserController, institutionController} from '../src/entity/index'
 
 export class UserFixture extends User {
     constructor(data){
@@ -88,12 +88,11 @@ export default async function load() {
                 prev[k] = user[k]
         }
         const s = prev || new UserControllerFixture(user)
-        s.email = s.name.toLowerCase().replace(/[^\w]+/g, '')+'@klondike.fed'
+        s.email = s.name.toLowerCase().replace(/[^\w]+/g, '')
         s.password = await UserController.hash_password(s.email)
         if (s.relation){
-            const controller = s.relation.type==InstitutionType.Corporation ?
-                CorpController : ShipController
-            Object.assign(s.relation, (await controller.find({name: s.relation.name})).identifier)
+            const controller = institutionController(s.relation.type)
+            s.relation = (await controller.find({name: s.relation.name})).asOwner
         }
         await s.save()
     }

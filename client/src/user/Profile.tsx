@@ -7,7 +7,7 @@ import {ErrorMessage} from '../util/errors'
 import {User, ProfileFields} from '../common/entity'
 import {ControlBar} from '../util/controls'
 import * as F from '../Fetcher'
-import L from './locale'
+import {default as L, LR} from './locale'
 import EventEmitter from '../common/events'
 
 const ProfileEvents = new EventEmitter()
@@ -88,7 +88,7 @@ function ProfileInfo(props: UserViewProfileProps){
       </RB.Row>
       <RB.Row>
         <RB.Col>{L('desc_role')}</RB.Col>
-        <RB.Col>{L(`desc_user_type_${user.kind}`)}</RB.Col>
+        <RB.Col>{LR(`user_kind_${user.kind}`)}</RB.Col>
       </RB.Row>
       {(viewer.admin || viewer._id==user._id) && <RB.Row>
         <RB.Col>{L('desc_credit')}</RB.Col>
@@ -97,17 +97,21 @@ function ProfileInfo(props: UserViewProfileProps){
     </RB.Container>
 }
 
-function ProfileData(props: UserViewProfileProps){
+export function ProfileDataInfo(props: UserViewProfileProps){
     const {user} = props
     const {info} = user
-    const txt = info.replace(/\{([^:]+):([^}]+)\}/g,
+    const txt = info?.replace(/\{([^:]+):([^}]+)\}/g,
         '<a href="/profile/$2">$1</a>')
+    return <RB.Col dangerouslySetInnerHTML={({__html: txt})} />
+}
+
+function ProfileData(props: UserViewProfileProps){
     return <RB.Container>
       <RB.Row>
         <RB.Col className='menu-list-title'>{L('desc_data')}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <RB.Col dangerouslySetInnerHTML={({__html: txt})} />
+        <ProfileDataInfo {...props} />
       </RB.Row>
     </RB.Container>
 }
@@ -159,78 +163,3 @@ export function Navigator(props){
       </RR.Routes>
     </div>)
 }
-
-/*
-export class UserProfile extends React.Component<UserProfileProps, UserProfileState> {
-    constructor(props: UserProfileProps){
-        super(props)
-        this.state = {user: this.props_user(props), changed: false}
-        this.submit = this.submit.bind(this)
-    }
-    componentDidUpdate(prevProps: Readonly<UserProfileProps>, prevState: Readonly<UserProfileState>): void {
-        if (prevProps==this.props)
-            return
-        this.setState({user: this.props_user(this.props)})
-    }
-    props_user(props){
-        if (!props.user)
-            return null
-        return Object.assign({}, props.user)
-    }
-    async submit(){
-        const {user} = this.state
-        if (!user) {
-            return this.setState({err: new CError.ApiError(
-                CError.Codes.INCORRECT_PARAM, 'field_error_invalid')})
-        }
-        const data = util.obj_copyto(user, {}, Profile.fields.filter(k=>
-            !Profile.static.includes(k)))
-        let res = await util.wget('/api/profile', {method: 'POST', data})
-        if (res.err)
-            return this.setState({err: res.err})
-        ProfileEvents.emit('reset')
-        this.setState({user: res.data.user, changed: false, err: null})
-    }
-    field(name: string){
-        const {user} = this.state
-        let field = this.state?.err?.stack.find(
-            (f: CError.FormValidationError)=>f?.field==name)
-        const onChange = (name, value)=>{
-            if (Profile.static.includes(name) || !Profile.fields.includes(name))
-                return
-            const user = this.state.user||{};
-            user[name] = value;
-            this.setState({user, changed: true})
-        }
-        return <ProfileField value={user[name]} field={field} name={name}
-            onChange={onChange}  />
-    }
-    render(){
-        const {err, changed, user} = this.state
-        if (!user)
-            return <RB.Container>No user</RB.Container>
-        const fields = Profile.fields.map(f=>this.field(f))
-        return <RB.Container className='menu-container'>
-          <ControlBar title={L('interface')} />
-          <RB.Row>{err && <ErrorMessage field={err} />}</RB.Row>          
-          <RB.Row>
-            <RB.Col className='menu-box-clear'>
-              <ProfileInfo user={user} />
-            </RB.Col>
-            <RB.Col>
-
-            </RB.Col>
-          </RB.Row>
-          <RB.Container className='center'>
-            <RB.Row className='justify-content-center'><h3>Профиль</h3></RB.Row>
-            {fields}
-            {changed && <RB.Row>
-                <RB.Col sm={3}></RB.Col>
-                <RB.Col sm={3}>
-                  <RB.Button onClick={this.submit}>{L('save_change')}</RB.Button>
-                </RB.Col>
-            </RB.Row>}
-          </RB.Container>
-        </RB.Container>
-    }
-}*/

@@ -1,9 +1,11 @@
 import * as bcrypt from 'bcrypt'
 import {Entity} from './base';
+import {institutionController} from '.';
 import {Identifier, Owner, User, UserType} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import * as sutil from '../util/util'
-import { ObjectId } from 'mongodb';
+import * as uutil from '../util/user'
+import {ObjectId} from 'mongodb';
 
 export type AuthToken = {token: string, ts: Date}
 
@@ -53,6 +55,7 @@ export class Controller extends UserDB {
     async save() {
         const data = this as UserDB
         data.created = data.created || new Date()
+        data.info = await uutil.process_data(data.data)
         data.updated = new Date()
         return await Controller.DB.save(data)
     }
@@ -70,6 +73,10 @@ export class Controller extends UserDB {
     static async fromObj(obj: any){
         const u = new Controller(obj)
         u.password = await Controller.hash_password(obj.password)
+        if (u.relation){
+            const ctrl = institutionController(u.relation.type)
+            u.relation = (await ctrl.get(u.relation._id)).asOwner
+        }
         return u
     }
 

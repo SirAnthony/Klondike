@@ -17,6 +17,7 @@ type TextInputProps = {
     placeholder: string
     name?: string
     described?: string
+    autoComplete?: boolean
     as?: React.ElementType<any>
     rows?: number
     type?: string
@@ -34,10 +35,11 @@ export function LoginInput(props: TextInputProps){
 export function TextInput(props: TextInputProps){
     const onChange = ({target: {value}})=>props.onChange(value)
     const cls = props.err ? 'input-error' : ''
+    const complete = props.autoComplete ? undefined : 'new-password'
     return <RB.FormControl name={props.name} placeholder={props.placeholder}
       className={cls} as={props.as} rows={props.rows} type={props.type}
       aria-label={props.placeholder} aria-describedby={props.described}
-      value={props.value} onChange={onChange} />
+      value={props.value} onChange={onChange} autocomplete={complete} />
 }
 
 type NumberInputProps = {

@@ -1,10 +1,12 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, CorpController, PlanetController, ConfigController} from '../../entity'
+import {UserController, CorpController, PlanetController, ConfigController, institutionController} from '../../entity'
 import {OrderController, ItemController, ResourceController} from '../../entity'
-import {ItemType, UserType, Resource, PatentOwner, PatentStatus, InstitutionType} from '../../../client/src/common/entity'
+import {UserType, PatentOwner, PatentStatus} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {Time} from '../../util/time'
+import * as util from '../../../client/src/common/util'
+import * as uutil from '../../util/user'
 
 export class AdminApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -93,6 +95,43 @@ export class AdminApiRouter extends BaseRouter {
         if (!order)
             throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
         return await order.delete()
+    }
+
+    @CheckRole(UserType.Master)
+    async post_user_add(ctx: RenderContext){
+        const {data} = ctx.aparams
+        if (!data.password || !data.email)
+            throw new ApiError(Codes.INCORRECT_PARAM, 'missing_field')
+        if (!/^[a-zA-Z0-9_.+-]+$/.test(data.email))
+            throw new ApiError(Codes.INCORRECT_PARAM, 'email')
+        if (data.phone && !util.isPhone(data.phone))
+            throw new ApiError(Codes.INCORRECT_PARAM, 'phone')
+        const user = await UserController.fromObj(data)
+        if (user._id)
+            delete user._id
+        await user.save()  
+    }
+
+    @CheckRole(UserType.Master)
+    async post_user_set(ctx: RenderContext){
+        const {id} = ctx.aparams
+        const user = await UserController.get(id)
+        if (!user)
+            throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
+        const {data} = ctx.aparams
+        if (data.email && !/^[a-zA-Z0-9_.+-]+$/.test(data.email))
+            throw new ApiError(Codes.INCORRECT_PARAM, 'email')
+        if (data.phone && !util.isPhone(data.phone))
+            throw new ApiError(Codes.INCORRECT_PARAM, 'phone')
+        for (let k in data)
+            user[k] = data[k]
+        if (user.relation){
+            const ctrl = institutionController(user.relation.type)
+            user.relation = (await ctrl.get(user.relation._id)).asOwner
+        }
+        if (user.password)
+            user.password = await UserController.hash_password(data.password)
+        await user.save()        
     }
     
     @CheckRole(UserType.Master)

@@ -8,6 +8,7 @@ import {default as L, LR} from './locale'
 import {Delimeter} from '../util/components'
 import {LoginInput, TextInput, NumberInput} from '../util/inputs'
 import {UserTypeSelect, OwnerSelect} from '../util/inputs'
+import {ProfileDataInfo} from './Profile'
 import {ApiStackError, ClientError} from '../common/errors'
 
 type UserSend = Omit<User, 'type' | 'admin' | 'displayName' | 'fullName'
@@ -15,6 +16,7 @@ type UserSend = Omit<User, 'type' | 'admin' | 'displayName' | 'fullName'
 
 type UserRowProps = {
     user?: User
+    viewer?: User
     add?: boolean
     err?: ApiStackError,
     onChange: (u: UserSend)=>void
@@ -39,7 +41,7 @@ function UserRowEdit(props: UserRowProps){
         relation, data})
     return <RB.Row key={`user_edit_${user?._id||'new'}`} className="menu-input-row">
       {props.err && <ErrorMessage field={props.err} />}
-      <RB.Container>
+      <RB.Form autoComplete='off'>
         <RB.Row className='menu-input-row'>
           <RB.Col sm={3}><LoginInput value={email} onChange={setEmail}
             placeholder={L('field_email')}/></RB.Col>
@@ -88,12 +90,12 @@ function UserRowEdit(props: UserRowProps){
             </RB.Container>
           </RB.Col>
         </RB.Row>
-      </RB.Container>
+      </RB.Form>
     </RB.Row>
 }
 
 function UserRow(props: UserRowProps) {
-    const {user} = props
+    const {user, viewer} = props
     const [showData, setShowData] = React.useState(false)
     const [showEdit, setShowEdit] = React.useState(false)
     if (showEdit)
@@ -112,7 +114,7 @@ function UserRow(props: UserRowProps) {
           </RB.Col>
         </RB.Row>
         {showData && <RB.Row>
-          <RB.Col>{user.info}</RB.Col>
+          <ProfileDataInfo user={user} viewer={viewer} />
         </RB.Row>}
       </RB.Container>
     </RB.Row>
@@ -122,6 +124,7 @@ type UserListState = {
     list?: User[]
     filter_text?: string
     filter_kind?: UserType
+    newForm?: UserSend
 }
 type UserListProps = {
     user: User
@@ -146,26 +149,32 @@ export default class List extends UList<UserListProps, UserListState> {
     }
     async onChange(target: string, u: UserSend){
         const {user} = this.props
-        this.setState({err: null})
+        this.setState({err: null, newForm: null})
         const empty = user.keys.concat(['password'])
-            .filter(k=>!['_id', 'type', 'relation'].includes(k))
-            .filter(k=>!u[k]).join(' ')
+            .filter(k=>!['_id', 'type', 'info', 'relation'].includes(k))
+            .filter(k=>util.isEmpty(u[k])).join(' ')
         if (empty)
-            return this.setState({err: new ClientError(`Missing ${empty}`)})
-        const ret = await util.wget(`/api/admin/users/${target}`, {
+            return this.setState({err: new ClientError(`Missing ${empty}`), newForm: u})
+        if (!/^[a-zA-Z0-9_.+-]+$/.test(u.email))
+            throw 'Incorrect email format'
+        if (u.phone && !util.isPhone(u.phone))
+            throw 'Incorrect phone format'
+        const ret = await util.wget(`/api/admin/user/${target}`, {
             method: 'POST', data: {data: u}})
         if (ret.err)
-            return this.setState({err: ret.err})
+            return this.setState({err: ret.err, newForm: u})
         this.fetch()        
     }
     body(){
-        if (!this.props.user?.admin)
+        const {user} = this.props
+        if (!user?.admin)
             return [<ErrorMessage message={this.L('error_restricted')} />]
         const {filter_text, filter_kind, err} = this.state
         const rows = this.list.map(l=><UserRow key={`user_list_${l._id}`} err={err}
-            user={l} onChange={u=>this.onChange(`${u._id}/set`, u)} />)
+            user={l} viewer={user} onChange={u=>this.onChange(`${l._id}/set`, u)} />)
         return [
-          <UserRowEdit onChange={u=>this.onChange('add', u)} add={true} err={err} />,
+          <UserRowEdit onChange={u=>this.onChange('add', u)} add={true} err={err}
+            user={(this.state.newForm as unknown) as User} />,
           <Delimeter />,
           <RB.Row className='menu-input-row'>
             <RB.Col>{L('desc_filter')}</RB.Col>

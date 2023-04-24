@@ -14,13 +14,15 @@ async function user_by_match(match: string){
 }
 
 export async function process_data(data = ''){
-    const match = data.match(/\{[^}]\}/g)||[]
+    const re = /\{([^}]+)\}/g
+    const match = data.match(re)||[]
     const matches = {}
     for (let m of match){
-        if (!(m in matches))
-            matches[m] = await user_by_match(m)
+        const input = m.replace(/^{/, '').replace(/}$/, '') 
+        if (!(input in matches))
+            matches[input] = await user_by_match(input)
     }
     for (let m in matches)
-        data = data.replace(/\{[^}]\}/g, `{${m}:${matches[m]}}`)
+        data = data.replace(new RegExp(`{${m}}`, 'g'), `{${m}:${matches[m]}}`)
     return data
 }

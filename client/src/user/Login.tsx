@@ -43,10 +43,10 @@ function UserLoginEmail(props: {onSubmit: (data: EmailProps)=>void}){
     return <RB.Form autoComplete='on'><RB.Row>
       <RB.Col sm={4}>
         <LoginInput name='login_email' placeholder={L('field_email')}
-          value={email} onChange={setEmail} /></RB.Col>
+          value={email} onChange={setEmail} autoComplete={true} /></RB.Col>
       <RB.Col sm={4}>
         <TextInput type='password' name='login_password' placeholder={L('field_password')}
-          value={password} onChange={setPassword} />
+          value={password} onChange={setPassword} autoComplete={true} />
       </RB.Col>
       <RB.Col sm={2}><RB.Button onClick={submit}>{L('button_signin')}</RB.Button></RB.Col>
     </RB.Row></RB.Form>

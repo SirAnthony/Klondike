@@ -47,6 +47,8 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
     '/order/create': {func: 'order_change', methods: ['post']},
     '/order/:id/delete': {func: 'order', methods: ['delete']},
     '/orders/': {func: 'orders_list', methods: ['get']},
+    '/user/:id/set': {func: 'user_set', methods: ['post']},
+    '/user/add': {func: 'user_add', methods: ['post']},
     '/time': {func: 'time', methods: ['put']},
     '/config': {func: 'config', methods: ['post']},
 }},
