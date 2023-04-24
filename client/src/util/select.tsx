@@ -84,7 +84,7 @@ export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: bo
                 Object.assign(p, {[v as string]: L(`${key}_${v}`)}), {}) || []
         }
         componentDidUpdate(prevProps){
-            if (prevProps.exclude!=this.props.exclude)
+            if (prevProps.exclude!==this.props.exclude)
                 this.fetch()
         }
     }

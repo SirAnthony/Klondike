@@ -71,7 +71,7 @@ export function PatentSelect(props: {value?: Patent, corp: Corporation,
     const {value, corp, item, onChange} = props
     const res = item as Resource
     const filter = (p: Patent)=>p.resourceCost.some(r=>
-        r.kind==res.kind && ((r.provided|0)<r.value))
+        +r.kind===+res.kind && ((r.provided|0)<r.value))
     return <RPSelect value={value} corp={corp} filter={filter} onChange={onChange} />
 }
 
@@ -106,14 +106,12 @@ const asID = (obj: ID) : ID|null => {
 
 export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolean,
     exclude?: number[], onChange: (owner: Owner)=>void}){
-    const [owner, setOwner] = React.useState(props.value)
     const [instType, setInstType] = React.useState(props.value?.type)
     const [id, setId] = React.useState(asID(props.value))
     const ownerChange = (type: InstitutionType, id: ID)=>{
       const obj = asID(id), owner = Object.assign({type}, obj)
       setInstType(type)
       setId(obj)
-      setOwner(owner)
       props.onChange(owner)
     }
     return <RB.Row>
@@ -134,7 +132,7 @@ export function MultiOwnerSelect(props: {value?: Owner[], className?: string,
     const addOwner = ()=>owner && props.onChange(_.uniqBy([].concat(
         owner, props.value).filter(f=>f?._id&&f.type), f=>f._id))
     const removeOwner = (_id: string)=>props.onChange(_.uniqBy([].concat(
-        props.value).filter(o=>o && o._id!=_id), f=>f._id))
+        props.value).filter(o=>o && o._id!==_id), f=>f._id))
     const owners = props.value?.map(o=><RB.Container key={`sel_owner_${o._id}`}
       className='selected-item'>{o.name}<RB.CloseButton onClick={()=>removeOwner(o._id)} />
     </RB.Container>)
@@ -159,7 +157,7 @@ export function MultiResourceSelect(props: {value?: ResItem[],
     const addRes = ()=>kind!==null && kind>=0 && value>=0 && props.onChange(_.uniqBy(
         [].concat({kind, value}, props.value).filter(f=>!isNaN(+f?.kind)&&f?.value), f=>f.kind))
     const removeRes = (kind: number)=>props.onChange(_.uniqBy([].concat(
-        props.value).filter(o=>o && o.kind!=kind), f=>f.kind))
+        props.value).filter(o=>o && +o.kind!==+kind), f=>f.kind))
     const resources = props.value?.map(o=><RB.Container key={`sel_res_${o.kind}`} className='selected-item'>
       {L(`res_kind_${o.kind}`)} [{o.value}]<RB.CloseButton onClick={()=>removeRes(o.kind)} />
     </RB.Container>)
