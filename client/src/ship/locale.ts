@@ -1,4 +1,4 @@
-import {load, default as BL} from '../common/locale'
+import {load, isDefined, tpl, default as BL} from '../common/locale'
 const mod = 'ship'
 load(mod, {
     'not_found': 'Корабль не найден',
@@ -36,6 +36,14 @@ load(mod, {
     'desc_port': 'Порт приписки',
     'desc_captain': 'Капитан',
     'desc_owner': 'Владелец корабля',
+    'desc_flight_type_0': 'Планетарный вылет',
+    'desc_flight_type_1': 'Запуск дрона',
+    'desc_flight_status_0': 'В доке',
+    'desc_flight_status_1': 'Ожидание',
+    'desc_flight_status_2': 'Вылетел',
+    'desc_flight_status_3': 'SOS',
+    'desc_flight_status_4': 'Заблокирован',
+    'desc_info_hidden': '[Информация скрыта]',
     'mod_title': 'Дополнительные модули',
     'mod_values': 'Текущее значение',
     'mod_slot': 'Слот',
@@ -43,6 +51,12 @@ load(mod, {
     'mod_stat': name=>L('stat_'+name)+' модуля',
     'mod_stat_c': name=>'MOD'+L(`stat_${name}_c`)
 })
+
+export function LR(str: string, ...args): string {
+    if (isDefined(str))
+        return BL(str, ...args)
+    return L(str, ...args)
+}
 
 export default function L(str: string, ...args): string {
     return BL(`${mod}_${str}`, ...args)

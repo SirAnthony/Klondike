@@ -153,12 +153,13 @@ export default class List extends UList<UserListProps, UserListState> {
         const empty = user.keys.concat(['password'])
             .filter(k=>!['_id', 'type', 'info', 'relation'].includes(k))
             .filter(k=>util.isEmpty(u[k])).join(' ')
+        const err = msg=>this.setState({err: new ClientError(msg), newForm: u})
         if (empty)
-            return this.setState({err: new ClientError(`Missing ${empty}`), newForm: u})
+            return err(`Missing ${empty}`)
         if (!/^[a-zA-Z0-9_.+-]+$/.test(u.email))
-            throw 'Incorrect email format'
+            return err('Incorrect email format')
         if (u.phone && !util.isPhone(u.phone))
-            throw 'Incorrect phone format'
+            throw err('Incorrect phone format')
         const ret = await util.wget(`/api/admin/user/${target}`, {
             method: 'POST', data: {data: u}})
         if (ret.err)
