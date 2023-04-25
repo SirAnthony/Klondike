@@ -6,7 +6,7 @@ import {UserFooter} from '../user/Footer'
 import * as entity from '../common/entity'
 import {Menu} from '../util/controls'
 import {Navigator as ShipNavigator} from '../ship'
-import {Navigator as CorpNavigator} from '../corp'
+import {Navigator as InventoryNavigator} from '../inventory'
 import {Navigator as MapNavigator, ListNavigator as PlanetListNavigator} from '../map'
 import {Navigator as AdminNavigator} from '../admin'
 import {Navigator as UserProfileNavigator} from '../user/Profile'
@@ -18,12 +18,6 @@ type ListState = {}
 type ListProps = {user: entity.User}
 class ListNavigator extends Menu<ListProps, ListState> {
     L = L
-    body(){
-        return ['ship', 'ships', 'corp', 'corps', 'map', 'planets'].map(f=>
-        <RB.Row key={`index_list_${f}`} className='menu-list-row'>
-          <RB.Col><RB.NavLink href={`/${f}/`}>{this.L(`interface_${f}`)}</RB.NavLink></RB.Col>
-        </RB.Row>)
-    }
 }
 
 function App() {
@@ -39,8 +33,7 @@ function App() {
       <RR.Route path='/' element={<ListNavigator user={user} />} />
       <RR.Route path='/confirm/*' element={<Confirmator user={user} />} />
       <RR.Route path='/ship/*' element={<ShipNavigator user={user} />} />
-      <RR.Route path='/corp/*' element={<CorpNavigator user={user} />} />
-      <RR.Route path='/lab/*' element={<CorpNavigator user={user} />} />
+      <RR.Route path='/inventory/*' element={<InventoryNavigator user={user} />} />
       <RR.Route path='/map/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planet/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
@@ -49,7 +42,7 @@ function App() {
       { is_admin && <RR.Route path='/admin/*' element={<AdminNavigator user={user} />} />}
       { is_admin && <RR.Route path='/admin/' element={<AdminNavigator user={user} />} />}
     </RR.Routes>
-    <UserFooter user={user}></UserFooter>
+    {user && <UserFooter user={user}></UserFooter>}
   </RR.BrowserRouter>
   </div>);
 }

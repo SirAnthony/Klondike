@@ -4,6 +4,7 @@ import {RenderContext} from '../middlewares'
 import {UserType} from '../../client/src/common/entity'
 import {UserController} from '../entity'
 import {ApiError, Codes} from '../../client/src/common/errors'
+import {IDMatch} from '../util/server'
 
 export function CheckAuthenticated(){
     return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
@@ -52,7 +53,7 @@ export function CheckIDParam(param: string = 'id'){
                throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
             const id = ctx.aparams[param]
             const {user}: {user: UserController} = ctx.state
-            if (user.kind!=UserType.Master && !(id && id!=user?.relation?._id))
+            if (user.kind!=UserType.Master && !(id && IDMatch(id, user?.relation?._id)))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}

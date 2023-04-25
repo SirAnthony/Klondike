@@ -28,16 +28,13 @@ export class AdminApiRouter extends BaseRouter {
         for (let k in data)
             item[k] = data[k]
         if (data.owner)
-        {
-            const owner = Object.assign({type: data.owner.type},
-                (await CorpController.get(data.owner._id)).identifier)
-            item.owner = owner
-        }
+            item.owner = (await institutionController(data.owner.type).get(data.owner._id)).asOwner
         if (data.location)
             item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
         if (data.owners){
             const owners: PatentOwner[] = []
             for (let k of data.owners){
+                // Only corps owns patents
                 let owner = (await CorpController.get(k._id)).identifier
                 owners.push(Object.assign({status: PatentStatus.Created,
                     type: k.type}, owner))

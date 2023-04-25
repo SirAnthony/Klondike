@@ -14,6 +14,7 @@ export function Navigator(props){
     return (<div>
       <RR.Routes>
         <RR.Route path='/' element={<ShipDetailsNavigator user={user} />} />
+        <RR.Route path='/:type/:id' element={<ShipDetailsNavigator user={user} />} />
         <RR.Route path='/:id' element={<ShipDetailsNavigator user={user} />} />
         <RR.Route path='/all' />
       </RR.Routes>

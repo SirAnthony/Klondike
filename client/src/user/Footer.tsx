@@ -1,44 +1,37 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
-import {User, InstitutionType} from '../common/entity'
+import {User, InstitutionType, UserType} from '../common/entity'
 import {default as L} from './locale'
 
 export type FooterProps = {
     user: User
 }
 
-function CorpPane(props: FooterProps){
-    return <RB.TabPane eventKey='corp'><RB.Row>
-      <RB.Col><RB.Button>{L('pane_inventory')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_maps')}</RB.Button></RB.Col>
-    </RB.Row>
-    </RB.TabPane>
+function Button(props: FooterProps & {type: string}){
+    const {user, type} = props
+    const {relation} = user
+    return <RB.Button>
+      <RB.NavLink href={`/${type}/${relation.type}/${relation._id}`}>
+        {L(`pane_${type}`)}
+      </RB.NavLink>
+    </RB.Button>
 }
 
-function LabPane(props: FooterProps){
-    return <RB.TabPane eventKey='lab'><RB.Row>
-      <RB.Col><RB.Button>{L('pane_fligth_table')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_inventory')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_maps')}</RB.Button></RB.Col>
-    </RB.Row>
-    </RB.TabPane>
-}
-
-function OrgPane(props: FooterProps){
-    return <RB.TabPane eventKey='org'><RB.Row>
-      <RB.Col><RB.Button>{L('pane_inventory')}</RB.Button></RB.Col>
-    </RB.Row>
-    </RB.TabPane>
-}
-
-function ShipPane(props: FooterProps){
-    return <RB.TabPane eventKey='ship'><RB.Row>
-      <RB.Col><RB.Button>{L('pane_fligth_table')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_inventory')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_maps')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_ship')}</RB.Button></RB.Col>
-      <RB.Col><RB.Button>{L('pane_log')}</RB.Button></RB.Col>
+function EntityPane(props: FooterProps){
+    const {user} = props
+    const {relation} = user
+    const sp = s=>s.split(' ')
+    const buttons = {
+      [InstitutionType.Corporation]: sp('inventory maps'),
+      [InstitutionType.Organization]: sp('inventory'),
+      [InstitutionType.Research]: sp('flights inventory maps'),
+      [InstitutionType.Ship]: sp('flights inventory maps ship log'),
+    }
+    const cols = buttons[relation.type].map(b=><RB.Col key={`pane_button_${b}`}>
+      <Button {...props} type={b} /></RB.Col>)
+    return <RB.TabPane eventKey='entity'><RB.Row>
+      {cols}
     </RB.Row></RB.TabPane>
 }
 
@@ -48,51 +41,29 @@ function ProfilePane(props: FooterProps){
     </RB.Row></RB.TabPane>
 }
 
-
 export function UserFooter(props: FooterProps){
     const location = RR.useLocation()
     const {user} = props
     const {relation} = user||{}
     const has = (r: InstitutionType)=>user?.admin || +r===+relation?.type
-    const tab = location.pathname.startsWith('/ship') ? 'ship' :
-        location.pathname.startsWith('/corp') ? 'corp' :
-        location.pathname.startsWith('/lab') ? 'lab' :
-        location.pathname.startsWith('/org') ? 'org' : 'profile'
+    const tab = location.pathname.startsWith('/profile') ? 'profile' : 'entity'
     return <RB.Container className='app-footer'>
     <RB.TabContainer defaultActiveKey={tab}><RB.Row>
       <RB.Nav variant='tabs' defaultActiveKey={tab}>
-        {has(InstitutionType.Corporation) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='corp' href={`/corp/${relation?._id}`}>
-            {L('tab_corporation', relation?.name)}
-          </RB.NavLink>
-        </RB.NavItem></RB.Col>}
-        {has(InstitutionType.Corporation) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='lab' href={`/lab/${relation?._id}`}>
-            {L('tab_lab', relation?.name)}
-          </RB.NavLink>
-        </RB.NavItem></RB.Col>}
-        {has(InstitutionType.Organization) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='org' href={`/org/${relation?._id}`}>
-            {L('tab_organization', relation?.name)}
-          </RB.NavLink>
-        </RB.NavItem></RB.Col>}
-        {has(InstitutionType.Ship) && <RB.Col><RB.NavItem>
-          <RB.NavLink eventKey='ship' href={`/ship/${relation?._id}`}>
-            {L('tab_ship', relation?.name)}
+        {relation && <RB.Col><RB.NavItem>
+          <RB.NavLink eventKey='entity' href={`/inventory/${relation?.type}/${relation?._id}`}>
+            {L(`tab_entity_${relation.type}`, relation?.name)}
           </RB.NavLink>
         </RB.NavItem></RB.Col>}
         <RB.Col><RB.NavItem>
           <RB.NavLink eventKey='profile' href={`/profile/${user?._id}`}>
-            {L('tab_cabinet')}
+            {L(`tab_entity_${InstitutionType.User}`)}
           </RB.NavLink>
         </RB.NavItem></RB.Col>
       </RB.Nav>
     </RB.Row><RB.Row className='footer-tab'>
       <RB.Col><RB.TabContent>
-        <CorpPane {...props} />
-        <LabPane {...props} />
-        <OrgPane {...props} />
-        <ShipPane {...props} />
+        {relation && <EntityPane {...props} />}
         <ProfilePane {...props} />
       </RB.TabContent></RB.Col>
     </RB.Row></RB.TabContainer>

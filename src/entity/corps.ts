@@ -25,7 +25,7 @@ export class Controller extends CorporationDB {
         data.created = data.created || new Date()
         data.updated = new Date()
         if (data._id)
-            Cache.set(+data._id, data)
+            Cache.set(data._id, data)
         return await Controller.DB.save(data)
     }
 
@@ -33,11 +33,11 @@ export class Controller extends CorporationDB {
         if (data instanceof Controller)
             return data
         if (data instanceof ObjectId || typeof data == 'string'){
-            if (Cache.has(+data))
+            if (Cache.has(data))
                 data = Cache.get(+data)
             else {
                 data = await Controller.DB.get(data)
-                Cache.set(+data._id, data)
+                Cache.set(data._id, data)
             }
         }
         return new Controller(data, fields)

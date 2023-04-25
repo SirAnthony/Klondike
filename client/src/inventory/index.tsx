@@ -1,3 +1,7 @@
+import React from 'react'
+import * as RR from 'react-router-dom'
+import InventoryDetails from './Inventory'
+import {User} from '../common/entity'
 import EventEmitter from '../common/events'
 
 export {BudgetDetails, BalanceDetails} from './Balance'
@@ -15,4 +19,21 @@ export enum InventoryEventType {reloadTime, reloadBalance, timeChanged,
 Object.keys(InventoryEventType).filter(t=>isNaN(+t)).forEach(c=>{
     InventoryEvents[c] = ()=>InventoryEvents.emit(c)
     InventoryEvents[`on${c}`] = (...args)=>InventoryEvents.on(c, ...args)
-})
+});
+
+function InventoryDetailsNavigator(props: {user: User}){
+    const params = RR.useParams()
+    const {id, type} = params
+    return <InventoryDetails user={props.user} id={id} type={+type} />
+}
+
+export function Navigator(props){
+    const {user} = props
+    return (<div>
+      <RR.Routes>
+        <RR.Route path='/' element={<InventoryDetailsNavigator user={user} />} />
+        <RR.Route path='/:type/:id' element={<InventoryDetailsNavigator user={user} />} />
+        <RR.Route path='/all' />
+      </RR.Routes>
+    </div>)
+}

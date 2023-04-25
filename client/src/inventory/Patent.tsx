@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Patent, Corporation, InstitutionType} from '../common/entity'
+import {Patent, InstitutionType} from '../common/entity'
 import {MarketType, Owner} from '../common/entity'
 import {IDField} from '../util/components'
 import {ItemOwnerCol, ItemPriceInput} from './Item/components'
@@ -30,18 +30,18 @@ const OwnerListPopover = (patent: Patent)=>{
 }
 
 type RowProps = {
-    corp: Corporation
+    owner: Owner
     patent: Patent
     onAction?: (action: string, patent: Patent)=>()=>void
     onSell?: (item: Patent, target: Owner, price: number)=>void
 } & RowDescProps
 export function PatentRow(props: RowProps){
-    const {patent, corp} = props
+    const {patent, owner} = props
     const len = patent.owners.length
-    const owners = patent.owners.reduce((p, f)=>p + +(f._id==corp._id), 0)
+    const owners = patent.owners.reduce((p, f)=>p + +(f._id==owner._id), 0)
     const ownership = patent.owners.length<2 ? LR('patent_ownership_full') :
         LR(`patent_ownership_shared`)+` [${owners}/${len}]`
-    const is_served = Patent.served(patent, corp)
+    const is_served = Patent.served(patent, owner)
     const cls = props.className+(is_served ? 'patent-served' : '')
     return <RB.Row key={`patent_${patent._id}`} className={cls}>
         <RB.Col><IDField item={patent} /></RB.Col>
@@ -61,17 +61,17 @@ export function PatentRow(props: RowProps){
 }
 
 export function PatentSellButton(props: RowProps){
-  const {corp, patent, onSell} = props
+  const {owner: owner, patent, onSell} = props
   if (patent.market?.type!=MarketType.Sale)
-      return <ItemPriceInput item={patent} noRange={true} onSell={onSell} source={corp} />
+      return <ItemPriceInput item={patent} noRange={true} onSell={onSell} source={owner} />
   return <PopupButton url={`/item/${patent._id}/code`} desc={L('act_show_code')} />
 }
 
 export function PatentActions(props: RowProps){
-    const {patent, corp, onAction, onSell} = props
-    if (corp.type==InstitutionType.Research)
+    const {patent, owner, onAction} = props
+    if (owner.type==InstitutionType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>
-    const is_served = Patent.served(patent, corp)
+    const is_served = Patent.served(patent, owner)
     return <RB.Container>
       {!is_served  && <RB.Row><RB.Col>
         <RB.Button onClick={onAction('forward', patent)}>

@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation, InstitutionType, Order, User} from '../common/entity'
+import {Corporation, Institution, InstitutionType, Order, User} from '../common/entity'
 import {Item, Patent, MarketType, Owner} from '../common/entity'
 import {ItemRow, ItemRowDesc} from '../inventory'
 import {PatentLabItem, PatentRow, PatentRowDesc} from '../inventory'
@@ -17,7 +17,7 @@ type OrderDetailsState = {
     cycle: number
 }
 type OrderDetailsProps = {
-    corp: Corporation
+    owner: Institution
     user: User
     full?: Boolean
     fields?: string[]
@@ -31,8 +31,8 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
             this.setState({cycle: TimeDetails.Time?.cycle}))
     }
     get fetchUrl() { 
-        const {corp} = this.props
-        return `/api/corp/orders/${corp._id}`
+        const {owner} = this.props
+        return `/api/corp/orders/${owner._id}`
     }
     fetchState(data: any = {}){
         const {list} = data
@@ -59,7 +59,7 @@ type ItemDetailsState = {
     items?: Item[]
 }
 type ItemDetailsProps = {
-    corp: Corporation
+    owner: Owner
     user: User
 }
 class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
@@ -71,8 +71,8 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     }
     target: string
     get fetchUrl() { 
-        const {corp} = this.props
-        return `/api/inventory/${corp.type}/${corp._id}/${this.target}`
+        const {owner} = this.props
+        return `/api/inventory/${owner.type}/${owner._id}/${this.target}`
     }
     fetchState(data: any = {}){
         const {list} = data
@@ -82,10 +82,10 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     is_owner(item: Item){
         return this.props.user && item && this.props.user._id == item.owner?._id }
     async onItemAction(item: Item, check: ()=>boolean, action: string, opt?: any){
-        const {corp} = this.props
+        const {owner} = this.props
         if (!this.is_admin && !(this.is_owner(item) && check()))
             return
-        const res = await util.wget(`/api/inventory/${corp.type}/${corp._id}/item/${item._id}/${action}`,
+        const res = await util.wget(`/api/inventory/${owner.type}/${owner._id}/item/${item._id}/${action}`,
             Object.assign({method: 'PUT'}, opt))
         if (res.err)
             return this.setState({err: res.err})
@@ -113,15 +113,15 @@ export class ItemDetails extends ItemDetailsBase {
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
     async onPatentPay(item: Item, patent: Patent){
-        const {corp} = this.props
-        const res = await this.onItemAction(item, ()=>corp.type==InstitutionType.Research,
+        const {owner} = this.props
+        const res = await this.onItemAction(item, ()=>owner.type==InstitutionType.Research,
             `pay/patent/${patent._id}`)
         if (res)
             InventoryEvents.reloadPatents()
     }
     async onOrderPay(item: Item){
-        const {corp} = this.props
-        const res = await this.onItemAction(item, ()=>corp.type==InstitutionType.Corporation,
+        const {owner} = this.props
+        const res = await this.onItemAction(item, ()=>owner.type==InstitutionType.Corporation,
             `pay/order`)
         if (res)
             InventoryEvents.reloadOrders()
@@ -167,24 +167,24 @@ export class PatentDetails extends ItemDetailsBase {
         }
     }
     async action_forward(patent: Patent){
-        const {corp} = this.props
-        let ret = util.wget(`/api/corp/patent/forward/${corp._id}`, {method: 'PUT',
-            data: {_id: patent._id, requester: corp._id}});
+        const {owner} = this.props
+        let ret = util.wget(`/api/corp/patent/forward/${owner._id}`, {method: 'PUT',
+            data: {_id: patent._id, requester: owner._id}});
     }
     async action_product(patent: Patent){
-        const {corp} = this.props
-        let ret = util.wget(`/api/corp/patent/product/${corp._id}`, {method: 'PUT',
-            data: {_id: patent._id, requester: corp._id}});
+        const {owner} = this.props
+        let ret = util.wget(`/api/corp/patent/product/${owner._id}`, {method: 'PUT',
+            data: {_id: patent._id, requester: owner._id}});
     }
     rows(){
         const {items = []} = this.state
-        const {corp} = this.props
-        if (corp.type==InstitutionType.Research){
+        const {owner} = this.props
+        if (owner.type==InstitutionType.Research){
             return items.sort((a: Patent, b: Patent)=>+Patent.ready(a) - +Patent.ready(b)).map(i=>
                 <PatentLabItem onAction={this.onAction} key={`item_lab_${i._id}`}
-                patent={i as Patent} {...this.props} />)
+                    patent={i as Patent} {...this.props} />)
         }
-        const rows = items.sort((a: Patent, b: Patent)=>+Patent.served(a, corp) - +Patent.served(b, corp))
+        const rows = items.sort((a: Patent, b: Patent)=>+Patent.served(a, owner) - +Patent.served(b, owner))
             .map(i=><PatentRow onAction={this.onAction} onSell={this.onSell} key={`item_row_${i._id}`}
               patent={i as Patent} {...this.props} className='menu-list-row' />)
         rows.unshift(<PatentRowDesc className='menu-list-title' />)

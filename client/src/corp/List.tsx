@@ -13,7 +13,9 @@ function CorpRow(params: {corp: Corporation}) {
         corp.type==InstitutionType.User ? 'user' : 'corp'
     return <RB.Row className="menu-list-row">
       <RB.Col><img src={`/static/corp/${corp._id}.png`} /></RB.Col>
-      <RB.Col><RB.NavLink href={`/${url}/${corp._id}`}>{corp.name}</RB.NavLink></RB.Col>
+      <RB.Col>{corp.name}</RB.Col>
+      <RB.Col>{corp.credit}</RB.Col>
+      <RB.Col><RB.NavLink href={`/inventory/${corp.type}/${corp._id}`}>{LR('inventory')}</RB.NavLink></RB.Col>
     </RB.Row>
 }
 
@@ -31,7 +33,9 @@ export default class List extends UList<CorpListProps, CorpListState> {
         const rows = list.map(l=><CorpRow key={`corp_list_${l._id}`} corp={l} />)
         return [<RB.Row key={'corp_list_title'} className="menu-list-title">
           <RB.Col></RB.Col>
-          <RB.Col>{L('desc_name')}</RB.Col>
+          <RB.Col>{LR('item_desc_name')}</RB.Col>
+          <RB.Col>{LR('balance')}</RB.Col>
+          <RB.Col>{LR('item_desc_data')}</RB.Col>
         </RB.Row>, ...rows]
     }
 }

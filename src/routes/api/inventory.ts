@@ -44,6 +44,14 @@ async function pay_with_resource(resource: ItemController,
 export class InventoryApiRouter extends BaseRouter {
 
     @CheckIDParam()
+    @CheckAuthenticated()
+    async get_entity(ctx: RenderContext){
+        const {stype, id} = ctx.params;
+        const entity = await institutionController(+stype)?.get(id)
+        return {entity}
+    }
+
+    @CheckIDParam()
     @CheckRole(UserType.Scientist)
     async put_item_pay_patent(ctx: RenderContext){
         const {id, itemid, target} = ctx.aparams

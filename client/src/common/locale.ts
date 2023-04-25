@@ -94,6 +94,7 @@ const aliases = {
     'cycle': 'Цикл',
     'day_number': 'день',
     'assignee': 'Исполнитель',
+    'inventory': 'Инвентарь',
     'error_empty_select': 'Не выбрано',
     'error_value_high': 'Значение слишком велико',
     'error_value_low': 'Значение слишком мало',

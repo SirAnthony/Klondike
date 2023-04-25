@@ -100,14 +100,17 @@ function UserRow(props: UserRowProps) {
     const [showEdit, setShowEdit] = React.useState(false)
     if (showEdit)
         return <UserRowEdit {...props} onCancel={()=>setShowEdit(false)} />
+    const rel = !user.relation ? '-' :
+        LR(`institution_type_${user.relation.type}`)+' '+user.relation.name
     return <RB.Row key={`user_${user._id}`} className="menu-list-row">
       <RB.Container>
         <RB.Row>
           <RB.Col><RB.NavLink href={`/profile/${user._id}`}>{user.name}</RB.NavLink></RB.Col>
           <RB.Col>{User.fullName(user)}</RB.Col>
           <RB.Col>{LR(`user_kind_${user.kind}`)}</RB.Col>
-          <RB.Col>{user.phone}</RB.Col>
+          <RB.Col>{rel}</RB.Col>
           <RB.Col>{user.credit}</RB.Col>
+          <RB.Col>{user.phone}</RB.Col>
           <RB.Col>
             <RB.Button onClick={()=>setShowData(!showData)}>{L('act_show_data')}</RB.Button>
             <RB.Button onClick={()=>setShowEdit(true)}>{LR('act_edit')}</RB.Button>
@@ -143,8 +146,8 @@ export default class List extends UList<UserListProps, UserListState> {
         const {list, filter_text, filter_kind} = this.state
         const fk = (u: User)=>isNaN(filter_kind) || u.kind==filter_kind
         const ft = (u: User)=>util.isEmpty(filter_text) ||
-            [User.fullName(u), u.phone].some(v=>
-            (new RegExp(filter_text, 'i')).test(v))
+            [User.fullName(u), u.phone, u.relation?.name].some(v=>
+            (new RegExp(filter_text, 'i')).test(v||''))
         return list?.filter(u=>fk(u) && ft(u))||[]
     }
     async onChange(target: string, u: UserSend){
@@ -194,8 +197,9 @@ export default class List extends UList<UserListProps, UserListState> {
             <RB.Col>{L('desc_name')}</RB.Col>
             <RB.Col>{L('desc_fullname')}</RB.Col>
             <RB.Col>{L('desc_role')}</RB.Col>
-            <RB.Col>{L('desc_phone')}</RB.Col>
+            <RB.Col>{L('desc_relation')}</RB.Col>
             <RB.Col>{L('desc_credit')}</RB.Col>
+            <RB.Col>{L('desc_phone')}</RB.Col>
             <RB.Col>{L('desc_actions')}</RB.Col>
         </RB.Row>, <Delimeter />, ...rows]
     }
