@@ -31,7 +31,7 @@ export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsSt
     }
     get fetchUrl(){ return '/api/corp/rating' }
     fetchState(data: any){
-        return {item: data, rating: data.rating}
+        return {item: data, rating: data?.rating}
     }
     body(){
         const {rating} = this.state

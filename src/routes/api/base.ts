@@ -1,9 +1,9 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
-import {UserController, ShipController, ItemController, institutionController, LogController, LoanController} from '../../entity'
-import {PlanetController} from '../../entity'
-import {ConfigController} from '../../entity'
+import {UserController, ShipController, institutionController} from '../../entity'
+import {ItemController, PlanetController} from '../../entity'
+import {ConfigController, LogController} from '../../entity'
 import {PlanetInfo, UserType, LogAction} from '../../../client/src/common/entity'
-import {ItemType, Item, Resource} from '../../../client/src/common/entity'
+import {ItemType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
 import {Time} from '../../util/time'
@@ -54,7 +54,7 @@ export class ApiRouter extends BaseRouter {
         return {list}
     }
 
-    @CheckRole(UserType.Corporant)
+    @CheckRole([UserType.Corporant, UserType.Captain, UserType.Scientist])
     async get_prices(ctx: RenderContext){
         const prices = {}
         const conf = await ConfigController.get()
@@ -71,26 +71,17 @@ export class ApiRouter extends BaseRouter {
         return {list: prices}
     }
 
-    @CheckAuthenticated()
+    @CheckRole([UserType.Corporant, UserType.Captain, UserType.Scientist])
     async get_balance(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const {relation} = user
-        let loans = null, entity = null
+        let entity = null
         if (relation){
             const srcController = institutionController(relation.type)
             const src = await srcController.get(relation._id)
-            entity = Object.assign({
-                credit: src.credit,
-                cost: src.cost
-            }, relation)
-            loans = await LoanController.all({
-                filled: {$ne: true}, $or: [
-                    {'lender._id': src._id, 'lender.type': src.type},
-                    {'creditor._id': src._id, 'creditor.type': src.type},
-                ]
-            })
+            entity = Object.assign({credit: src.credit}, src.asOwner)
         }
-        return {user: user.credit, entity, loans}
+        return {user: user.credit, entity}
     }
 
     @CheckRole(UserType.Master)

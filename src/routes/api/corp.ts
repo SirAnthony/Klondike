@@ -8,7 +8,7 @@ import {InstitutionType, LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
-import * as rating from '../../util/rating'
+import * as Rating from '../../util/rating'
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -54,7 +54,7 @@ export class CorpApiRouter extends BaseRouter {
         })
         await item.save()
         // Calcluate points
-        const points = await rating.patent_points(patent, owner, prevOwners);
+        const points = await Rating.patent_points(patent, owner, prevOwners);
         if (points){
             await LogController.log({
                 name: 'patent_forward', info: 'post_patent_forward',
@@ -66,7 +66,8 @@ export class CorpApiRouter extends BaseRouter {
         }
     }
 
-    @CheckRole(UserType.Master)
+    @CheckRole([UserType.Captain, UserType.Corporant,
+        UserType.Guard, UserType.Scientist])
     async get_list(ctx: RenderContext){
         const {type} = ctx.aparams
         const controller = type ?
@@ -78,9 +79,9 @@ export class CorpApiRouter extends BaseRouter {
         return {list}
     }
 
-    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async get_rating(ctx: RenderContext){
-        return {rating: await rating.Rating.get()}
+        const rating = await Rating.Rating.get()
+        return {rating}
     }
 }

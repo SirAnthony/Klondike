@@ -41,6 +41,27 @@ async function pay_with_resource(resource: ItemController,
     return used
 }
 
+async function provide_loan(src: Owner, dst: Owner, value: number){
+    const reverse = await LoanController.find({filled: {$ne: true},
+        'lender._id': dst._id, 'lender.type': dst.type,
+        'creditor._id': src._id, 'creditor.type': src.type})
+    if (reverse) {
+        const val = Math.min(reverse.amount, value)
+        reverse.amount -= val
+        value -= val
+        reverse.filled = !reverse.amount
+        await reverse.save()
+    }
+    if (!value)
+        return
+    const loan = (await LoanController.find({filled: {$ne: true},
+        'lender._id': src._id, 'lender.type': src.type,
+        'creditor._id': dst._id, 'creditor.type': dst.type
+    })) || LoanController.create(src, dst)
+    loan.amount = (loan.amount|0) + value
+    await loan.save()
+}
+
 export class InventoryApiRouter extends BaseRouter {
 
     @CheckIDParam()
@@ -308,18 +329,31 @@ export class InventoryApiRouter extends BaseRouter {
         const value = amount|0
         if (IDMatch(src._id, dst._id) || value<=0 || value>src.credit)
             throw 'field_error_invalid'
-        const loan =(await LoanController.find({filled: {$ne: true},
-            'lender._id': src._id, 'lender.type': src.type,
-            'creditor._id': dst._id, 'creditor.type': dst.type
-        })) || LoanController.create(src.asOwner, dst.asOwner)
-        loan.amount = loan.amount|0 + value
+        await provide_loan(src, dst, value)
         src.credit = (src.credit|0) - value
         dst.credit = (dst.credit|0) + value
-        await loan.save()
         await src.save()
         await dst.save()
         return {credit: src.credit}
     }
 
+    @CheckIDParam()
+    @CheckAuthenticated()
+    async get_balance(ctx: RenderContext){
+        const {stype, id} = ctx.aparams
+        const srcController = institutionController(+stype)
+        const src = await srcController.get(id)
+        const entity = Object.assign({
+            credit: src.credit,
+            cost: src.cost
+        }, src.asOwner)
+        const loans = await LoanController.all({
+            filled: {$ne: true}, $or: [
+                {'lender._id': src._id, 'lender.type': src.type},
+                {'creditor._id': src._id, 'creditor.type': src.type},
+              ]
+        })
+        return {entity, loans}
+    }
 
 } 

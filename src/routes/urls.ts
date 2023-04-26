@@ -30,13 +30,14 @@ inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json
     '/:stype/:id': {func: 'entity', methods: ['get']},
     '/:stype/:id/items': {func: 'items_list', methods: ['get']},
     '/:stype/:id/patents': {func: 'patents_list', methods: ['get']},
+    '/:stype/:id/balance': {func: 'balance', methods: ['get']},
     '/:stype/:id/transfer': {func: 'transfer', methods: ['post']},
     '/:stype/:id/item/:itemid/pay/patent/:target': {func: 'item_pay_patent', methods: ['put']},
     '/:stype/:id/item/:itemid/pay/order': {func: 'item_pay_order', methods: ['put']},
     '/:stype/:id/item/:itemid/pay/loan': {func: 'item_pay_loan', methods: ['put']},
     '/:stype/:id/item/:itemid/sell': {func: 'item_sell', methods: ['put']},
     '/:stype/:id/item/:itemid/delist': {func: 'item_delist', methods: ['put']},
-    '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['post']}
+    '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['post']},
 }},
 user_api: {prefix: '/api/user', router: UserApiRouter, opt: {json: true}, urls: {
     '/profile/:id': {func: 'profile', methods: ['get', 'post']}
