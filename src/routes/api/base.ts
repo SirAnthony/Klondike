@@ -1,5 +1,5 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
-import {UserController, ShipController, ItemController, institutionController, LogController} from '../../entity'
+import {UserController, ShipController, ItemController, institutionController, LogController, LoanController} from '../../entity'
 import {PlanetController} from '../../entity'
 import {ConfigController} from '../../entity'
 import {PlanetInfo, UserType, LogAction} from '../../../client/src/common/entity'
@@ -75,13 +75,22 @@ export class ApiRouter extends BaseRouter {
     async get_balance(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const {relation} = user
-        let institution = null
+        let loans = null, entity = null
         if (relation){
             const srcController = institutionController(relation.type)
             const src = await srcController.get(relation._id)
-            institution = src.credit
+            entity = Object.assign({
+                credit: src.credit,
+                cost: src.cost
+            }, relation)
+            loans = await LoanController.all({
+                filled: {$ne: true}, $or: [
+                    {'lender._id': src._id, 'lender.type': src.type},
+                    {'creditor._id': src._id, 'creditor.type': src.type},
+                ]
+            })
         }
-        return {user: user.credit, relation, institution}
+        return {user: user.credit, entity, loans}
     }
 
     @CheckRole(UserType.Master)

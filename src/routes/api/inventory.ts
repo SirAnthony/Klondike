@@ -1,5 +1,5 @@
 import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
-import {CorpController, institutionController, LogController} from '../../entity'
+import {CorpController, institutionController, LoanController, LogController} from '../../entity'
 import {ItemController, UserController, ConfigController} from '../../entity'
 import {OrderController} from '../../entity'
 import {UserType, Patent, PatentStatus, InstitutionType, Coordinates} from '../../../client/src/common/entity'
@@ -292,4 +292,34 @@ export class InventoryApiRouter extends BaseRouter {
         const list = await ItemController.all(filter)
         return {list}
     }
+
+    @CheckIDParam()
+    @CheckAuthenticated()
+    async post_transfer(ctx: RenderContext){
+        const {stype, dtype, id, target, amount} = ctx.aparams
+        const srcController = institutionController(+stype)
+        const dstController = institutionController(+dtype)
+        if (!srcController || !dstController)
+            throw 'field_error_noempty'
+        const src = await srcController.get(id)
+        const dst = await dstController.get(target)
+        if (!src || !dst)
+            throw 'field_error_noempty'
+        const value = amount|0
+        if (IDMatch(src._id, dst._id) || value<=0 || value>src.credit)
+            throw 'field_error_invalid'
+        const loan =(await LoanController.find({filled: {$ne: true},
+            'lender._id': src._id, 'lender.type': src.type,
+            'creditor._id': dst._id, 'creditor.type': dst.type
+        })) || LoanController.create(src.asOwner, dst.asOwner)
+        loan.amount = loan.amount|0 + value
+        src.credit = (src.credit|0) - value
+        dst.credit = (dst.credit|0) + value
+        await loan.save()
+        await src.save()
+        await dst.save()
+        return {credit: src.credit}
+    }
+
+
 } 

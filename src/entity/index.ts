@@ -6,12 +6,13 @@ import {Controller as PlanetController} from './planets'
 import {Controller as FlightController} from './flights'
 import {Controller as OrderController} from './orders'
 import {Controller as ItemController} from './items'
+import {Controller as LoanController} from './loans'
 import {Controller as LogController} from './logs'
 import {Controller as ConfigController} from './config'
 
 export {UserController, ShipController, CorpController, PlanetController,
-    FlightController, OrderController, ItemController, LogController,
-    ConfigController}
+    FlightController, OrderController, ItemController, LoanController,
+    LogController, ConfigController}
 
 export function institutionController(type: InstitutionType){
     switch(type){

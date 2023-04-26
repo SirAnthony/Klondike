@@ -75,14 +75,13 @@ export class Entity<T> {
     }
 }
 
-type DBState = {
-    created: Date
-    updated: Date
-} & Identifier
 type Constructor = new (...args: any[]) => {} & Identifier;
 export function MakeController<TBase extends Constructor>(Base: TBase, db: string){
-    type DBBase = DBState & TBase
-    return class Controller extends Base {
+    class DBBase extends Base {
+        created: Date
+        updated: Date
+    }
+    return class Controller extends DBBase {
         private static DB = new Entity<DBBase>(db)
         protected constructor(...args: any[]){
             const [data, fields] = args
@@ -91,21 +90,26 @@ export function MakeController<TBase extends Constructor>(Base: TBase, db: strin
             return this
         }
         get identifier(): Identifier {
-            const data = (this as unknown) as DBBase
+            const data = this as DBBase
             return {_id: data._id, name: data.name}
         }
         get asObject(): any { return {...this} }
         get asOwner(): Owner {
-            const data = (this as unknown) as Institution
+            if (!(this instanceof Institution))
+                return null
+            const data = this as Institution
             return Object.assign({type: data.type}, this.identifier)
         }
     
         async save() {
-            const data = (this as unknown) as DBBase
+            const data = this as DBBase
             data.created = data.created || new Date()
             data.updated = new Date()
             return await Controller.DB.save(data)
         }
+
+        async delete() {
+            return await Controller.DB.delete(this) }
     
         static async get(data: Controller | DBBase | TBase | ObjectId | string, fields?) : Promise<Controller>{
             if (data instanceof Controller)

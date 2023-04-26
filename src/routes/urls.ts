@@ -15,7 +15,6 @@ main: {prefix: '', router: MainRouter, urls: {
     '/item/:id/code': {func: 'item_code', template: 'item_code', methods: ['get']},
 }},
 corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: {
-    '/transfer/:id': {func: 'transfer', methods: ['post']},
     '/orders/:id': {func: 'orders', methods: ['get']},
     '/patent/forward/:id': {func: 'patent_forward', methods: ['post']},
     '/list': {func: 'list', methods: ['get']},
@@ -31,6 +30,7 @@ inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json
     '/:stype/:id': {func: 'entity', methods: ['get']},
     '/:stype/:id/items': {func: 'items_list', methods: ['get']},
     '/:stype/:id/patents': {func: 'patents_list', methods: ['get']},
+    '/:stype/:id/transfer': {func: 'transfer', methods: ['post']},
     '/:stype/:id/item/:itemid/pay/patent/:target': {func: 'item_pay_patent', methods: ['put']},
     '/:stype/:id/item/:itemid/pay/order': {func: 'item_pay_order', methods: ['put']},
     '/:stype/:id/item/:itemid/pay/loan': {func: 'item_pay_loan', methods: ['put']},

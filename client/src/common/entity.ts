@@ -304,6 +304,14 @@ export class PlanetInfo extends Planet {
     ships?: PlanetShip[]
 }
 
+export class Loan extends ID {
+    ts: number
+    amount: number
+    creditor: Owner
+    lender: Owner
+    filled: boolean
+}
+
 export enum LogAction {
     PatentPaid, PatentForwardFull, PatentForwardPart, PatentForwardLeftovers,
     ResourceUsed,
