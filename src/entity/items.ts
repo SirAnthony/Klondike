@@ -1,4 +1,5 @@
-import {Entity} from './base';
+/*
+import {Entity, MakeController} from './base';
 import {Identifier, Item} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
@@ -49,3 +50,4 @@ export class Controller extends ItemDB {
         return ret
     }
 }
+*/

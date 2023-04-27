@@ -1,3 +1,4 @@
+/*
 import {Entity} from './base';
 import {Identifier, Owner, Corporation} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
@@ -56,3 +57,4 @@ export class Controller extends CorporationDB {
         return ret
     }
 }
+*/

@@ -1,17 +1,25 @@
-import {InstitutionType} from '../../client/src/common/entity'
+import {Corporation, Flight, InstitutionType, Item, Order} from '../../client/src/common/entity'
+import {Loan, Owner} from '../../client/src/common/entity'
 import {Controller as UserController} from './users'
 import {Controller as ShipController} from './ships'
-import {Controller as CorpController} from './corps'
 import {Controller as PlanetController} from './planets'
-import {Controller as FlightController} from './flights'
-import {Controller as OrderController} from './orders'
-import {Controller as ItemController} from './items'
-import {Controller as LoanController} from './loans'
 import {Controller as LogController} from './logs'
 import {Controller as ConfigController} from './config'
+import {MakeController} from './base'
+import {Time} from '../util/time';
 
-export {UserController, ShipController, CorpController, PlanetController,
-    FlightController, OrderController, ItemController, LoanController,
+export class ItemController extends MakeController(Item, 'items') {}
+export class CorpController extends MakeController(Corporation, 'corps') {}
+export class OrderController extends MakeController(Order, 'orders') {}
+export class FlightController extends MakeController(Flight, 'flights') {}
+
+export class LoanController extends MakeController(Loan, 'loans') {
+    static create(lender: Owner, creditor: Owner, amount: number = 0) {
+        return new LoanController({creditor, lender, amount, ts: Time.time})
+    }
+}
+
+export {UserController, ShipController, PlanetController,
     LogController, ConfigController}
 
 export function institutionController(type: InstitutionType){

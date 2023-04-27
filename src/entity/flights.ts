@@ -1,3 +1,4 @@
+/*
 import {Entity} from './base';
 import {Identifier, Flight} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
@@ -49,3 +50,4 @@ export class Controller extends FlightDB {
         return ret
     }
 }
+*/

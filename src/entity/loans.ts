@@ -1,3 +1,4 @@
+/*
 import {Entity} from './base';
 import {Identifier, Loan, Owner} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
@@ -50,3 +51,4 @@ export class Controller extends LoanDB {
         return ret
     }
 }
+*/
