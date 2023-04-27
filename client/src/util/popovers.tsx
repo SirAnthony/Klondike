@@ -1,8 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, Item, Patent, Owner, InstitutionType} from '../common/entity'
+import {Corporation, Item, Patent} from '../common/entity'
+import {Owner, Loan, InstitutionType} from '../common/entity'
 import {NumberInput, OwnerSelect, PatentSelect} from './inputs'
 import L from '../common/locale'
+import {LoanSelect} from '../corp/List'
 
 type PatentSelectProps = {
     item: Item
@@ -36,7 +38,35 @@ function RangeWarning(props: {value: number, range?: [number, number]}){
     return null
 }
 
-type OwnerSelectProps = {
+type LoanSelectProps = {
+    desc: string
+    placement?: any
+    source?: Owner
+    inputRange?: [number, number]
+    onClick: (loan: Loan)=>void
+}
+export function LoanSelectTrigger(props: LoanSelectProps){
+    const {desc, source, inputRange} = props
+    const [loan, setLoan] = React.useState(null)
+    const onClick = ()=>props.onClick(loan)
+    const filter = (l: Loan)=>
+        +l.creditor.type==+source.type && l.creditor._id==source._id &&
+        l.amount>= inputRange[0] && l.amount<=inputRange[1] 
+    const btn = <RB.Popover>
+      <RB.PopoverBody>
+        <LoanSelect value={loan} entity={source} onChange={setLoan} filter={filter} />
+        <RB.Row className='menu-input-row'>
+          <RB.Button disabled={!loan} onClick={onClick}>{desc}</RB.Button>
+        </RB.Row>
+      </RB.PopoverBody>
+    </RB.Popover>
+    return <RB.OverlayTrigger placement={props.placement||'top'} trigger={'click'}
+      overlay={btn} rootClose={true}>
+      <RB.Button>{desc}</RB.Button>
+    </RB.OverlayTrigger>
+}
+
+type OwnerValueSelectProps = {
     desc: string
     valDesc: string
     placement?: any
@@ -45,7 +75,7 @@ type OwnerSelectProps = {
     inputRange?: [number, number]
     onClick: (owner: Owner, value: number)=>void
 }
-export function OwnerValueSelectTrigger(props: OwnerSelectProps){
+export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
     const {desc, valDesc, exclude, source, inputRange} = props
     const [owner, setOwner] = React.useState(null)
     const [value, setValue] = React.useState(null)
