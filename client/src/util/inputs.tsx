@@ -1,6 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, PatentWeight, ArtifactType, UserType} from '../common/entity'
+import {ItemType, ResourceType, PatentType, PatentWeight} from '../common/entity'
+import {ArtifactType, UserType} from '../common/entity'
 import {Patent, Corporation, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
 import {TypedSelect} from '../util/select'
