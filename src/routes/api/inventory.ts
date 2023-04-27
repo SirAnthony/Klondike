@@ -51,6 +51,9 @@ async function provide_loan(src: Owner, dst: Owner, value: number){
         value -= val
         reverse.filled = !reverse.amount
         await reverse.save()
+        await LogController.log({action: LogAction.LoanPay,
+            name: 'loan_pay', info: ''+val,
+            owner: src, institution: dst})
     }
     if (!value)
         return
@@ -60,6 +63,9 @@ async function provide_loan(src: Owner, dst: Owner, value: number){
     })) || LoanController.create(src, dst)
     loan.amount = (loan.amount|0) + value
     await loan.save()
+    await LogController.log({action: LogAction.LoanPay,
+        name: 'loan_take', info: ''+value,
+        owner: src, institution: dst})
 }
 
 export class InventoryApiRouter extends BaseRouter {

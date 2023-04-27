@@ -317,6 +317,7 @@ export enum LogAction {
     ResourceUsed,
     ItemPutSale, ItemRemoveSale, ItemPurchase,
     OrderPay, OrderClosed,
+    LoanPay, LoanProvided,
     BonusRating,
     MoneyLeftovers, ResourceLeftovers,
     CycleRating,
