@@ -1,6 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, User, Item, Patent, InstitutionType} from '../common/entity'
+import {Corporation, User, Item, Patent} from '../common/entity'
+import {Owner, InstitutionType, Loan} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
@@ -66,6 +67,23 @@ export class PatentSelect extends USelect<PatentSelectProps, {}> {
         return `/api/corp/patents/${this.props.corp?._id}` }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Patent[]){
+        return list?.filter(this.props.filter||Boolean)
+            .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
+    }
+}
+
+type LoanSelectProps = {
+    entity: Owner
+}
+export class LoanSelect extends USelect<LoanSelectProps, {}>{
+    L = LR
+    get optName(){ return 'loans' }
+    get fetchURL(){
+        const {entity} = this.props
+        return `/api/inventory/${entity.type}/${entity._id}/loans`
+    }
+    getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getOptions(list: Loan[]){
         return list?.filter(this.props.filter||Boolean)
             .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }
