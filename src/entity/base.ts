@@ -75,12 +75,14 @@ export class Entity<T> {
     }
 }
 
-type Constructor = new (...args: any[]) => {} & Identifier;
-export function MakeController<TBase extends Constructor>(Base: TBase, db: string){
+type Constructor<T extends Identifier> = new (...args: any[]) => T;
+export function MakeController<TBase extends Identifier>(Base: Constructor<TBase>, db: string){
+    // @ts-ignore
     class DBBase extends Base {
         created: Date
         updated: Date
     }
+    const Cache = new Map()
     return class Controller extends DBBase {
         private static DB = new Entity<DBBase>(db)
         protected constructor(...args: any[]){
@@ -89,14 +91,11 @@ export function MakeController<TBase extends Constructor>(Base: TBase, db: strin
             util.obj_copyto(data, this, fields)
             return this
         }
-        get identifier(): Identifier {
-            const data = this as DBBase
-            return {_id: data._id, name: data.name}
-        }
+        get identifier(): Identifier { return {_id: this._id, name: this.name} }
         get asObject(): any { return {...this} }
         get asOwner(): Owner {
             if (!(this instanceof Institution))
-                return null
+                return void(console.error(`requested asOwner from ${JSON.stringify(this)}`))
             const data = this as Institution
             return Object.assign({type: data.type}, this.identifier)
         }
@@ -105,17 +104,27 @@ export function MakeController<TBase extends Constructor>(Base: TBase, db: strin
             const data = this as DBBase
             data.created = data.created || new Date()
             data.updated = new Date()
+            if (data._id)
+                Cache.set(data._id, data)
             return await Controller.DB.save(data)
         }
 
         async delete() {
-            return await Controller.DB.delete(this) }
+            Cache.delete(this._id)
+            return await Controller.DB.delete(this)
+        }
     
-        static async get(data: Controller | DBBase | TBase | ObjectId | string, fields?) : Promise<Controller>{
+        static async get(data: Controller | DBBase | TBase | Constructor<TBase> | ObjectId | string, fields?) : Promise<Controller>{
             if (data instanceof Controller)
                 return data as Controller
-            if (data instanceof ObjectId || typeof data == 'string')
-                data = await Controller.DB.get(data)
+            if (data instanceof ObjectId || typeof data == 'string') {
+                if (Cache.has(data))
+                    data = Cache.get(data)
+                else {
+                    data = await Controller.DB.get(data)
+                    Cache.set(data._id, data)
+                }
+            }
             return new Controller(data, fields)
         }
     
