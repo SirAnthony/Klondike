@@ -1,7 +1,8 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, Owner, Patent, PatentOwner} from '../../common/entity'
-import {OwnerValueSelectTrigger} from '../../util/popovers'
+import {Item, ItemType, Owner, Resource} from '../../common/entity'
+import {Patent, PatentOwner, Loan} from '../../common/entity'
+import {LoanSelectTrigger, OwnerValueSelectTrigger} from '../../util/popovers'
 import {PriceFetcher} from '../Prices'
 import {default as L, LR} from '../locale'
 import * as iutil from './util'
@@ -57,6 +58,26 @@ export class ItemPriceCol extends PriceFetcher<ItemComponentProps, {}> {
         return <RB.Col sm={this.props.layout}>
           {iutil.item_base_price(this.props.item, this.state.prices)}
         </RB.Col>
+    }
+}
+
+export type ItemLoanInputProps = {
+    item: Item
+    source?: Owner
+    onPay?: (item: Item, loan: Loan)=>void
+}
+
+export class ItemLoanInput extends PriceFetcher<ItemLoanInputProps, {}> {
+    render(){
+        const {item, onPay} = this.props
+        const {prices} = this.state
+        const res = item as Resource
+        const inputRange: [number, number] = [
+            prices[res.kind]*defines.price.low_modifier,
+            prices[res.kind]*defines.price.high_modifier
+        ]
+        return <LoanSelectTrigger onClick={loan=>onPay(item, loan)}
+          inputRange={inputRange} desc={L('act_loan_pay')} source={this.props.source} />
     }
 }
 
