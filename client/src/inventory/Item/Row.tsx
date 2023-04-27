@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, Item, ItemType, User} from '../../common/entity'
-import {Resource, Patent, Owner, PatentOwner} from '../../common/entity'
+import {Institution, Item, ItemType, User} from '../../common/entity'
+import {Resource, Patent, Loan} from '../../common/entity'
 import {LocationCol, ResourceCostCol, ItemPriceCol} from './components'
 import {ItemOwnerCol, ItemPriceInputProps} from './components'
 import {ItemActions} from './Actions'
@@ -18,12 +18,12 @@ type ItemRowTitleProps = {
 export type ItemRowProps = {
     user: User
     item: Item
-    corp?: Corporation 
+    entity?: Institution
     layout?: number
     onDelete?: (item: Item)=>void
     onPatentPay?: (item: Item, patent: Patent)=>void
     onOrderPay?: (item: Item)=>void
-    onLoanPay?: (item: Item)=>void
+    onLoanPay?: (item: Item, loan: Loan)=>void
     onDelist?: (item: Item)=>void
 } & ItemPriceInputProps & ItemRowTitleProps
 

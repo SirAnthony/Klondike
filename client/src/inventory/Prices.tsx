@@ -1,13 +1,13 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {User} from '../common/entity'
+import {User, ResourceType} from '../common/entity'
 import {default as L, LR} from './locale'
 import {Delimeter} from '../util/components'
 import {InventoryEvents, InventoryEventType as IET} from './index'
 
 type PriceDetailsState = {
-    prices?: {ResourceType: number}
+    prices?: {[k in ResourceType]: number}
 }
 
 export class PriceFetcher<P, S> extends F.Fetcher<P, PriceDetailsState & S> {

@@ -67,13 +67,13 @@ export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'ar
 export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
 
-export function PatentSelect(props: {value?: Patent, corp: Corporation,
+export function PatentSelect(props: {value?: Patent, owner: Owner,
     item: Item, onChange: (p: Patent)=>void}){
-    const {value, corp, item, onChange} = props
+    const {item} = props
     const res = item as Resource
     const filter = (p: Patent)=>p.resourceCost.some(r=>
         +r.kind===+res.kind && ((r.provided|0)<r.value))
-    return <RPSelect value={value} corp={corp} filter={filter} onChange={onChange} />
+    return <RPSelect filter={filter} {...props} />
 }
 
 export function LocationSelect(props: {value?: Location, optName?: string, onChange: (loc: Location)=>void}){

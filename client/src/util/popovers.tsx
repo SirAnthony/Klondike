@@ -8,17 +8,17 @@ import {LoanSelect} from '../corp/List'
 
 type PatentSelectProps = {
     item: Item
-    corp: Corporation
+    owner: Owner
     desc: string
     onClick: (patent: Patent)=>void
 }
 export function PatentSelectTrigger(props: PatentSelectProps){
-    const {item, corp, desc} = props
+    const {item, owner, desc} = props
     const [patent, setPatent] = React.useState(null)
     const onClick = ()=>patent && props.onClick(patent)
     const btn = <RB.Popover>
       <RB.PopoverBody>
-        <PatentSelect value={patent} corp={corp} item={item} onChange={setPatent} />
+        <PatentSelect value={patent} owner={owner} item={item} onChange={setPatent} />
         <RB.Button disabled={!patent} onClick={onClick}>{desc}</RB.Button>
       </RB.PopoverBody>
     </RB.Popover>
@@ -54,7 +54,7 @@ export function LoanSelectTrigger(props: LoanSelectProps){
         l.amount>= inputRange[0] && l.amount<=inputRange[1] 
     const btn = <RB.Popover>
       <RB.PopoverBody>
-        <LoanSelect value={loan} entity={source} onChange={setLoan} filter={filter} />
+        <LoanSelect value={loan} owner={source} onChange={setLoan} filter={filter} />
         <RB.Row className='menu-input-row'>
           <RB.Button disabled={!loan} onClick={onClick}>{desc}</RB.Button>
         </RB.Row>

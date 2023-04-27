@@ -1,8 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Corporation, Institution, InstitutionType, Order, User} from '../common/entity'
-import {Item, Patent, MarketType, Owner} from '../common/entity'
+import {Institution, InstitutionType, Order, User} from '../common/entity'
+import {Item, MultiOwnedItem, Owner} from '../common/entity'
+import {MarketType, Patent, Loan} from '../common/entity'
 import {ItemRow, ItemRowDesc} from '../inventory'
 import {PatentLabItem, PatentRow, PatentRowDesc} from '../inventory'
 import {OrderRowCompact} from '../inventory'
@@ -80,7 +81,11 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     }
     get is_admin(){ return this.props.user.admin }
     is_owner(item: Item){
-        return this.props.user && item && this.props.user._id == item.owner?._id }
+        const {relation} = this.props.user||{}
+        const owners = [item?.owner?._id].concat(
+            (item as MultiOwnedItem).owners?.map(o=>o._id)).filter(Boolean)
+        return relation && owners.includes(relation._id)
+    }
     async onItemAction(item: Item, check: ()=>boolean, action: string, opt?: any){
         const {owner} = this.props
         if (!this.is_admin && !(this.is_owner(item) && check()))
@@ -97,7 +102,7 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         await this.onItemAction(item, check, 'delist')
     }
     async onSell(item: Item, target: Owner, price: number){
-        const check = ()=>![MarketType.Protected, MarketType.Sale].includes(item.market?.type)
+        const check = ()=>[MarketType.None].includes(item.market?.type)
         await this.onItemAction(item, check, 'sell', {
             data: {target: target._id, dtype: target.type, price: price}})
     }
@@ -126,11 +131,8 @@ export class ItemDetails extends ItemDetailsBase {
         if (res)
             InventoryEvents.reloadOrders()
     }
-    async onLoanPay(item: Item){
-        const res = await this.onItemAction(item, ()=>true, `pay/loan`)
-        if (res)
-            InventoryEvents.reloadLoans()
-    }
+    async onLoanPay(item: Item, loan: Loan){
+        await this.onItemAction(item, ()=>true, `pay/loan/${loan._id}`) }
     rows(){
         const {items = []} = this.state
         const rows = items.filter(util.not_depleted).map(i=><ItemRow className='menu-list-row'

@@ -1,5 +1,5 @@
 import {Item, ItemType, InstitutionType} from '../../common/entity'
-import {Resource} from '../../common/entity'
+import {Resource, ResourceType} from '../../common/entity'
 
 export const owners_exclude = (type: ItemType)=>{
     switch(type){
@@ -27,8 +27,7 @@ export const column_layout = (long: Boolean)=>{
     return res
 }
 
-export const item_base_price = (item: Item, prices: {ResourceType: number} = {} as any)=>{
+export const item_base_price = (item: Item, prices: {[k in ResourceType]: number} = {} as any)=>{
     return item.type == ItemType.Resource ? 
         (prices[(item as Resource).kind]|0) * (item as Resource).value : item.price
 }
-

@@ -12,6 +12,7 @@ load(mod, {
     'res_cur': 'Собственность',
     'patent_cur': 'Доступные патенты',
     'corporations_rating': 'Рейтинг корпораций',
+    'suitable_loans': 'Подходящие займы',
 })
 
 export function LR(str: string, ...args): string {

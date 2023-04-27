@@ -11,7 +11,7 @@ type SelectState = {
     options: {[key: string]: string | ID}
 }
 type SelectProps = {
-    value: any
+    value?: any
     optName?: string
     disabled?: boolean
     filter?: (item: any)=>Boolean
@@ -34,6 +34,8 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
     getOptions(list: any[] = []){
         return {}
     }
+    getOptionValue(opt) : String { 
+        return typeof opt=='string' ? opt : opt.name }
     getValue(value){ return value }
     onChange({target: {value}}){
         this.setState({value})
@@ -45,7 +47,7 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
         const opts = Object.keys(options).map(o=>{
             const opt = options[o];
             const id = typeof opt=='string' ? o : opt._id
-            const name = typeof opt=='string' ? opt : opt.name
+            const name = this.getOptionValue(opt)
             return <option key={`opt_${id}_${o}`} value={id}>{name}</option>
         })
         opts.unshift(<option key={`opt_name`} disabled={!this.top_enabled}

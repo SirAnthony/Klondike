@@ -58,13 +58,13 @@ export class Select extends USelect<{type: InstitutionType}, {}> {
 }
 
 type PatentSelectProps = {
-    corp: Corporation
+    owner: Owner
 }
 export class PatentSelect extends USelect<PatentSelectProps, {}> {
     L = LR
     get optName(){ return 'item_desc_name' }
     get fetchUrl(){
-        return `/api/corp/patents/${this.props.corp?._id}` }
+        return `/api/corp/patents/${this.props.owner?._id}` }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Patent[]){
         return list?.filter(this.props.filter||Boolean)
@@ -73,16 +73,18 @@ export class PatentSelect extends USelect<PatentSelectProps, {}> {
 }
 
 type LoanSelectProps = {
-    entity: Owner
+    owner: Owner
 }
 export class LoanSelect extends USelect<LoanSelectProps, {}>{
     L = LR
-    get optName(){ return 'loans' }
-    get fetchURL(){
-        const {entity} = this.props
-        return `/api/inventory/${entity.type}/${entity._id}/loans`
+    get optName(){ return 'suitable_loans' }
+    get fetchUrl(){
+        const {owner} = this.props
+        return `/api/inventory/${owner.type}/${owner._id}/loans`
     }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getOptionValue(opt: Loan) : String { 
+        return `${opt.lender.name}: ${opt.amount}` }
     getOptions(list: Loan[]){
         return list?.filter(this.props.filter||Boolean)
             .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []

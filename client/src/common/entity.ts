@@ -45,7 +45,7 @@ export const ItemTypePrefix = {
     [ItemType.Module]: 'M', [ItemType.Patent]: 'P',
     [ItemType.Artifact]: 'A'
 }
-export enum MarketType {None, Sale, Protected}
+export enum MarketType {None, Sale, Protected, Loan}
 export class Item extends ID {
     type: ItemType
     owner: Owner | null
@@ -81,6 +81,12 @@ export class Item extends ID {
     }
 }
 
+export class MultiOwnedItem extends Item {
+    owners: Owner[]
+    get keys(){
+        return super.keys.concat('owners').filter(k=>k!='owner') }
+}
+
 export enum ResourceType {Mineral, Energy, Alloy, Crystal, Gas, Particle}
 export const ResourceMultiper = {
     [ResourceType.Mineral]: 100,
@@ -96,14 +102,11 @@ export class Resource extends Item {
     }
 }
 
-export class Coordinates extends Item {
+export class Coordinates extends MultiOwnedItem {
     type = ItemType.Coordinates
     target: Location 
-    owners: Owner[]
     get keys(){
-        return super.keys.concat('target owners'.split(' '))
-            .filter(k=>!['owner'].includes(k))
-    }
+        return super.keys.concat('target'.split(' ')) }
 }
 
 export class Module extends Item {
@@ -120,15 +123,15 @@ export enum PatentWeight {Minimal, Basic, Premium}
 export enum PatentStatus {Created, Ready, Served}
 export enum PatentOwnership {Partial, Full}
 export type PatentOwner = Owner & {status: PatentStatus}
-export class Patent extends Item {
+export class Patent extends MultiOwnedItem {
     type = ItemType.Patent
     kind: PatentType
     weight: PatentWeight
     owners: PatentOwner[]
     resourceCost: ResourceCost[]
     get keys(){
-        return super.keys.concat('kind weight owners resourceCost status'
-            .split(' ')).filter(k=>!['location', 'owner'].includes(k))
+        return super.keys.concat('kind weight resourceCost status'
+            .split(' ')).filter(k=>!['location'].includes(k))
     }
     get ownership(){ 
         return this.fullOwnership ? PatentOwnership.Full : PatentOwnership.Partial }
@@ -317,7 +320,7 @@ export enum LogAction {
     ResourceUsed,
     ItemPutSale, ItemRemoveSale, ItemPurchase,
     OrderPay, OrderClosed,
-    LoanPay, LoanProvided,
+    LoanPay, LoanProvided, LoanProposeItem, LoanProposeReject,
     BonusRating,
     MoneyLeftovers, ResourceLeftovers,
     CycleRating,

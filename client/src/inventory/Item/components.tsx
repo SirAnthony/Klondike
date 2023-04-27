@@ -63,21 +63,19 @@ export class ItemPriceCol extends PriceFetcher<ItemComponentProps, {}> {
 
 export type ItemLoanInputProps = {
     item: Item
-    source?: Owner
     onPay?: (item: Item, loan: Loan)=>void
 }
 
 export class ItemLoanInput extends PriceFetcher<ItemLoanInputProps, {}> {
     render(){
         const {item, onPay} = this.props
-        const {prices} = this.state
-        const res = item as Resource
+        const base_price = iutil.item_base_price(item, this.state.prices)
         const inputRange: [number, number] = [
-            prices[res.kind]*defines.price.low_modifier,
-            prices[res.kind]*defines.price.high_modifier
+            base_price*defines.price.low_modifier,
+            base_price*defines.price.high_modifier
         ]
         return <LoanSelectTrigger onClick={loan=>onPay(item, loan)}
-          inputRange={inputRange} desc={L('act_loan_pay')} source={this.props.source} />
+          inputRange={inputRange} desc={L('act_loan_pay')} source={item.owner} />
     }
 }
 

@@ -8,7 +8,10 @@ import {Resource, ResourceCost, Owner, LogAction} from '../../../client/src/comm
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
+import defines from '../../../client/src/common/defines'
 import * as rating from '../../util/rating'
+import * as iutil from '../../../client/src/inventory/Item/util'
+import * as cutil from '../../util/config'
 import * as crypto from 'crypto'
 
 async function pay_with_resource(resource: ItemController,
@@ -158,14 +161,75 @@ export class InventoryApiRouter extends BaseRouter {
     @CheckIDParam()
     @CheckAuthenticated()
     async put_item_pay_loan(ctx: RenderContext){
-       const {stype, id, itemid} = ctx.aparams
+       const {stype, id, itemid, loanid} = ctx.aparams
         if (!itemid)
             throw 'Required fields missing'
         const srcController = institutionController(+stype)
         const src = await srcController.get(id)
-        const resource = await ItemController.get(itemid)
-        if (!IDMatch(resource.owner._id, src._id))
+        const item = await ItemController.get(itemid)
+        if (!IDMatch(item.owner._id, src._id) || item.type!=ItemType.Resource)
             throw 'Wrong owner of resource'
+        const loan = await LoanController.get(loanid)
+        if (!loan || !IDMatch(loan.creditor._id, src._id))
+            throw 'Wrong loan'
+        if ((item.market?.type|0)!=MarketType.None)
+            throw 'Wrong market state'
+        const prices = await cutil.get_prices()
+        const price = iutil.item_base_price(item, prices)
+        if (loan.amount<price*defines.price.low_modifier || loan.amount>price*defines.price.high_modifier)
+            throw 'Wrong loan amount'
+        item.market = {type: MarketType.Loan, price,
+            from: src.asOwner, to: loan.lender, code: ''+loan._id}
+        await item.save()
+        await LogController.log({action: LogAction.LoanProposeItem,
+            name: 'loan_propose_item', info: 'put_item_pay_loan',
+            owner: src.asOwner, institution: loan.lender, item})
+    }
+
+    @CheckIDParam()
+    @CheckAuthenticated()
+    async put_item_close_loan(ctx: RenderContext){
+        const {stype, id, itemid} = ctx.aparams
+        if (!itemid)
+            throw 'Required fields missing'
+        const srcController = institutionController(+stype)
+        const src = await srcController.get(id)
+        const item = await ItemController.get(itemid)
+        if (+item.market?.type!=MarketType.Loan)
+            throw 'Wrong market type'
+        const loan = await LoanController.get(item.market.code)
+        if (!IDMatch(loan?.lender?._id, src._id) || item.type!=ItemType.Resource)
+            throw 'Wrong owner of resource'
+        item.owner = src.asOwner
+        item.market = null
+        await item.save()
+        loan.amount = 0
+        loan.filled = true
+        await loan.save()
+        await LogController.log({action: LogAction.LoanPay, item,
+            name: 'loan_pay_item', info: 'put_item_close_loan',
+            owner: loan.creditor, institution: src.asOwner})
+    }
+
+    @CheckIDParam()
+    @CheckAuthenticated()
+    async put_item_reject_loan(ctx: RenderContext){
+        const {stype, id, itemid} = ctx.aparams
+        if (!itemid)
+            throw 'Required fields missing'
+        const srcController = institutionController(+stype)
+        const src = await srcController.get(id)
+        const item = await ItemController.get(itemid)
+        if (+item.market?.type!=MarketType.Loan)
+            throw 'Wrong market type'
+        const loan = await LoanController.get(item.market.code)
+        if (!IDMatch(loan?.lender?._id, src._id) || item.type!=ItemType.Resource)
+            throw 'Wrong owner of resource'
+        item.market = null
+        await item.save()
+        await LogController.log({action: LogAction.LoanProposeReject, item,
+            name: 'loan_reject_item', info: 'put_item_reject_loan',
+            owner: loan.creditor, institution: src.asOwner})
     }
 
     @CheckIDParam()
@@ -177,14 +241,14 @@ export class InventoryApiRouter extends BaseRouter {
         const item = await ItemController.get(itemid)
         if (!item)
             throw 'Item not found'
-        if ([MarketType.Sale, MarketType.Protected].includes(+item.market?.type))
+        if ([MarketType.Sale, MarketType.Protected].includes(item.market?.type|0))
             throw 'Wrong market status'
         const srcController = institutionController(+stype)
         const dstController = institutionController(+dtype)
         if (!srcController || !dstController)
             throw 'No source or target type'
         const src = await srcController.get(id)
-        const owners = [].concat((item as any).owners, item.owner)
+        const owners = [].concat((item as any).owners, item.owner).filter(Boolean)
         if (!owners.some(o=>IDMatch(o._id, src._id)))
             throw 'Cannot sell foreign item'
         const dst = await dstController.get(target)
@@ -271,13 +335,13 @@ export class InventoryApiRouter extends BaseRouter {
         const item = await ItemController.get(itemid)
         if (!item)
             throw 'Item not found'
-        if (+item.market?.type!=MarketType.Sale)
+        if (![MarketType.Sale, MarketType.Loan].includes(+item.market?.type))
             throw 'Wrong market status'
         const srcController = institutionController(+stype)
         if (!srcController)
             throw 'No source type'
         const src = await srcController.get(id)
-        const owners = [].concat((item as any).owners, item.owner)
+        const owners = [].concat((item as any).owners, item.owner).filter(Boolean)
         if (!owners.some(o=>IDMatch(o._id, src._id)))
             throw 'Cannot act on foreign item'
         item.market = null
@@ -335,7 +399,7 @@ export class InventoryApiRouter extends BaseRouter {
         const value = amount|0
         if (IDMatch(src._id, dst._id) || value<=0 || value>src.credit)
             throw 'field_error_invalid'
-        await provide_loan(src, dst, value)
+        await provide_loan(src.asOwner, dst.asOwner, value)
         src.credit = (src.credit|0) - value
         dst.credit = (dst.credit|0) + value
         await src.save()
@@ -359,7 +423,26 @@ export class InventoryApiRouter extends BaseRouter {
                 {'creditor._id': src._id, 'creditor.type': src.type},
               ]
         })
-        return {entity, loans}
+        const proposes = await ItemController.all({
+            'market.type': MarketType.Loan,
+            'market.to._id': src._id, 'market.to.type': src.type,
+        })
+        return {entity, loans, proposes}
+    }
+
+    @CheckIDParam()
+    @CheckAuthenticated()
+    async get_loans(ctx: RenderContext){
+        const {stype, id} = ctx.aparams
+        const srcController = institutionController(+stype)
+        const src = await srcController.get(id)
+        const list = await LoanController.all({
+            filled: {$ne: true}, $or: [
+                {'lender._id': src._id, 'lender.type': src.type},
+                {'creditor._id': src._id, 'creditor.type': src.type},
+              ]
+        })
+        return {list}
     }
 
 } 

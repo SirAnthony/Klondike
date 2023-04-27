@@ -47,6 +47,8 @@ load(mod, {
     'balance_type_2': tpl`Счет лаборатории ${0}:`,
     'balance_type_3': tpl`Счет корпорации ${0}:`,
     'balance_type_4': tpl`Счет корабля ${0}:`,
+    'loan_proposes': 'Предложения заемшиков',
+    'loan_proposed': tpl`Предложено ${0}`,
 })
 
 export function LR(str: string, ...args): string {

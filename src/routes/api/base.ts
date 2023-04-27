@@ -6,6 +6,7 @@ import {PlanetInfo, UserType, LogAction} from '../../../client/src/common/entity
 import {ItemType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
+import * as cutil from '../../util/config'
 import {Time} from '../../util/time'
 import {ObjectId} from 'mongodb';
 
@@ -56,18 +57,7 @@ export class ApiRouter extends BaseRouter {
 
     @CheckRole([UserType.Corporant, UserType.Captain, UserType.Scientist])
     async get_prices(ctx: RenderContext){
-        const prices = {}
-        const conf = await ConfigController.get()
-        const cycle = Time.cycle
-        const res = conf.price.res[cycle]
-        for (let k in res)
-            prices[k] = res[k]
-        const entries = await LogController.all({'item.type': ItemType.Resource,
-            action: LogAction.ItemPurchase, ts: Time.cycleInterval(cycle)})
-        for (let l of entries){
-            const res = l.item as Resource
-            prices[res.kind] = (prices[res.kind]+(res.price/res.value||prices[res.kind]))/2
-        }
+        const prices = await cutil.get_prices()
         return {list: prices}
     }
 
