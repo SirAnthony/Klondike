@@ -34,7 +34,7 @@ export class ApiRouter extends BaseRouter {
         const {user}: {user: UserController} = ctx.state
         const planet: PlanetInfo = await PlanetController.get(id)
         const ships = await ShipController.all({'location._id': new ObjectId(id)})
-        planet.ships = ships.map(s=>s.PlanetShip)
+        planet.ships = ships.map(s=>ShipController.PlanetShip(s))
         return {planet, date: server_util.currentDate()}
     }
 

@@ -1,42 +1,72 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, User, Item, Patent} from '../common/entity'
+import {Corporation, User, Item, Patent, Institution} from '../common/entity'
 import {Owner, InstitutionType, Loan} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
+import {EntityRowEdit} from './RowEdit'
+import * as util from '../common/util'
 
-function CorpRow(params: {corp: Corporation}) {
-    const {corp} = params
-    const url = corp.type==InstitutionType.Ship ? 'ship' :
-        corp.type==InstitutionType.Organization ? 'org' :
-        corp.type==InstitutionType.Research ? 'lab' :
-        corp.type==InstitutionType.User ? 'user' : 'corp'
+function CorpRow(props: {entity: Corporation, onChange: (entity: Institution)=>Promise<boolean>}) {
+    const {entity} = props
+    const [showData, setShowData] = React.useState(false)
+    const [showEdit, setShowEdit] = React.useState(false)
+    const onChange = async entity=>(await props.onChange(entity)) && setShowEdit(false)
+    if (showEdit)
+        return <EntityRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
     return <RB.Row className="menu-list-row">
-      <RB.Col><img src={`/static/corp/${corp._id}.png`} /></RB.Col>
-      <RB.Col>{corp.name}</RB.Col>
-      <RB.Col>{corp.credit}</RB.Col>
-      <RB.Col><RB.NavLink href={`/inventory/${corp.type}/${corp._id}`}>{LR('inventory')}</RB.NavLink></RB.Col>
+      <RB.Container><RB.Row>
+        <RB.Col><img src={`/static/corp/${entity._id}.png`} /></RB.Col>
+        <RB.Col>{entity.name}</RB.Col>
+        <RB.Col>{entity.credit}</RB.Col>
+        <RB.Col>
+          <RB.NavLink href={`/inventory/${entity.type}/${entity._id}`}>{LR('inventory')}</RB.NavLink>
+        </RB.Col>
+        <RB.Col>
+          <RB.Button onClick={()=>setShowData(!showData)}>{LR('act_show_data')}</RB.Button>
+          <RB.Button onClick={()=>setShowEdit(true)}>{LR('act_edit')}</RB.Button>
+        </RB.Col>
+      </RB.Row>
+      {showData && <RB.Row>
+        <RB.Col>
+          {entity.data}
+        </RB.Col>
+      </RB.Row>}
+      </RB.Container>
     </RB.Row>
 }
 
 type CorpListState = {
     list?: Corporation[]
+    newForm?: Institution
 }
 type CorpListProps = {
     user: User
 }
 export default class List extends UList<CorpListProps, CorpListState> {
     L = L
-    get fetchUrl() { return `/api/corp/list` }
+    get fetchUrl() { return `/api/admin/entity/list` }
+    async changeEntity(entity: Institution) : Promise<boolean> {
+        this.setState({err: null, newForm: null})
+        const ret = await util.wget(`/api/admin/entity/${entity.type}/${entity._id||0}/set`,
+            {method: 'POST', data: {data: entity}})
+        if (ret.err)
+            return void this.setState({err: ret.err, newForm: entity})
+        this.fetch()
+        return true  
+    }
     body(){
-        const {list} = this.state
-        const rows = list.map(l=><CorpRow key={`corp_list_${l._id}`} corp={l} />)
-        return [<RB.Row key={'corp_list_title'} className="menu-list-title">
+        const {list, newForm} = this.state
+        const rows = list.map(l=><CorpRow key={`corp_list_${l._id}`}
+            entity={l} onChange={e=>this.changeEntity(e)} />)
+        return [<EntityRowEdit add={true} onChange={e=>this.changeEntity(e)} entity={newForm} />,
+        <RB.Row key={'corp_list_title'} className="menu-list-title">
           <RB.Col></RB.Col>
           <RB.Col>{LR('item_desc_name')}</RB.Col>
           <RB.Col>{LR('balance')}</RB.Col>
           <RB.Col>{LR('item_desc_data')}</RB.Col>
+          <RB.Col>{LR('item_desc_actions')}</RB.Col>
         </RB.Row>, ...rows]
     }
 }
@@ -44,8 +74,7 @@ export default class List extends UList<CorpListProps, CorpListState> {
 export class Select extends USelect<{type: InstitutionType}, {}> {
     L = LR
     get optName(){ return 'item_desc_owner' }
-    get fetchUrl(){ return '/api/corp/list' }
-    get fetchOpt(){ return {params: {type: this.props.type}} }
+    get fetchUrl(){ return `/api/corp/list/${this.props.type}` }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
         return list?.filter(this.props.filter||Boolean)

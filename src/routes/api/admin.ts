@@ -1,7 +1,7 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController, ConfigController, institutionController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
-import {UserType, PatentOwner, PatentStatus} from '../../../client/src/common/entity'
+import {UserType, PatentOwner, PatentStatus, InstitutionType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {Time} from '../../util/time'
@@ -116,6 +116,35 @@ export class AdminApiRouter extends BaseRouter {
         if (user.password)
             user.password = await UserController.hash_password(data.password)
         await user.save()        
+    }
+
+    @CheckRole(UserType.Master)
+    async get_entity_list(ctx: RenderContext){
+        // Use CorpController since it shares corp db
+        const list = await CorpController.all()
+        return {list}
+    }
+
+    @CheckRole(UserType.Master)
+    async post_entity_set(ctx: RenderContext){
+        const {id, type, data} = ctx.aparams
+        if (!data.name || !InstitutionType[+type])
+            throw 'Should have name and type fields'
+        if (+data.type == InstitutionType.User)
+            throw 'Cannot change user with this method'
+        if (data._id && data._id!=id)
+            throw 'Cannot change id of item'
+        const controller = institutionController(+type)
+        const obj = await controller.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
+        for (let k in data)
+            obj[k] = data[k]
+        if (data.owner){
+            const ctrl = institutionController(+data.owner.type);
+            (obj as any).owner = (await ctrl.get(data.owner._id)).asOwner
+        }
+        if (data.location)
+            (obj as any).location = (await PlanetController.get(data.location._id)).location(data.location.pos)
+        await obj.save()
     }
     
     @CheckRole(UserType.Master)

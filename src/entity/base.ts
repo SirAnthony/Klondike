@@ -99,7 +99,7 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             const data = this as Institution
             return Object.assign({type: data.type}, this.identifier)
         }
-    
+ 
         async save() {
             const data = this as DBBase
             data.created = data.created || new Date()

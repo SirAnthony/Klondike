@@ -4,7 +4,6 @@ import {ApiRouter, CorpApiRouter, AdminApiRouter, ShipApiRouer} from './api'
 import {InventoryApiRouter, UserApiRouter} from './api'
 import {RenderContext} from '../middlewares'
 import {Environment} from 'nunjucks'
-import * as date from '../../client/src/common/date'
 import config from '../config'
 import * as intl from 'intl'
 global.Intl = intl
@@ -17,13 +16,12 @@ main: {prefix: '', router: MainRouter, urls: {
 corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: {
     '/orders/:id': {func: 'orders', methods: ['get']},
     '/patent/forward/:id': {func: 'patent_forward', methods: ['post']},
-    '/list': {func: 'list', methods: ['get']},
     '/rating': {func: 'rating', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},
 ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
     '/flights': {func: 'flights', methods: ['get']},
-    '/list': {func: 'list', methods: ['get']},
+    '/list/:type': {func: 'list', methods: ['get']},
     '/:id': {func: 'ship', methods: ['get']},
 }},
 inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json: true}, urls: {
@@ -54,6 +52,8 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
     '/orders/': {func: 'orders_list', methods: ['get']},
     '/user/:id/set': {func: 'user_set', methods: ['post']},
     '/user/add': {func: 'user_add', methods: ['post']},
+    '/entity/list': {func: 'entity_list', methods: ['get']},
+    '/entity/:type/:id/set': {func: 'entity_set', methods: ['post']},
     '/time': {func: 'time', methods: ['put']},
     '/config': {func: 'config', methods: ['post']},
 }},

@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, Resource, ResourceType, User} from '../common/entity'
+import {Item, ResourceType, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {ItemRow, ItemRowDesc, ItemRowNew} from '../inventory/Item'
 import {NumberInput} from '../util/inputs';
@@ -10,7 +10,6 @@ import {ConfigFetcher} from '../site/Config';
 import {Config} from '../common/config'
 import {Delimeter} from '../util/components'
 import {ErrorMessage} from '../util/errors';
-import {InventoryEvents} from '../inventory'
 
 type ListState = {
     showResources: Boolean

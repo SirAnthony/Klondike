@@ -91,6 +91,8 @@ const aliases = {
     'user_kind_6': 'Охранник',
     'user_kind_7': 'Мастер',
     'loc_desc_coord': 'Координаты (x:y)',
+    'entity_desc_credit': 'Счет',
+    'entity_desc_cost': 'Стоимость',
     'cycle': 'Цикл',
     'day_number': 'день',
     'assignee': 'Исполнитель',
@@ -102,6 +104,7 @@ const aliases = {
     'act_edit': 'Редактировать',
     'act_save': 'Сохранить',
     'act_cancel': 'Отмена',
+    'act_show_data': 'Показать данные',
 }
 
 export function extend(obj: {string: string | ((...values: any[])=>string)}) {

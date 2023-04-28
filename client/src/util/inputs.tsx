@@ -1,8 +1,8 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, PatentWeight} from '../common/entity'
-import {ArtifactType, UserType} from '../common/entity'
-import {Patent, Corporation, InstitutionType} from '../common/entity'
+import {ItemType, ResourceType, PatentType, PatentWeight, ResourceSpecialityType} from '../common/entity'
+import {ArtifactType, UserType, ResourceValueInfo} from '../common/entity'
+import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
 import {TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
@@ -65,6 +65,7 @@ export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_d
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
 export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
+export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
 
 export function PatentSelect(props: {value?: Patent, owner: Owner,
@@ -175,5 +176,18 @@ export function MultiResourceSelect(props: {value?: ResItem[],
       <RB.Col sm={7}>
         {resources}
       </RB.Col>
+    </RB.Row>
+}
+
+export function ResourceValueSelect(props: {value?: ResourceValueInfo, onChange: (info: ResourceValueInfo)=>void}){
+    const onChange = (k: ResourceType, v: ResourceSpecialityType)=>
+        props.onChange(Object.assign({}, props.value, {[k]: v}))
+    const cols = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=>[<RB.Col>
+      {L(`res_kind_${k}`)}
+    </RB.Col>, <RB.Col>
+      <ResourceSpecialitySelect value={(props.value||{})[+k]} onChange={v=>onChange(+k, v)} />
+    </RB.Col>]).flat()
+    return <RB.Row className='menu-list-row'>
+      {cols}
     </RB.Row>
 }

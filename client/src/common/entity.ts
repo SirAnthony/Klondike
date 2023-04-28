@@ -164,8 +164,9 @@ export class Institution extends ID {
     credit: number
     data: string
     cost: number
+    img?: string
     get keys(){
-        return '_id name type data cost'.split(' ')
+        return '_id name type data cost img'.split(' ')
     }
     get class(){ return Institution.class(this.type) }
     static class(type: InstitutionType){
@@ -174,6 +175,7 @@ export class Institution extends ID {
         switch (type){
             case InstitutionType.User: return User;
             case InstitutionType.Organization: return Organization;
+            case InstitutionType.Research: return Corporation;
             case InstitutionType.Corporation: return Corporation;
             case InstitutionType.Ship: return Ship;
         }
@@ -218,15 +220,16 @@ export class User extends Institution {
 
 export class Organization extends Institution {
     type = InstitutionType.Organization
-    get keys(){
-        return super.keys.concat(``.replace(/\s+/g, ' ').split(' '))
-    }
 }
 
 export enum ResourceSpecialityType {Common, Special, Profile}
+export type ResourceValueInfo = {[k in ResourceType]: ResourceSpecialityType}
 export class Corporation extends Institution {
     type = InstitutionType.Corporation
-    resourceValue: {[k in ResourceType]: ResourceSpecialityType}
+    resourceValue: ResourceValueInfo
+    get keys(){
+        return super.keys.concat(`resourceValue`.replace(/\s+/g, ' ').split(' '))
+    }
 }
 
 export class ResearchLab extends Institution {
@@ -247,9 +250,8 @@ export class Ship extends Institution {
     owner: Owner | null
     location: Location | null
     price: number
-    data: string
     port: string
-    captain: ID
+    captain: Owner | null
     integrity: number
     mass: number
     engine: number
@@ -261,11 +263,10 @@ export class Ship extends Institution {
     crew: number
     slots: number
     modules: Module[]
-    img?: string
     get keys(){
-        return super.keys.concat(`kind location price data port captain
+        return super.keys.concat(`kind location price port captain
             integrity mass engine speed movement size attack defence 
-            crew modules img`.replace(/\s+/g, ' ').split(' '))
+            crew`.replace(/\s+/g, ' ').split(' '))
     }
 }
 
