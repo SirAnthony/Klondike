@@ -1,5 +1,5 @@
-import {ExpenseType, InstitutionType, Loan, LogAction} from 'entity';
-import {ResourceCost, Resource, Owner} from 'entity';
+import {ExpenseType, InstitutionType, Loan, LogAction} from '../../client/src/common/entity';
+import {ResourceCost, Resource, Owner} from '../../client/src/common/entity';
 import {CorpController, LoanController, LogController} from '../entity'
 import {ItemController, ShipController, institutionController} from '../entity';
 import * as Time from './time'
