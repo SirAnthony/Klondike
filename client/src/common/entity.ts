@@ -307,12 +307,22 @@ export class PlanetInfo extends Planet {
     ships?: PlanetShip[]
 }
 
-export class Loan extends ID {
+export enum ExpenseType {Loan, Fine}
+class Expense extends ID {
     ts: number
+    type: ExpenseType
     amount: number
     creditor: Owner
-    lender: Owner
     filled: boolean
+}
+
+export class Loan extends Expense {
+    type = ExpenseType.Loan
+    lender: Owner
+}
+
+export class Fine extends Expense {
+    type = ExpenseType.Fine
 }
 
 export enum LogAction {
@@ -321,9 +331,10 @@ export enum LogAction {
     ItemPutSale, ItemRemoveSale, ItemPurchase,
     OrderPay, OrderClosed,
     LoanPay, LoanProvided, LoanProposeItem, LoanProposeReject,
+    FineCycleClose, LoanCycleClose, CostCycleClose,
     BonusRating,
     MoneyLeftovers, ResourceLeftovers,
-    CycleRating,
+    CycleRating, 
 }
 export class LogEntry extends ID {
     action: LogAction

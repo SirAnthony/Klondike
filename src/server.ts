@@ -5,10 +5,18 @@ import * as urls from './routes/urls'
 import config from './config'
 import merge = require('lodash.merge')
 import {Server} from 'http';
-import {Time} from './util/time'
+import * as Time from './util/time'
 
 process.on('unhandledRejection', (reason: any, promise: Promise<any>)=>
     console.error(reason))
+
+async function loadTime(){
+    await Time.load()
+    Time.Time.serverTime = +new Date()
+    Time.Time.basicTime = Time.Time.basicTime||Time.Time.serverTime
+    console.log(`Server time: ${Time.Time.serverTime}`)
+    console.log(`World time: ${Time.Time.basicTime}`)
+}
 
 export let server : Server & {start_ts?: Date};
 export async function run(opt: any = {}){
@@ -20,8 +28,8 @@ export async function run(opt: any = {}){
     for (let r of routers)
         app.use(r.routes()).use(r.methods())
     server = await app.listen(port)
-    Time.serverTime = Time.basicTime = +new Date()
     console.log(`Server running on port ${port}`)
+    await loadTime()
     return server
 }
 export function stop(){

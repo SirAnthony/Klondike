@@ -10,66 +10,11 @@ import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
 import defines from '../../../client/src/common/defines'
 import * as rating from '../../util/rating'
+import * as balance from '../../util/balance'
 import * as iutil from '../../../client/src/inventory/Item/util'
 import * as cutil from '../../util/config'
 import * as crypto from 'crypto'
 
-async function pay_with_resource(resource: ItemController,
-    target: {resourceCost: ResourceCost[]}, owner: Owner, info: string){
-    const res = (resource as unknown) as Resource
-    const {value} = res
-    for (let k of target.resourceCost){
-        if (!res.value)
-            break
-        if (k.kind!=res.kind || k.value<=k.provided)
-            continue
-        let amount = Math.min(res.value, k.value-k.provided)
-        k.provided += amount
-        res.value -= amount
-    }
-    const used = value != res.value
-    // Resource is single-used
-    if (used) {
-        // Delist from market
-        res.market = null
-        await LogController.log({
-            name: 'resource_used', info,
-            owner: owner, item: res, points: 0,
-            data: {value}, action: LogAction.ResourceUsed
-        })
-        res.value = 0
-        // Should delete?
-        await resource.save()
-    }
-    return used
-}
-
-async function provide_loan(src: Owner, dst: Owner, value: number){
-    const reverse = await LoanController.find({filled: {$ne: true},
-        'lender._id': dst._id, 'lender.type': dst.type,
-        'creditor._id': src._id, 'creditor.type': src.type})
-    if (reverse) {
-        const val = Math.min(reverse.amount, value)
-        reverse.amount -= val
-        value -= val
-        reverse.filled = !reverse.amount
-        await reverse.save()
-        await LogController.log({action: LogAction.LoanPay,
-            name: 'loan_pay', info: ''+val,
-            owner: src, institution: dst})
-    }
-    if (!value)
-        return
-    const loan = (await LoanController.find({filled: {$ne: true},
-        'lender._id': src._id, 'lender.type': src.type,
-        'creditor._id': dst._id, 'creditor.type': dst.type
-    })) || LoanController.create(src, dst)
-    loan.amount = (loan.amount|0) + value
-    await loan.save()
-    await LogController.log({action: LogAction.LoanPay,
-        name: 'loan_take', info: ''+value,
-        owner: src, institution: dst})
-}
 
 export class InventoryApiRouter extends BaseRouter {
 
@@ -103,7 +48,7 @@ export class InventoryApiRouter extends BaseRouter {
             await patent.save()
             throw 'Wrong patent status'
         }
-        if (await pay_with_resource(resource, pt, corp.asOwner, 'post_patent_pay'))
+        if (await balance.pay_with_resource(resource, pt, corp.asOwner, 'post_patent_pay'))
             await patent.save()
         // Patent closed
         if (!pt.resourceCost.some(k=>k.provided<k.value)){
@@ -137,7 +82,7 @@ export class InventoryApiRouter extends BaseRouter {
         if (!order)
             throw 'No order for corp'
         order.resourceCost.forEach(k=>k.provided |= 0)
-        if (await pay_with_resource(resource, order, corp.asOwner, 'post_order_pay'))
+        if (await balance.pay_with_resource(resource, order, corp.asOwner, 'post_order_pay'))
             await order.save()
         await LogController.log({
             name: 'order_pay', info: 'put_item_pay_order',
@@ -399,7 +344,7 @@ export class InventoryApiRouter extends BaseRouter {
         const value = amount|0
         if (IDMatch(src._id, dst._id) || value<=0 || value>src.credit)
             throw 'field_error_invalid'
-        await provide_loan(src.asOwner, dst.asOwner, value)
+        await balance.provide_loan(src.asOwner, dst.asOwner, value)
         src.credit = (src.credit|0) - value
         dst.credit = (dst.credit|0) + value
         await src.save()

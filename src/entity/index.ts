@@ -1,5 +1,5 @@
 import {Corporation, Flight, InstitutionType, Item, Order} from '../../client/src/common/entity'
-import {Loan, Owner} from '../../client/src/common/entity'
+import {Loan, ExpenseType, Owner} from '../../client/src/common/entity'
 import {Controller as UserController} from './users'
 import {Controller as ShipController} from './ships'
 import {Controller as PlanetController} from './planets'
@@ -15,7 +15,12 @@ export class FlightController extends MakeController(Flight, 'flights') {}
 
 export class LoanController extends MakeController(Loan, 'loans') {
     static create(lender: Owner, creditor: Owner, amount: number = 0) {
-        return new LoanController({creditor, lender, amount, ts: Time.time})
+        return new LoanController({creditor, lender, amount, ts: Time.time,
+            type: ExpenseType.Loan})
+    }
+    static createFine(creditor: Owner, amount = 0){
+        return new LoanController({creditor, amount, ts: Time.time,
+            type: ExpenseType.Fine})
     }
 }
 

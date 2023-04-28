@@ -105,12 +105,12 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             data.created = data.created || new Date()
             data.updated = new Date()
             if (data._id)
-                Cache.set(data._id, data)
+                Cache.set(''+data._id, data)
             return await Controller.DB.save(data)
         }
 
         async delete() {
-            Cache.delete(this._id)
+            Cache.delete(''+this._id)
             return await Controller.DB.delete(this)
         }
     
@@ -118,11 +118,11 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             if (data instanceof Controller)
                 return data as Controller
             if (data instanceof ObjectId || typeof data == 'string') {
-                if (Cache.has(data))
-                    data = Cache.get(data)
+                if (Cache.has(''+data))
+                    data = Cache.get(''+data)
                 else {
                     data = await Controller.DB.get(data)
-                    Cache.set(data._id, data)
+                    Cache.set(''+data._id, data)
                 }
             }
             return new Controller(data, fields)

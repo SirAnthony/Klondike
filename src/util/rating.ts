@@ -3,9 +3,8 @@ import {ConfigController} from '../entity'
 import {InstitutionType, Owner, LogAction} from '../../client/src/common/entity'
 import {Patent, PatentStatus, PatentOwner} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
-import {Time} from "./time"
+import * as Time from "./time"
 import {IDMatch} from '../util/server'
-import defines from '../defines'
 import * as date from '../../client/src/common/date'
 
 class Cache {
@@ -42,7 +41,7 @@ async function getForCycle(cycle: number){
 }
 
 async function getForAll(){
-    let last_cycle = Time.cycle
+    let last_cycle = Time.Time.cycle
     const ret = []
     for (let i=1; i<last_cycle+1; i++)
         ret.push(await getForCycle(i))
@@ -58,7 +57,7 @@ async function calcCycle(cycle: number){
     {
         const owner = corp.asOwner, name = `cycle_${cycle}`
         const events = await LogController.all({'owner._id': corp._id,
-            ts: Time.cycleInterval(cycle)})
+            ts: Time.Time.cycleInterval(cycle)})
         let points = events.filter(f=>RatingActions.includes(f.action)).reduce(
             (p, c)=>p+c.points|0, 0)
         const orders = await OrderController.all({'owner._id': owner._id, cycle})
@@ -79,14 +78,9 @@ async function calcCycle(cycle: number){
     }
 }
 
-let last_cycle = 1
-const timer = setInterval(async ()=>{
-    const cur_cycle = Time.cycle
-    if (last_cycle==cur_cycle)
-        return
-    await calcCycle(last_cycle)
-    last_cycle = cur_cycle
-}, date.ms.MIN/2)
+// Calculate rating each cycle
+Time.addCycleEvent(calcCycle)
+
 
 export const Rating = {
     get: getForAll,

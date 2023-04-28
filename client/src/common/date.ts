@@ -5,9 +5,9 @@ export class Time {
     serverTime: number
     basicTime: number
     cycleLength: number
-    constructor(data?: {serverTime: number, basicTime: number, cycleLength: number}){
+    constructor(data?: {serverTime: number, basicTime: number, cycleLength?: number}){
         this.serverTime = this.basicTime = 0
-        this.cycleLength = ms.HOUR
+        this.cycleLength = 4*ms.HOUR
         for (let k in data)
             this[k] = data[k]
     }
@@ -19,7 +19,11 @@ export class Time {
         return {$gte: this.cycleLength*(cycle-1), $lt: this.cycleLength*cycle} }
 }
 
-export const sec = {
+type TimeResolution = {
+    NANO: number, MS: number, SEC: number, MIN: number, HOUR: number,
+    DAY: number, WEEK: number, MONTH: number, YEAR: number
+}
+export const sec : TimeResolution = {
     NANO: 1/1e9,
     MS: 0.001,
     SEC: 1,
@@ -30,10 +34,10 @@ export const sec = {
     MONTH: 30*24*60*60,
     YEAR: 365*24*60*60,
 };
-export const ms: any = Object.keys(sec).reduce((p, n)=>{
+export const ms: TimeResolution = Object.keys(sec).reduce((p, n)=>{
     p[n] = sec[n]*1000
     return p
-}, {})
+}, {} as TimeResolution)
 
 export const get = (d?: Date | string | number | null, _new?: boolean)=>{
     let y, mon, day, H, M, S, _ms;
