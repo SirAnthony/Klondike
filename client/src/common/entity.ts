@@ -113,9 +113,10 @@ export class Module extends Item {
     type = ItemType.Module
     mass: number
     energy: number
+    installed: boolean
     boosts: [{kind: string, value: number}]
     get keys(){
-        return super.keys.concat('mass energy boosts'.split(' ')) }
+        return super.keys.concat('mass energy installed boosts'.split(' ')) }
 }
 
 export enum PatentType {Bio, Enginering, Planet}
