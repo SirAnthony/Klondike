@@ -21,10 +21,10 @@ export type ItemRowProps = {
     entity?: Institution
     layout?: number
     onDelete?: (item: Item)=>void
-    onPatentPay?: (item: Item, patent: Patent)=>void
-    onOrderPay?: (item: Item)=>void
-    onLoanPay?: (item: Item, loan: Loan)=>void
-    onDelist?: (item: Item)=>void
+    onPatentPay?: (item: Item, patent: Patent)=>Promise<boolean>
+    onOrderPay?: (item: Item)=>Promise<boolean>
+    onLoanPay?: (item: Item, loan: Loan)=>Promise<boolean>
+    onDelist?: (item: Item)=>Promise<boolean>
 } & ItemPriceInputProps & ItemRowTitleProps
 
 export function ItemRowDesc(props: ItemRowTitleProps){

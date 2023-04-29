@@ -68,13 +68,14 @@ export class BudgetDetails extends F.Fetcher<BudgetDetailsProps, BudgetDetailsSt
         return `/api/inventory/${entity.type}/${entity._id}`
     }
     get fetchUrl(){ return `${this.base_url}/balance` }
-    async onTransfer(owner: Owner, amount: number){
+    async onTransfer(owner: Owner, amount: number) : Promise<boolean> {
         this.setState({err: null})
         const res = await util.wget(`${this.base_url}/transfer`,
             {method: 'POST', data: {dtype: owner.type, target: owner._id, amount}})
         if (res.err)
-            return this.setState({err: res.err})
+            return void this.setState({err: res.err})
         this.fetch()
+        return true
     }
     async onLoanAgree(item: Item){
         this.setState({err: null})

@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, Owner, Resource} from '../../common/entity'
+import {Item, ItemType, Owner} from '../../common/entity'
 import {Patent, PatentOwner, Loan} from '../../common/entity'
 import {LoanSelectTrigger, OwnerValueSelectTrigger} from '../../util/popovers'
 import {PriceFetcher} from '../Prices'
@@ -63,7 +63,7 @@ export class ItemPriceCol extends PriceFetcher<ItemComponentProps, {}> {
 
 export type ItemLoanInputProps = {
     item: Item
-    onPay?: (item: Item, loan: Loan)=>void
+    onPay?: (item: Item, loan: Loan)=>Promise<boolean>
 }
 
 export class ItemLoanInput extends PriceFetcher<ItemLoanInputProps, {}> {
@@ -83,7 +83,7 @@ export type ItemPriceInputProps = {
     item: Item
     noRange?: boolean
     source?: Owner
-    onSell?: (item: Item, target: Owner, price: number)=>void
+    onSell?: (item: Item, target: Owner, price: number)=>Promise<boolean>
 }
 
 export class ItemPriceInput extends PriceFetcher<ItemPriceInputProps, {}> {

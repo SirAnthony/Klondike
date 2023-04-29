@@ -43,12 +43,12 @@ type LoanSelectProps = {
     placement?: any
     source?: Owner
     inputRange?: [number, number]
-    onClick: (loan: Loan)=>void
+    onClick: (loan: Loan)=>Promise<boolean>
 }
 export function LoanSelectTrigger(props: LoanSelectProps){
     const {desc, source, inputRange} = props
     const [loan, setLoan] = React.useState(null)
-    const onClick = ()=>props.onClick(loan)
+    const onClick = async ()=>(await props.onClick(loan)) && document.body.click()
     const filter = (l: Loan)=>
         +l.creditor.type==+source.type && l.creditor._id==source._id &&
         l.amount>= inputRange[0] && l.amount<=inputRange[1] 
@@ -73,7 +73,7 @@ type OwnerValueSelectProps = {
     exclude: InstitutionType[]
     source?: Owner
     inputRange?: [number, number]
-    onClick: (owner: Owner, value: number)=>void
+    onClick: (owner: Owner, value: number)=>Promise<boolean>
 }
 export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
     const {desc, valDesc, exclude, source, inputRange} = props
@@ -83,7 +83,8 @@ export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
         (val>=inputRange[0] && val<=inputRange[1])
     const check = ()=>owner?._id && !isNaN(+owner?.type) &&
         !isNaN(+value) && checkRange(+value)
-    const onClick = ()=>check() && props.onClick(owner, value)
+    const onClick = async ()=>check() &&
+        (await props.onClick(owner, value)) && document.body.click()
     const btn = <RB.Popover>
       <RB.PopoverBody>
         <OwnerSelect value={owner} onChange={setOwner} exclude={exclude}

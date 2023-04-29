@@ -32,8 +32,8 @@ const OwnerListPopover = (patent: Patent)=>{
 type RowProps = {
     owner: Owner
     patent: Patent
-    onAction?: (action: string, patent: Patent)=>()=>void
-    onSell?: (item: Patent, target: Owner, price: number)=>void
+    onAction?: (action: string, patent: Patent)=>()=>Promise<boolean>
+    onSell?: (item: Patent, target: Owner, price: number)=>Promise<boolean>
 } & RowDescProps
 export function PatentRow(props: RowProps){
     const {patent, owner} = props
@@ -60,14 +60,14 @@ export function PatentRow(props: RowProps){
     </RB.Row>
 }
 
-export function PatentSellButton(props: RowProps){
+function PatentSellButton(props: RowProps){
   const {owner: owner, patent, onSell} = props
   if (patent.market?.type!=MarketType.Sale)
       return <ItemPriceInput item={patent} noRange={true} onSell={onSell} source={owner} />
   return <PopupButton url={`/item/${patent._id}/code`} desc={L('act_show_code')} />
 }
 
-export function PatentActions(props: RowProps){
+function PatentActions(props: RowProps){
     const {patent, owner, onAction} = props
     if (owner.type==InstitutionType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>

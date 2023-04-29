@@ -3,7 +3,6 @@ import {UserController, ShipController, FlightController} from '../../entity'
 import {UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {Time} from '../../util/time'
-import {ApiError, Codes} from '../../../client/src/common/errors'
 
 export class ShipApiRouer extends BaseRouter {
     async get_index(ctx: RenderContext){

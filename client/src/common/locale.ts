@@ -88,7 +88,7 @@ const aliases = {
     'user_kind_3': 'Механик',
     'user_kind_4': 'Навигатор',
     'user_kind_5': 'Ученый',
-    'user_kind_6': 'Охранник',
+    'user_kind_6': 'СБ',
     'user_kind_7': 'Мастер',
     'loc_desc_coord': 'Координаты (x:y)',
     'entity_desc_credit': 'Счет',

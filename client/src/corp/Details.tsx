@@ -86,24 +86,24 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
             (item as MultiOwnedItem).owners?.map(o=>o._id)).filter(Boolean)
         return relation && owners.includes(relation._id)
     }
-    async onItemAction(item: Item, check: ()=>boolean, action: string, opt?: any){
+    async onItemAction(item: Item, check: ()=>boolean, action: string, opt?: any) : Promise<boolean> {
         const {owner} = this.props
         if (!this.is_admin && !(this.is_owner(item) && check()))
-            return
+            return false
         const res = await util.wget(`/api/inventory/${owner.type}/${owner._id}/item/${item._id}/${action}`,
             Object.assign({method: 'PUT'}, opt))
         if (res.err)
-            return this.setState({err: res.err})
+            return void this.setState({err: res.err})
         this.fetch()
         return true
     }
-    async onDelist(item: Item){
+    async onDelist(item: Item) : Promise<boolean> {
         const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
-        await this.onItemAction(item, check, 'delist')
+        return await this.onItemAction(item, check, 'delist')
     }
-    async onSell(item: Item, target: Owner, price: number){
+    async onSell(item: Item, target: Owner, price: number) : Promise<boolean>  {
         const check = ()=>[MarketType.None].includes(item.market?.type)
-        await this.onItemAction(item, check, 'sell', {
+        return await this.onItemAction(item, check, 'sell', {
             data: {target: target._id, dtype: target.type, price: price}})
     }
 }
@@ -117,22 +117,24 @@ export class ItemDetails extends ItemDetailsBase {
         ['PatentPay', 'OrderPay', 'LoanPay'].forEach(cmd=>
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
-    async onPatentPay(item: Item, patent: Patent){
+    async onPatentPay(item: Item, patent: Patent) : Promise<boolean> {
         const {owner} = this.props
         const res = await this.onItemAction(item, ()=>owner.type==InstitutionType.Research,
             `pay/patent/${patent._id}`)
         if (res)
             InventoryEvents.reloadPatents()
+        return res
     }
-    async onOrderPay(item: Item){
+    async onOrderPay(item: Item) : Promise<boolean> {
         const {owner} = this.props
         const res = await this.onItemAction(item, ()=>owner.type==InstitutionType.Corporation,
             `pay/order`)
         if (res)
             InventoryEvents.reloadOrders()
+        return res
     }
-    async onLoanPay(item: Item, loan: Loan){
-        await this.onItemAction(item, ()=>true, `pay/loan/${loan._id}`) }
+    async onLoanPay(item: Item, loan: Loan) : Promise<boolean> {
+        return await this.onItemAction(item, ()=>true, `pay/loan/${loan._id}`) }
     rows(){
         const {items = []} = this.state
         const rows = items.filter(util.not_depleted).map(i=><ItemRow className='menu-list-row'
@@ -162,10 +164,12 @@ export class PatentDetails extends ItemDetailsBase {
         ['Action'].forEach(cmd=>
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
-    onAction(name: string, patent: Patent){
-        return async ()=>{
-            if (await this[`action_${name}`](patent))
+    onAction(name: string, patent: Patent)  {
+        return async function() : Promise<boolean> {
+            const ret = await this[`action_${name}`](patent)
+            if (ret)
                 this.fetch()
+            return ret
         }
     }
     async action_forward(patent: Patent){
