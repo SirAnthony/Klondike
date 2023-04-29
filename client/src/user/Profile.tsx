@@ -90,7 +90,7 @@ function ProfileInfo(props: UserViewProfileProps){
         <RB.Col>{L('desc_role')}</RB.Col>
         <RB.Col>{LR(`user_kind_${user.kind}`)}</RB.Col>
       </RB.Row>
-      {(viewer.admin || viewer._id==user._id) && <RB.Row>
+      {(viewer.admin || viewer._id===user._id) && <RB.Row>
         <RB.Col>{L('desc_credit')}</RB.Col>
         <RB.Col>{user.credit|0}</RB.Col>
       </RB.Row>}

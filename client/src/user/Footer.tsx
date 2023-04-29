@@ -1,7 +1,7 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
-import {User, InstitutionType, UserType} from '../common/entity'
+import {User, InstitutionType} from '../common/entity'
 import {default as L} from './locale'
 
 export type FooterProps = {
@@ -45,7 +45,6 @@ export function UserFooter(props: FooterProps){
     const location = RR.useLocation()
     const {user} = props
     const {relation} = user||{}
-    const has = (r: InstitutionType)=>user?.admin || +r===+relation?.type
     const tab = location.pathname.startsWith('/profile') ? 'profile' : 'entity'
     return <RB.Container className='app-footer'>
     <RB.TabContainer defaultActiveKey={tab}><RB.Row>

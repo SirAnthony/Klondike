@@ -30,7 +30,7 @@ export function DataViewerButtons(props: {show: boolean,
 }
 
 export function EditButtons(props: {onCancel?: ()=>void, onSubmit: (v: any)=>void, add?: boolean}){
-    const {add, onCancel, onSubmit} = props
+    const {onCancel, onSubmit} = props
     return <RB.Container className='btn-box'><RB.Row className='justify-content-end'>
       <RB.Col sm={6}>
         <RB.Button onClick={onSubmit}>{L(props.add ? 'act_add' : 'act_save')}</RB.Button>

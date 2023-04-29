@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, Item, Patent} from '../common/entity'
+import {Item, Patent} from '../common/entity'
 import {Owner, Loan, InstitutionType} from '../common/entity'
 import {NumberInput, OwnerSelect, PatentSelect} from './inputs'
 import L from '../common/locale'
@@ -50,7 +50,7 @@ export function LoanSelectTrigger(props: LoanSelectProps){
     const [loan, setLoan] = React.useState(null)
     const onClick = async ()=>(await props.onClick(loan)) && document.body.click()
     const filter = (l: Loan)=>
-        +l.creditor.type==+source.type && l.creditor._id==source._id &&
+        +l.creditor.type===+source.type && l.creditor._id===source._id &&
         l.amount>= inputRange[0] && l.amount<=inputRange[1] 
     const btn = <RB.Popover>
       <RB.PopoverBody>
