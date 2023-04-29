@@ -296,6 +296,12 @@ export type PlanetZone = {
     radius: number
     img?: string
 }
+export type PlanetFog = {
+    owner: Owner
+    location: Location
+    data: {[k: string]: boolean}
+}
+
 export class Planet extends ID {
     type: PlanetType
     system: string
@@ -306,6 +312,7 @@ export class Planet extends ID {
 export class PlanetInfo extends Planet {
     items?: Item[]
     ships?: PlanetShip[]
+    // fog: PlanetFog[]
 }
 
 export enum ExpenseType {Loan, Fine}

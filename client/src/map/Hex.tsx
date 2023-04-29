@@ -52,11 +52,27 @@ function HexShip(props: HexProps & {entity: PlanetShip}){
 }
 
 function reduce_by_location(p, c: {location: Location}){
-    const {pos} = c.location
-    const col = p[pos.col] = p[pos.col]||{}
-    const row = col[pos.row] = col[pos.row]||[]
-    row.push(c)
+    const {pos} = c.location, key = `${pos.col}:${pos.row}`;
+    (p[key] = p[key]||[]).push(c)
     return p
+}
+
+function Hex(props: {col: number, row: number,
+    items: {[k: string]: Item[]}, ships: {[k: string]: PlanetShip[]}}){
+    const {col, row, items, ships} = props
+    const [fill, setFill] = React.useState(false)
+    const fillProps = {hover: {onMouseLeave: ()=>setFill(false),
+        onMouseOver: ()=>setFill(true)}, fill}
+    const key = `${col}:${row}`, pos = new Pos(col, row)
+    const hexes = []
+    hexes.push(<Hexagon key={`${col}:${row}`} pos={pos} {...fillProps} />)
+    const item_arr = items[key]||[]
+    for (let k of item_arr)
+        hexes.push(<HexItem key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
+    const ship_arr = ships[key]||[]
+    for (let k of ship_arr)
+        hexes.push(<HexShip key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
+    return <>{hexes}</>
 }
 
 export function HexLayer(props: {planet: PlanetInfo}){
@@ -67,20 +83,8 @@ export function HexLayer(props: {planet: PlanetInfo}){
     const items_by_pos = props.planet.items?.reduce(reduce_by_location, {})||{}
     const ships_by_pos = props.planet.ships?.reduce(reduce_by_location, {})||{}
     for (let col=0; col<countw; col++){
-        for (let row=0; row<counth; row++){
-            const [fill, setFill] = React.useState(false)
-            const fillProps = {hover: {onMouseLeave: ()=>setFill(false),
-                onMouseOver: ()=>setFill(true)}, fill}
-            const key = `${col}:${row}`, pos = new Pos(col, row)
-            hexes.push(<Hexagon key={`${col}:${row}`} pos={pos} {...fillProps} />)
-            const items = items_by_pos[col] ? items_by_pos[col][row]||[] : []
-            for (let k of items as Item[])
-                hexes.push(<HexItem key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
-            const ships = ships_by_pos[col] ? ships_by_pos[col][row]||[] : []
-            for (let k of items as PlanetShip[])
-                hexes.push(<HexShip key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
-        }
+        for (let row=0; row<counth; row++)
+            hexes.push(<Hex col={col} row={row} items={items_by_pos} ships={ships_by_pos} />)
     }
-    
     return <Layer>{hexes}</Layer>
 }
