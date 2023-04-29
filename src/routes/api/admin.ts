@@ -144,6 +144,10 @@ export class AdminApiRouter extends BaseRouter {
         }
         if (data.location)
             (obj as any).location = (await PlanetController.get(data.location._id)).location(data.location.pos)
+        if (data.captain){
+            const ctrl = institutionController(+data.captain.type);
+            (obj as any).captain = (await ctrl.get(data.captain._id)).asOwner
+        }
         await obj.save()
     }
     

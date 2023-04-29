@@ -1,7 +1,7 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import Ship from './Ship'
+import {ShipDesc} from './Ship'
 import {Ship as EShip, User} from '../common/entity'
 import {ControlBar} from '../util/controls'
 import L from './locale'
@@ -32,7 +32,7 @@ export default class ShipDetails extends F.Fetcher<ShipDetailsProps, ShipDetails
         const {ship} = this.state
         return <RB.Container className="menu-container">
           <ControlBar title={L('interface')} onClose={this.props.onClose} />
-          {ship ? <Ship ship={ship} /> : <div>{L('not_found')}</div>}
+          {ship ? <ShipDesc ship={ship} /> : <div>{L('not_found')}</div>}
         </RB.Container>
     }
 }

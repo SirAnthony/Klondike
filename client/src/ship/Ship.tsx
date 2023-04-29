@@ -1,49 +1,16 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Ship as EShip, Module as EModule, ShipValues} from '../common/entity'
+import {Ship, ShipValues} from '../common/entity'
+import {ModuleDetails} from './Module'
 import * as util from '../common/util'
 import L from './locale'
 
 type ShipProps = {
-    ship: EShip
-}
-
-function Mod(num: number, mod: EModule){
-    if (!mod)
-        return [<tr><td>{L('mod_empty')}</td><td></td><td></td></tr>]
-    const values = ShipValues.mods.map(k=><tr>
-      <td>{L('mod_stat', k)}</td>
-      <td>{L('mod_stat_c', k)}</td>
-      <td>{mod[k]}</td>
-    </tr>).concat(mod.boosts.map(k=><tr>
-      <td>{L('mod_stat', k.kind)}</td>
-      <td>{L('mod_stat_c', k.kind)}</td>
-      <td>{k.value}</td>
-    </tr>))
-    return [<tr>
-      <td>{L('mod_slot')+' '+num}</td>
-    </tr>,
-    <tr>
-      <td>{mod.name}</td>
-    </tr>, ...values]
-}
-
-function Modules(props: ShipProps){
-    const ship: EShip = props.ship
-    const values = []
-    for (let k=0; k<ship.slots; k++)
-        values.push(Mod(k, ship.modules[k]))
-    return <div className="menu-box"><table>
-      <tr>
-        <th colSpan={2}>{L('mod_title')}</th>
-        <th>{L('mod_values')}</th>
-      </tr>
-      {values.flat()}
-    </table></div>
+    ship: Ship
 }
 
 function Description(props: ShipProps){
-    const ship: EShip = props.ship
+    const ship: Ship = props.ship
     const values = ShipValues.desc.map(k=><RB.Row>
       <RB.Col sm={5} className="menu-box-row-desc left">{L(`desc_${k}`)}</RB.Col>
       <RB.Col className="left">{util.get_name(ship[k])}</RB.Col>
@@ -59,7 +26,7 @@ function Description(props: ShipProps){
 }
 
 function Stats(props: ShipProps){
-    const ship: EShip = props.ship
+    const ship: Ship = props.ship
     const values = ShipValues.stats.map(k=><tr>
       <td className="left">{L(`stat_${k}`)}</td>
       <td>{L(`stat_${k}_c`)}</td>
@@ -82,7 +49,7 @@ function ShipInfo(props: ShipProps){
           <Description {...props} />
         </RB.Col>
         <RB.Col className="menu-box-col-clear" sm={6}>
-          <Modules {...props} />
+          <ModuleDetails {...props} />
         </RB.Col>
       </RB.Row>
     </RB.Container>
@@ -102,7 +69,7 @@ function ShipControls(props: ShipProps){
     </RB.Container>
 }
 
-export default function Ship(props: ShipProps){
+export function ShipDesc(props: ShipProps){
     return <RB.Row>
       <RB.Col className="menu-box-clear" sm={3}>
         <ShipControls {...props} />

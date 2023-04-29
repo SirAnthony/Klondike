@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, PatentWeight, ResourceSpecialityType} from '../common/entity'
+import {ItemType, ResourceType, PatentType, PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo} from '../common/entity'
 import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
@@ -65,6 +65,7 @@ export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_d
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
 export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
+export const ShipClassSelect = TypedSelect(ShipClass, 'ship_kind_desc', '')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
 

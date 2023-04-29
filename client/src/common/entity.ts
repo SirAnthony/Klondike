@@ -263,7 +263,6 @@ export class Ship extends Institution {
     defence: number
     crew: number
     slots: number
-    modules: Module[]
     get keys(){
         return super.keys.concat(`kind location price port captain
             integrity mass engine speed movement size attack defence 
