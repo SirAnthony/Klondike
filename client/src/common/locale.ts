@@ -81,7 +81,7 @@ const aliases = {
     'artifact_kind_0': 'Био-медицинский',
     'artifact_kind_1': 'Инженерный',
     'artifact_kind_2': 'Аномалия',
-    'ship_kind_desc': 'Класс корабля',
+    'ship_desc_kind': 'Класс корабля',
     'user_desc_kind': 'Роль',
     'user_kind_0': 'Нет',
     'user_kind_1': 'Корпорант',

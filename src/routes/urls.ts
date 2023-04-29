@@ -24,6 +24,9 @@ ship_api: {prefix: '/api/ship', router: ShipApiRouer, opt: {json: true}, urls: {
     '/flights': {func: 'flights', methods: ['get']},
     '/list': {func: 'list', methods: ['get']},
     '/:id': {func: 'ship', methods: ['get']},
+    '/:id/modules': {func: 'modules_list', methods: ['get']},
+    '/:id/module/:mod/install': {func: 'module_install', methods: ['put']},
+    '/:id/module/:mod/remove': {func: 'module_remove', methods: ['put']},
 }},
 inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json: true}, urls: {
     '/:stype/:id': {func: 'entity', methods: ['get']},

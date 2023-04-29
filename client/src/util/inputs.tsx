@@ -37,10 +37,13 @@ export function TextInput(props: TextInputProps){
     const onChange = ({target: {value}})=>props.onChange(value)
     const cls = props.err ? 'input-error' : ''
     const complete = props.autoComplete ? undefined : 'new-password'
-    return <RB.FormControl name={props.name} placeholder={props.placeholder}
-      className={cls} as={props.as} rows={props.rows} type={props.type}
-      aria-label={props.placeholder} aria-describedby={props.described}
-      value={props.value} onChange={onChange} autocomplete={complete} />
+    const controlId = (Math.random() + 1).toString(36).substring(7);
+    return <RB.FloatingLabel controlId={controlId} label={props.placeholder}>
+      <RB.FormControl name={props.name} placeholder={props.placeholder}
+        className={cls} as={props.as} rows={props.rows} type={props.type}
+        aria-label={props.placeholder} aria-describedby={props.described}
+        value={props.value} onChange={onChange} autocomplete={complete} />
+    </RB.FloatingLabel>
 }
 
 type NumberInputProps = {
@@ -55,8 +58,11 @@ export function NumberInput(props: NumberInputProps){
     const val =  empty ? undefined : +props.value
     const onChange = ({target: {value}})=>props.onChange(isNaN(+value) ? val : +value)
     const cls = props.err ? 'input-error' : ''
-    return <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val}
-      className={cls} onChange={onChange} />
+    const controlId = (Math.random() + 1).toString(36).substring(7);
+    return <RB.FloatingLabel controlId={controlId} label={props.placeholder}>
+      <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val}
+        className={cls} onChange={onChange} />
+    </RB.FloatingLabel>
 }
 
 export const ResourceSelect = TypedSelect(ResourceType, 'res_kind', 'res_desc_kind')
@@ -65,7 +71,7 @@ export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_d
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
 export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
-export const ShipClassSelect = TypedSelect(ShipClass, 'ship_kind_desc', '')
+export const ShipClassSelect = TypedSelect(ShipClass, '', 'ship_desc_kind')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
 
@@ -108,7 +114,7 @@ const asID = (obj: ID) : ID|null => {
 }
 
 export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolean,
-    exclude?: number[], onChange: (owner: Owner)=>void}){
+    exclude?: number[], title?: string, onChange: (owner: Owner)=>void}){
     const [instType, setInstType] = React.useState(props.value?.type)
     const [id, setId] = React.useState(asID(props.value))
     const ownerChange = (type: InstitutionType, id: ID)=>{
@@ -120,9 +126,9 @@ export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolea
     return <RB.Row>
       <RB.Col>
         <InstitutionTypeSelect value={instType} exclude={props.exclude}
-          onChange={type=>ownerChange(type, id)} />
+          onChange={type=>ownerChange(type, id)} title={props.title} />
       </RB.Col>
-      <RB.Col>
+      <RB.Col className='flex-center'>
         <CSelect value={id} type={instType} filter={props.filter}
           onChange={id=>ownerChange(instType, id)} disabled={isNaN(instType)} />
       </RB.Col>

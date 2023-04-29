@@ -5,6 +5,7 @@ import {Corporation} from '../common/entity'
 import {TextInput, InstitutionTypeSelect, ResourceValueSelect} from '../util/inputs'
 import {NumberInput} from '../util/inputs'
 import {ErrorMessage} from '../util/errors'
+import {EditButtons} from '../util/buttons'
 import {ApiStackError} from '../common/errors'
 import {default as L, LR} from './locale'
 
@@ -41,16 +42,12 @@ export function EntityRowEdit(props: RowNewProps){
           <TextInput value={name} onChange={setName}
             placeholder={LR('item_desc_name')} />
         </RB.Col>
-        <RB.Col sm={1}>
-          {LR('entity_desc_credit')}
-        </RB.Col>
         <RB.Col>
           <NumberInput value={credit} onChange={setCredit}
-            placeholder={LR('currency')} />
+            placeholder={LR('entity_desc_credit')} />
         </RB.Col>
-        <RB.Col sm={4}>
-          <RB.Button onClick={onSubmit}>{LR(props.add ? 'act_add' : 'act_save')}</RB.Button>
-            {onCancel && <RB.Button onClick={onCancel}>{LR('act_cancel')}</RB.Button>}
+        <RB.Col>
+          <EditButtons {...props} onSubmit={onSubmit} />
         </RB.Col>
       </RB.Row>
       {has('resourceValue') && <ResourceValueSelect value={resourceValue}
@@ -60,12 +57,9 @@ export function EntityRowEdit(props: RowNewProps){
           <TextInput as='textarea' rows={3} placeholder={LR('item_desc_data')}
             value={data} onChange={setData} />
         </RB.Col>
-        <RB.Col sm={1}>
-          {LR('entity_desc_cost')}
-        </RB.Col>
         <RB.Col sm={2}>
           <NumberInput value={cost} onChange={setCost}
-            placeholder={LR('currency')} />
+            placeholder={LR('entity_desc_cost')} />
         </RB.Col>
       </RB.Row>
     </RB.InputGroup>

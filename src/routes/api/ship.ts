@@ -1,8 +1,9 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, ShipController, FlightController} from '../../entity'
-import {UserType} from '../../../client/src/common/entity'
+import {UserController, ShipController, FlightController, ItemController} from '../../entity'
+import {ItemType, Module, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {Time} from '../../util/time'
+import {IDMatch} from '../../util/server'
 
 export class ShipApiRouer extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -33,5 +34,45 @@ export class ShipApiRouer extends BaseRouter {
         const list = await FlightController.all({
             ts: Time.cycleInterval(Time.cycle)})
         return {list}
+    }
+
+    @CheckRole([UserType.Guard, UserType.Captain])
+    async get_modules_list(ctx: RenderContext){
+        const {id} = ctx.aparams
+        // From ship api only ship modules is available
+        const owner = await ShipController.get(id)
+        const list = await ItemController.all({type: ItemType.Module,
+            'owner._id': owner._id, 'owner.type': owner.type})
+        return {list}
+    }
+
+    @CheckRole([UserType.Guard, UserType.Captain])
+    async put_module_install(ctx: RenderContext){
+        const {id, mod} = ctx.aparams
+        const ship = await ShipController.get(id)
+        const item = await ItemController.get(mod)
+        if (!ship || !mod)
+            throw 'not_found'
+        if (item.owner.type!=ship.type || !IDMatch(item.owner._id, ship._id))
+            throw 'Cannot act on foreigh item'
+        const active = await ItemController.all({type: ItemType.Module,
+            'owner._id': ship._id, 'owner.type': ship.type, installed: true})
+        if (active.length >= ship.slots)
+            throw 'No space available';
+        ((item as unknown) as Module).installed = true
+        await item.save()
+    }
+
+    @CheckRole([UserType.Guard, UserType.Captain])
+    async put_module_remove(ctx: RenderContext){
+        const {id, mod} = ctx.aparams
+        const ship = await ShipController.get(id)
+        const item = await ItemController.get(mod)
+        if (!ship || !mod)
+            throw 'not_found'
+        if (item.owner.type!=ship.type || !IDMatch(item.owner._id, ship._id))
+            throw 'Cannot act on foreigh item';
+        ((item as unknown) as Module).installed = false
+        await item.save()
     }
 }

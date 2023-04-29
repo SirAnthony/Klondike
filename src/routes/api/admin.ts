@@ -32,14 +32,11 @@ export class AdminApiRouter extends BaseRouter {
         if (data.location)
             item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
         if (data.owners){
-            const owners: PatentOwner[] = []
-            for (let k of data.owners){
-                // Only corps owns patents
-                let owner = (await CorpController.get(k._id)).identifier
-                owners.push(Object.assign({status: PatentStatus.Created,
-                    type: k.type}, owner))
+            const owners = (item as any).owners = [] as PatentOwner[]
+            for (let k of data.owners as PatentOwner[]){
+                const owner = (await institutionController(+k.type).get(k._id))
+                owners.push(Object.assign({status: PatentStatus.Created}, owner.asOwner))
             }
-            (item as any).owners = owners
         }
         await item.save()
     }
@@ -109,7 +106,7 @@ export class AdminApiRouter extends BaseRouter {
             throw new ApiError(Codes.INCORRECT_PARAM, 'phone')
         for (let k in data)
             user[k] = data[k]
-        if (user.relation){
+        if (user.relation?._id){
             const ctrl = institutionController(user.relation.type)
             user.relation = (await ctrl.get(user.relation._id)).asOwner
         }
@@ -138,13 +135,13 @@ export class AdminApiRouter extends BaseRouter {
         const obj = await controller.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
         for (let k in data)
             obj[k] = data[k]
-        if (data.owner){
+        if (data.owner?._id){
             const ctrl = institutionController(+data.owner.type);
             (obj as any).owner = (await ctrl.get(data.owner._id)).asOwner
         }
-        if (data.location)
+        if (data.location?._id)
             (obj as any).location = (await PlanetController.get(data.location._id)).location(data.location.pos)
-        if (data.captain){
+        if (data.captain?._id){
             const ctrl = institutionController(+data.captain.type);
             (obj as any).captain = (await ctrl.get(data.captain._id)).asOwner
         }

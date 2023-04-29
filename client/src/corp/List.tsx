@@ -6,6 +6,7 @@ import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
 import {EntityRowEdit} from './RowEdit'
+import {DataViewerButtons} from '../util/buttons'
 import * as util from '../common/util'
 
 function CorpRow(props: {entity: Corporation, onChange: (entity: Institution)=>Promise<boolean>}) {
@@ -23,10 +24,7 @@ function CorpRow(props: {entity: Corporation, onChange: (entity: Institution)=>P
         <RB.Col>
           <RB.NavLink href={`/inventory/${entity.type}/${entity._id}`}>{LR('inventory')}</RB.NavLink>
         </RB.Col>
-        <RB.Col>
-          <RB.Button onClick={()=>setShowData(!showData)}>{LR('act_show_data')}</RB.Button>
-          <RB.Button onClick={()=>setShowEdit(true)}>{LR('act_edit')}</RB.Button>
-        </RB.Col>
+        <DataViewerButtons onEdit={setShowEdit} onShow={setShowData} show={showData} />
       </RB.Row>
       {showData && <RB.Row>
         <RB.Col>

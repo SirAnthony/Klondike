@@ -37,6 +37,7 @@ load(mod, {
     'desc_port': 'Порт приписки',
     'desc_captain': 'Капитан',
     'desc_owner': 'Владелец корабля',
+    'desc_balance': 'Баланс',
     'desc_flight_type_0': 'Планетарный вылет',
     'desc_flight_type_1': 'Запуск дрона',
     'desc_flight_status_0': 'В доке',

@@ -58,8 +58,11 @@ export class ModuleDetails extends F.Fetcher<ModuleDetailsProps, ModuleDetailsSt
         return true
     }
     render(){
+        const {ship} = this.props
         const {list} = this.state
-        const modules = list.filter(m=>m.installed).slice(0, 4)
+        const modules = list?.filter(m=>m.installed).slice(0, ship.slots)||[]
+        for (let i=0; i<ship.slots; i++)
+            modules[i] = modules[i]||null
         const rows = modules.map((m, i)=>Mod(i, m, this.removeModule)).flat()
         return <div className="menu-box"><table>
           <tr>

@@ -59,7 +59,7 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
         if (err)
             return <ErrorMessage field={err} />
         if (!list)
-            return <div key={'list_empty'}>{this.L('not_found')}</div>
+            return <div>{this.L('not_found')}</div>
         let value = this.state.value
         if (value===null||value===undefined)
             value = this.defaultValue
@@ -71,19 +71,21 @@ export class Select<P, S> extends F.Fetcher<P & SelectProps, S & SelectState> {
 }
 
 export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: boolean){
-    return class TypedSelect extends Select<{exclude?: number[]}, {}> {
+    return class TypedSelect extends Select<{exclude?: (number | string)[], title?: string}, {}> {
         L = L
         top_enabled = top_enabled
-        get optName(){ return opt }
+        get optName(){ return this.props.title || opt }
         getValue(value){ return +value }
         async fetch(){
-            const list = Object.keys(TO).filter(k=>
-                !isNaN(+k) && !this.props.exclude?.includes(+(k)))
+            const keys = Object.keys(TO)
+            const numeric = keys.filter(k=>!isNaN(+k))
+            const arr = numeric.length ? numeric : keys
+            const list = arr.filter(k=>!this.props.exclude?.includes(numeric.length ? +k : k))
             this.setState(this.fetchState({list}))
         }
         getOptions(list: T[]){
             return list.reduce((p, v)=>
-                Object.assign(p, {[v as string]: L(`${key}_${v}`)}), {}) || []
+                Object.assign(p, {[v as string]: key ? L(`${key}_${v}`) : v }), {}) || []
         }
         componentDidUpdate(prevProps){
             if (prevProps.exclude!==this.props.exclude)

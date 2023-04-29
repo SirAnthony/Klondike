@@ -113,6 +113,11 @@ div.app-head {
     overflow-wrap: break-word;
 }
 
+.flex-center {
+    display: flex;
+    align-items: center;
+}
+
 hr.delimeter {
     color: var(--color-ui-border);
     opacity: 0.70;
@@ -304,7 +309,7 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
 }
 
 button.btn {
-    width: 160px;
+    width: 130px;
     font-size: 10pt;
     color: var(--color-ui-text);
     border-radius: 5px;
@@ -374,11 +379,45 @@ input.form-control::placeholder, textarea.form-control::placeholder {
     color: var(--color-ui-text-shade);
 }
 
+div.form-floating>.form-control-plaintext:focus,
+div.form-floating>.form-control-plaintext:not(:placeholder-shown),
+div.form-floating>.form-control:focus,
+div.form-floating>.form-control:not(:placeholder-shown),
+div.form-floating>.form-control,
+div.form-floating>label {
+    height: auto;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+    padding-bottom: 0.375rem;
+    padding-top: 0.375rem;
+    font-size: 10pt;
+}
+
+div.form-floating>.form-control-plaintext~label,
+div.form-floating>.form-control:focus~label,
+div.form-floating>.form-control:not(:placeholder-shown)~label,
+div.form-floating>.form-select~label {
+    left: auto;
+    width: auto;
+    right: 0px;
+    padding: 7px 0px;
+    font-size: 10pt;
+    color: var(--color-ui-text);
+}
+
+div.form-floating>label {
+    color: var(--color-ui-text-shade);
+}
+
 .input-group .input-group-text {
     background: var(--color-ui-box-light);
     border-color: var(--color-ui-border);
     color: var(--color-ui-text);
     font-size: 10pt;
+}
+
+.input-group>:first-child {
+    margin-left: -1px;
 }
 
 .item-code {
