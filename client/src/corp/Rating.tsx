@@ -1,16 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Institution, Owner, User, ID} from '../common/entity'
+import {Owner} from '../common/entity'
 import {Delimeter} from '../util/components'
-import {NumberInput, OwnerSelect} from '../util/inputs'
-import {ErrorMessage} from '../util/errors'
-import {ClientError} from '../common/errors'
 import {InventoryEvents, TimeDetails} from '../inventory'
 import * as F from '../Fetcher'
-import {default as L, LR} from './locale'
-import * as util from '../common/util'
-import * as date from '../common/date'
-import * as _ from 'lodash'
+import {default as L} from './locale'
 
 type RatingDetailsState = {
     rating: {
@@ -35,8 +29,6 @@ export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsSt
     }
     body(){
         const {rating} = this.state
-        const corps = Object.keys(rating?.flat().map(f=>f.owner.name)
-            .reduce((p, c)=>{ p[c] = 1; return p }, {})||{}).sort();
         const rows = []
         for (let k=0; k<rating.length; k++){
             const cols = [<td>{`C${k+1}`}</td>]
@@ -58,7 +50,6 @@ export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsSt
         </thead>
     }
     render(){
-        const {rating, cycle} = this.state
         return <RB.Container>
           <RB.Row className='menu-list-title'><RB.Col>
             {L('corporations_rating')}

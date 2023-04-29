@@ -38,7 +38,7 @@ export const array_join = (arr: any[], sep?: string)=>arr.filter(Boolean).join(s
 export const obj_copyto = (data: any, target: any, keys?: string | string[])=>{
     if (!data)
         return target
-    keys = (keys && (Array.isArray(keys) ? keys : keys.split(/\s+/)) || Object.keys(data))
+    keys = keys ? (Array.isArray(keys) ? keys : keys.split(/\s+/)) : Object.keys(data)
     keys.filter(k=>k in data).forEach(k=>target[k] = data[k])
     return target
 }
@@ -46,7 +46,7 @@ export const obj_copyto = (data: any, target: any, keys?: string | string[])=>{
 export const get_name = (data: any)=>typeof data==='object' ? data.name : data
 
 export const not_depleted = (item: Item)=>{
-    return item.type!=ItemType.Resource || (item as Resource).value>0 }
+    return +item.type!==ItemType.Resource || (item as Resource).value>0 }
 
 export const isEmpty = (input: string)=>!input && isNaN(+input)
 export const isPhone = (input: string)=>

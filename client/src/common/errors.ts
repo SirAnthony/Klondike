@@ -42,7 +42,7 @@ export class ApiError {
         this.message = message
         this.stack = [].concat(stack).filter(Boolean)
     }
-    get valid(){ return this.code != Codes.INITIAL_VALUE }
+    get valid(){ return +this.code !== Codes.INITIAL_VALUE }
     static from(obj: any) : ApiError {
         if (obj instanceof ApiError)
             return obj

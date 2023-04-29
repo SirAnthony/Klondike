@@ -1,5 +1,4 @@
-
-export default {
+const defaults = {
     locale: 'RU-ru',
     styles: {
         color: {
@@ -34,3 +33,4 @@ export default {
     },
     date: new Date('06.05.2523'),
 }
+export default defaults
