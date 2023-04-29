@@ -75,6 +75,7 @@ export class Select extends USelect<{type: InstitutionType}, {}> {
     L = LR
     get optName(){ return 'item_desc_owner' }
     get fetchUrl(){ return `/api/corp/list/${this.props.type}` }
+    get canFetch(){ return !isNaN(+this.props.type) }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
         return list?.filter(this.props.filter||Boolean)
@@ -94,6 +95,7 @@ export class PatentSelect extends USelect<PatentSelectProps, {}> {
     get optName(){ return 'item_desc_name' }
     get fetchUrl(){
         return `/api/corp/patents/${this.props.owner?._id}` }
+    get canFetch(){ return !!this.props.owner?._id }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Patent[]){
         return list?.filter(this.props.filter||Boolean)
@@ -111,6 +113,7 @@ export class LoanSelect extends USelect<LoanSelectProps, {}>{
         const {owner} = this.props
         return `/api/inventory/${owner.type}/${owner._id}/loans`
     }
+    get canFetch(){ return !isNaN(+this.props.owner.type) }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptionValue(opt: Loan) : String { 
         return `${opt.lender.name}: ${opt.amount}` }

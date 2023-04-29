@@ -17,6 +17,8 @@ export class Fetcher<P, S> extends React.PureComponent<P & FetcherProps, S & Err
     fetches = 0
     componentDidMount() { this.fetch() }
     async fetch(){
+        if (!this.canFetch)
+            return
         const fetcher = this.cacheClass||this
         if (fetcher.fetching)
             return fetcher.requesters.push(this)
@@ -35,6 +37,7 @@ export class Fetcher<P, S> extends React.PureComponent<P & FetcherProps, S & Err
     }
     get fetchUrl(){ return '' }
     get fetchOpt(){ return {} }
+    get canFetch(){ return true }
     fetchState(data: any){ return {item: data} }
     render(){
         const err = this.state?.err

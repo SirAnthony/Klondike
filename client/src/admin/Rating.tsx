@@ -142,7 +142,7 @@ class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState
           <RB.Row className='menu-input-row'>
             <RB.Col>{L('config_setup_points')}</RB.Col>
             <RB.Col sm={3}><RB.Button onClick={()=>this.onSubmit()}>
-              {L('action_save')}
+              {LR('act_save')}
             </RB.Button></RB.Col>
           </RB.Row>
           {PatentConfigChange(item, setConf)}

@@ -69,13 +69,13 @@ export class CorpApiRouter extends BaseRouter {
     @CheckRole([UserType.Captain, UserType.Corporant,
         UserType.Guard, UserType.Scientist])
     async get_list(ctx: RenderContext){
-        const {type} = ctx.aparams
-        if (isNaN(+type))
+        const {stype} = ctx.aparams
+        if (isNaN(+stype))
             throw 'No type provided'
-        const controller = institutionController(+type)
+        const controller = institutionController(+stype)
         if (!controller)
             return {}
-        const list = await controller.all({type: +type})
+        const list = await controller.all({type: +stype})
         return {list}
     }
 

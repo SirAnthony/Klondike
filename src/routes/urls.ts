@@ -16,6 +16,7 @@ main: {prefix: '', router: MainRouter, urls: {
 corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: {
     '/orders/:id': {func: 'orders', methods: ['get']},
     '/patent/forward/:id': {func: 'patent_forward', methods: ['post']},
+    '/list/:stype': {func: 'list', methods: ['get']},
     '/rating': {func: 'rating', methods: ['get']},
     '/:id': {func: 'corp', methods: ['get']},
 }},
