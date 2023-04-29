@@ -2,7 +2,7 @@ import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, institutionController} from '../../entity'
 import {ItemController, PlanetController} from '../../entity'
 import {ConfigController, LogController} from '../../entity'
-import {PlanetInfo, UserType, LogAction} from '../../../client/src/common/entity'
+import {PlanetInfo, UserType, LogAction, InstitutionType} from '../../../client/src/common/entity'
 import {ItemType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as server_util from '../../util/server'
@@ -32,10 +32,20 @@ export class ApiRouter extends BaseRouter {
     async get_planet(ctx: RenderContext){
         const {id} = ctx.params;
         const {user}: {user: UserController} = ctx.state
+        const entity = await institutionController(user.relation?.type)?.get(user.relation?._id)
         const planet: PlanetInfo = await PlanetController.get(id)
-        const ships = await ShipController.all({'location._id': new ObjectId(id)})
+        const ships = await ShipController.all({'location._id': planet._id})
         planet.ships = ships.map(s=>ShipController.PlanetShip(s))
-        return {planet, date: server_util.currentDate()}
+        const filter = user.kind==UserType.Master ? {} : {$or: [
+            {'owner._id': entity._id, 'owner.type': entity.type},
+            {'known._id': entity._id, 'known.type': entity.type}
+        ]}
+        const items = await ItemController.all(Object.assign({
+            'location._id': planet._id,
+            'type': {$in: [ItemType.Resource, ItemType.Coordinates]}
+        }, filter))
+        planet.items = items
+        return {item: planet}
     }
 
     @CheckRole(UserType.Navigator)

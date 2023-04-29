@@ -1,4 +1,5 @@
-import {Item, ItemTypePrefix} from '../common/entity'
+import {Item, ItemTypePrefix, Resource, ResourceType} from '../common/entity'
+import L from '../common/locale'
 
 export function IDField(props: {item: Item}){
     const {item} = props
@@ -9,4 +10,10 @@ export function IDField(props: {item: Item}){
 
 export function Delimeter(){
     return <hr className='delimeter' />
+}
+
+export function ResourceImg(props: {res: Resource}){
+    const {res} = props
+    const name = ResourceType[res.kind].toLowerCase()
+    return <img src={`/static/img/res/${name}.png`} alt={L(`res_kind_${res.kind}`)} />
 }

@@ -96,6 +96,7 @@ export class Resource extends Item {
     type = ItemType.Resource
     kind: ResourceType
     value: number
+    known: Owner[]
     get keys(){
         return super.keys.concat('kind value'.split(' '))
             .filter(f=>f!='price')

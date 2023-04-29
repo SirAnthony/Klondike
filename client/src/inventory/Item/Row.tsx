@@ -6,7 +6,7 @@ import {LocationCol, ResourceCostCol, ItemPriceCol} from './components'
 import {ItemOwnerCol, ItemPriceInputProps} from './components'
 import {ItemActions} from './Actions'
 import {ItemPopoverOverlay} from './Popover'
-import {IDField} from '../../util/components'
+import {IDField, ResourceImg} from '../../util/components'
 import {default as L, LR} from '../locale'
 import * as iutil from './util'
 
@@ -62,7 +62,7 @@ class ItemRowContent extends React.Component<ItemRowProps, {}> {
         return res.kind==undefined ? '-' :
             item.type==ItemType.Patent ?
             LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
-            LR(`res_kind_${res.kind}`)
+            <div><ResourceImg res={res} /><span>{LR(`res_kind_${res.kind}`)}</span></div>
     }
     render(){
         const {item, long} = this.props
