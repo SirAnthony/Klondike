@@ -118,6 +118,10 @@ div.app-head {
     align-items: center;
 }
 
+.auto-width {
+    width: auto !important;
+}
+
 hr.delimeter {
     color: var(--color-ui-border);
     opacity: 0.70;

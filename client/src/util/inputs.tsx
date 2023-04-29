@@ -1,7 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
+import {ItemType, ResourceType, PatentType} from '../common/entity'
+import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo} from '../common/entity'
+import {PlanetType, Pos} from '../common/entity'
 import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
 import {TypedSelect} from '../util/select'
@@ -18,6 +20,7 @@ type TextInputProps = {
     name?: string
     described?: string
     autoComplete?: boolean
+    disabled?: boolean
     as?: React.ElementType<any>
     rows?: number
     type?: string
@@ -39,10 +42,9 @@ export function TextInput(props: TextInputProps){
     const complete = props.autoComplete ? undefined : 'new-password'
     const controlId = (Math.random() + 1).toString(36).substring(7);
     return <RB.FloatingLabel controlId={controlId} label={props.placeholder}>
-      <RB.FormControl name={props.name} placeholder={props.placeholder}
-        className={cls} as={props.as} rows={props.rows} type={props.type}
+      <RB.FormControl {...props} className={cls} onChange={onChange}
         aria-label={props.placeholder} aria-describedby={props.described}
-        value={props.value} onChange={onChange} autocomplete={complete} />
+        autocomplete={complete} />
     </RB.FloatingLabel>
 }
 
@@ -65,6 +67,23 @@ export function NumberInput(props: NumberInputProps){
     </RB.FloatingLabel>
 }
 
+type CoordinatesInputProps = {
+    value: Pos
+    disabled?: boolean
+    onChange: (l: Pos)=>void
+}
+export function CoordinatesInput(props: CoordinatesInputProps){
+    const {value} = props
+    const [coord, setCoord] = React.useState(!value ? undefined : `${value.col}:${value.row}`)
+    const coordChange = (val)=>{
+      setCoord(val)
+      const pos = val?.split(':')
+      props.onChange(pos?.length>1 ? {col: pos[0], row: pos[1]} : null)
+    }
+    return <TextInput {...props} value={coord} onChange={coordChange}
+        placeholder={L('loc_desc_coord')} />
+}
+
 export const ResourceSelect = TypedSelect(ResourceType, 'res_kind', 'res_desc_kind')
 export const TypeSelect = TypedSelect(ItemType, 'item_type', 'item_desc_type')
 export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_desc_kind')
@@ -74,6 +93,7 @@ export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_t
 export const ShipClassSelect = TypedSelect(ShipClass, '', 'ship_desc_kind')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
+export const PlanetTypeSelect = TypedSelect(PlanetType, '', 'planet_desc_kind')
 
 export function PatentSelect(props: {value?: Patent, owner: Owner,
     item: Item, onChange: (p: Patent)=>void}){
@@ -86,27 +106,15 @@ export function PatentSelect(props: {value?: Patent, owner: Owner,
 
 export function LocationSelect(props: {value?: Location, optName?: string, onChange: (loc: Location)=>void}){
     const {value} = props
-    const [location, setLocation] = React.useState(value)
-    const [coord, setCoord] = React.useState(!value ? '' : `${value.pos.col}:${value.pos.row}`)
-    const updateLocation = (loc, coord)=>{
-        setLocation(loc)
-        setCoord(coord)
-        const pos = coord?.split(':')
-        props.onChange({_id: loc._id, name: loc.name, system: loc?.system,
-            pos: {col: +pos[0], row: +pos[1]}})
-    }
-    const locChange = value=>updateLocation(value, coord)
-    const coordChange = ({target: {value}})=>updateLocation(location, value)
-    return <RB.Container>
-      <RB.Row><RB.Col>
-        <PSelect value={location} onChange={locChange} optName={props.optName} />
+    const coordChange = pos=>props.onChange(Object.assign({}, value, {pos}))
+    return <RB.Container><RB.Row>
+      <RB.Col>
+        <PSelect value={value} onChange={props.onChange} optName={props.optName} />
       </RB.Col>
       <RB.Col>
-        <RB.FormControl value={coord} onChange={coordChange} disabled={!location}
-            placeholder={L('loc_desc_coord')} />
+        <CoordinatesInput value={value?.pos} onChange={coordChange} disabled={!value} />
       </RB.Col>
-      </RB.Row>
-    </RB.Container>
+    </RB.Row></RB.Container>
 }
 
 const asID = (obj: ID) : ID|null => {

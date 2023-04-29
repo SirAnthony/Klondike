@@ -295,12 +295,11 @@ export type PlanetZone = {
     radius: number
     img?: string
 }
-
 export class Planet extends ID {
+    type: PlanetType
     system: string
     data: string
     zones: PlanetZone[]
-    type: PlanetType
 }
 
 export class PlanetInfo extends Planet {

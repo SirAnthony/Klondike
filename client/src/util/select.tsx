@@ -74,13 +74,14 @@ export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: bo
     return class TypedSelect extends Select<{exclude?: (number | string)[], title?: string}, {}> {
         L = L
         top_enabled = top_enabled
+        numeric = true
         get optName(){ return this.props.title || opt }
-        getValue(value){ return +value }
+        getValue(value){ return this.numeric ? +value : value }
         async fetch(){
-            const keys = Object.keys(TO)
-            const numeric = keys.filter(k=>!isNaN(+k))
-            const arr = numeric.length ? numeric : keys
-            const list = arr.filter(k=>!this.props.exclude?.includes(numeric.length ? +k : k))
+            const keys = Object.keys(TO), numeric = keys.filter(k=>!isNaN(+k))
+            this.numeric = !!numeric.length
+            const arr = this.numeric ? numeric : keys
+            const list = arr.filter(k=>!this.props.exclude?.includes(this.getValue(k)))
             this.setState(this.fetchState({list}))
         }
         getOptions(list: T[]){

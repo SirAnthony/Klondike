@@ -1,27 +1,43 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {PlanetInfo, User, Item} from '../common/entity'
+import {PlanetInfo, User, Item, Planet} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
+import {PlanetRowEdit} from './RowEdit'
+import {DataViewerButtons} from '../util/buttons'
 import * as util from '../common/util'
 import {default as L, LR} from './locale'
 
-function PlanetRow(params: {planet: PlanetInfo}) {
-    const {planet} = params
-    const resources = planet.items?.map(f=>
-        `${L('res_'+f.type)}: `+(f.owner ? `(${util.get_name(f.owner)})` : '')).join(', ')
-    const ships = planet.ships?.map(f=>
-        <RB.NavLink href={`/ship/${f._id}`}>{util.get_name(f)}</RB.NavLink>)
+function PlanetRow(props: {planet: PlanetInfo, onChange: (entity: PlanetInfo)=>Promise<boolean>}) {
+    const {planet} = props
+    const [showData, setShowData] = React.useState(false)
+    const [showEdit, setShowEdit] = React.useState(false)
+    const onChange = async planet=>(await props.onChange(planet)) && setShowEdit(false)
+    if (showEdit)
+        return <PlanetRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
+    const zones = showData ? planet.zones?.map(z=>
+        <RB.Col>{`<${z.center.col}:${z.center.row}>(${z.radius})`}</RB.Col>) : null
     return <RB.Row className="menu-list-row">
-      <RB.Col><RB.NavLink href={`/map/${planet._id}`}>{planet.name}</RB.NavLink></RB.Col>
-      <RB.Col>{L(`desc_type_${planet.type}`)+' '+L('desc_zones')+`: ${planet.zones.length}`}</RB.Col>
-      <RB.Col>{resources}</RB.Col>
-      <RB.Col>{ships}</RB.Col>
+      <RB.Container>
+        <RB.Row>
+          <RB.Col><RB.NavLink href={`/map/${planet._id}`}>{planet.name}</RB.NavLink></RB.Col>
+          <RB.Col>{planet.type+' '+L('desc_zones')+`: ${planet.zones?.length|0}`}</RB.Col>
+          <RB.Col>{planet.system}</RB.Col>
+          <DataViewerButtons onEdit={setShowEdit} onShow={setShowData} show={showData} />
+        </RB.Row>
+        <RB.Row>{zones}</RB.Row>
+        {showData && <RB.Row>
+          <RB.Col>
+            {planet.data}
+          </RB.Col>
+        </RB.Row>}
+      </RB.Container>
     </RB.Row>
 }
 
 type PlanetListState = {
-    list?: PlanetInfo[]
+    list?: Planet[]
+    newForm?: Planet
 }
 type PlanetListProps = {
     user: User
@@ -31,15 +47,26 @@ export default class List extends UList<PlanetListProps, PlanetListState> {
     constructor(props){
         super(props)
     }
-    get fetchUrl() { return `/api/planets/` }
+    get fetchUrl() { return `/api/admin/planet/list` }
+    async changeEntity(planet: Planet) : Promise<boolean> {
+        this.setState({err: null, newForm: null})
+        const ret = await util.wget(`/api/admin/planet/${planet._id||0}/set`,
+            {method: 'POST', data: {data: planet}})
+        if (ret.err)
+            return void this.setState({err: ret.err, newForm: planet})
+        this.fetch()
+        return true  
+    }
     body(){
-        const {list} = this.state
-        const rows = list.map(l=><PlanetRow key={`planet_list_${l._id}`} planet={l} />)
-        return [<RB.Row key={'planet_list_title'} className="menu-list-title">
+        const {list, newForm} = this.state
+        const rows = list.map(l=><PlanetRow key={`planet_list_${l._id}`} planet={l}
+            onChange={e=>this.changeEntity(e)} />)
+        return [<PlanetRowEdit add={true} onChange={e=>this.changeEntity(e)} planet={newForm} />,
+        <RB.Row key={'planet_list_title'} className="menu-list-title">
           <RB.Col>{L('desc_name')}</RB.Col>
           <RB.Col>{L('desc_info')}</RB.Col>
-          <RB.Col>{L('desc_resources')}</RB.Col>
-          <RB.Col>{L('desc_ships')}</RB.Col>
+          <RB.Col>{L('desc_system')}</RB.Col>
+          <RB.Col>{LR('item_desc_actions')}</RB.Col>
         </RB.Row>, ...rows] 
     }
 }

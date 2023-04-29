@@ -1,7 +1,8 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController, ConfigController, institutionController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
-import {UserType, PatentOwner, PatentStatus, InstitutionType} from '../../../client/src/common/entity'
+import {UserType, PatentOwner, PatentStatus} from '../../../client/src/common/entity'
+import {InstitutionType, PlanetType, Planet} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {Time} from '../../util/time'
@@ -29,8 +30,10 @@ export class AdminApiRouter extends BaseRouter {
             item[k] = data[k]
         if (data.owner)
             item.owner = (await institutionController(data.owner.type).get(data.owner._id)).asOwner
-        if (data.location)
-            item.location = (await PlanetController.get(data.location._id)).location(data.location.pos)
+        if (data.location?._id){
+            const planet = await PlanetController.get(data.location._id);
+            item.location = PlanetController.location(planet, data.location.pos)
+        }
         if (data.owners){
             const owners = (item as any).owners = [] as PatentOwner[]
             for (let k of data.owners as PatentOwner[]){
@@ -139,13 +142,34 @@ export class AdminApiRouter extends BaseRouter {
             const ctrl = institutionController(+data.owner.type);
             (obj as any).owner = (await ctrl.get(data.owner._id)).asOwner
         }
-        if (data.location?._id)
-            (obj as any).location = (await PlanetController.get(data.location._id)).location(data.location.pos)
+        if (data.location?._id){
+            const planet = await PlanetController.get(data.location._id);
+            (obj as any).location = PlanetController.location(planet, data.location.pos)
+        }
         if (data.captain?._id){
             const ctrl = institutionController(+data.captain.type);
             (obj as any).captain = (await ctrl.get(data.captain._id)).asOwner
         }
         await obj.save()
+    }
+
+    @CheckRole(UserType.Navigator)
+    async get_planet_list(ctx: RenderContext){
+        const list: Planet[] = await PlanetController.all()
+        return {list}
+    }
+
+    @CheckRole(UserType.Master)
+    async post_planet_set(ctx: RenderContext){
+        const {id, data} = ctx.aparams
+        if (!data.name || !PlanetType[data.type])
+            throw 'Should have name and type fields'
+        if (data._id && data._id!=id)
+            throw 'Cannot change id of item'
+        const obj = await PlanetController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
+        for (let k in data)
+            obj[k] = data[k]
+       await obj.save()
     }
     
     @CheckRole(UserType.Master)

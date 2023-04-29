@@ -39,16 +39,6 @@ export class ApiRouter extends BaseRouter {
     }
 
     @CheckRole(UserType.Navigator)
-    async get_planet_list(ctx: RenderContext){
-        const list: PlanetInfo[] = await PlanetController.all()
-        for (let p of list) {
-            p.items = await ItemController.all({'location._id': p._id})
-            // p.ships = await ShipController.all({'location._id': p._id})
-        }
-        return {list}
-    }
-
-    @CheckRole(UserType.Navigator)
     async get_planet_list_short(ctx: RenderContext){
         const planets = await PlanetController.all()
         const list = planets.map(p=>({_id: p._id, name: p.name}))

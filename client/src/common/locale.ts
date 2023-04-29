@@ -92,6 +92,7 @@ const aliases = {
     'user_kind_6': 'СБ',
     'user_kind_7': 'Мастер',
     'loc_desc_coord': 'Координаты (x:y)',
+    'planet_desc_kind': 'Тип планеты',
     'entity_desc_credit': 'Счет',
     'entity_desc_cost': 'Стоимость',
     'cycle': 'Цикл',

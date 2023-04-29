@@ -12,7 +12,6 @@ import {Delimeter} from '../util/components'
 import {ErrorMessage} from '../util/errors';
 
 type ListState = {
-    showResources: Boolean
 }
 type ListProps = {
     user: User
@@ -23,7 +22,9 @@ export function ListNavigator(props: {user: User}){
     return <List user={user} />
 }
 
-type ConfigControlState = {}
+type ConfigControlState = {
+    show: Boolean
+}
 type ConfigControlProps = {}
 class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
     L = L
@@ -34,12 +35,10 @@ class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState
             item.price.res[cycle][k] = val
             this.setState({item: obj})
         }
-        const cols = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=>[
-          <RB.Col sm={1}>{LR(`res_kind_${k}`)}</RB.Col>,
-          <RB.Col>
+        const cols = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=><RB.Col>
             <NumberInput value={item.price.res[cycle][k]} placeholder={LR(`res_kind_${k}`)}
                 onChange={val=>onChange(+k, val)}/>     
-          </RB.Col>])
+          </RB.Col>)
         return <RB.Row className='menu-list-row'>
             <RB.Col sm={1}>{LR('cycle')+' '+cycle}</RB.Col>
             {cols}
@@ -53,15 +52,25 @@ class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState
             Object.assign({}, item.price.res[0]))
         this.setState({item: Object.assign({}, item)})
     }
+    toggleButton(){
+        const {show} = this.state
+        const toggleResources = ()=>this.setState({show: !show})
+        return <RB.Button className='auto-width' onClick={toggleResources}>
+          {L('res_show')+' '+(show ? '⇑' : '⇓')}
+        </RB.Button>
+    }
     render(){
-        const {item, err} = this.state
+        const {item, err, show} = this.state
+        if (!show)
+            return <RB.Container>{this.toggleButton()}</RB.Container>
         if (!item)
-            return <span>Not found</span>
+            return <span>{LR('not_found')}</span>
         const {res = []} = (item as Config).price
         const res_rows = res.map((r, i)=>this.res_row(i, r))
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-input-row'>
+            <RB.Col>{this.toggleButton()}</RB.Col>
             <RB.Col>{L('config_setup_prices')}</RB.Col>
             <RB.Col sm={2}><RB.Button onClick={()=>this.add_res_row()}>
               {L('act_add_cycle')}
@@ -109,13 +118,8 @@ class List extends UList<ListProps, ListState> {
         const {list} = this.state
         const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
           onDelete={item=>this.deleteItem(item)} item={l} long={true} user={this.props.user} />)
-        const {showResources} = this.state
-        const toggleResources = ()=>this.setState({showResources: !showResources})
         return [
-          <RB.Button onClick={toggleResources}>
-            {L('res_show')+' '+(showResources ? '⇑' : '⇓')}
-          </RB.Button>,
-          showResources ? <ConfigControl /> : null,
+          <ConfigControl />,
           <Delimeter key='res_delimeter' />,
           this.newItem(),
           <ItemRowDesc key='item_row_desc' className='menu-list-title' long={true} />,

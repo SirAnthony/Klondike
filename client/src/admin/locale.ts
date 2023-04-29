@@ -10,6 +10,7 @@ load(mod, {
     'link_resources': 'Ресурсы и цены',
     'link_ships': 'Корабли',
     'link_corps': 'Корпорации',
+    'link_planets': 'Планеты',
     'link_users': 'Пользователи',
     'act_save': 'Сохранить',
     'res_create': 'Создать ресурс',

@@ -1,4 +1,4 @@
-import {Entity} from './base';
+/*import {Entity} from './base';
 import {Identifier, Planet, Location, Pos} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {ObjectId} from 'mongodb';
@@ -47,4 +47,4 @@ export class Controller extends PlanetDB {
             ret.push(await Controller.get(item))
         return ret
     }
-}
+}*/
