@@ -13,8 +13,8 @@ export class FlightController extends MakeController(Flight, 'flights') {}
 
 export class ShipController extends MakeController(Ship, 'ships'){
     static PlanetShip(ship: Ship): PlanetShip {
-        return {_id: ship._id, name: ship.name, class: ship.kind,
-            img: ship.img, pos: ship.location.pos}
+        return {_id: ship._id, name: ship.name, kind: ship.kind,
+            img: ship.img, location: ship.location}
     }
 }
 

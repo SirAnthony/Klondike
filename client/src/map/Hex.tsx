@@ -1,33 +1,86 @@
 import React from 'react';
-import {Layer, RegularPolygon, Text, Group} from 'react-konva'
+import {Layer, RegularPolygon, Text, Group, Image as KImage} from 'react-konva'
 import {Pos} from './util'
 import defines from '../common/defines'
+import {Item, PlanetInfo, Ship, Location, PlanetShip} from '../common/entity';
+import useImage from 'use-image';
+import {Images} from '../util/components';
 
-function Hexagon(props: {pos: Pos}){
-    const [fill, setFill] = React.useState(false)
+type HoverProps = {
+    onMouseLeave: ()=>void,
+    onMouseOver: ()=>void
+}
+
+type HexProps = {
+    fill: boolean
+    pos: Pos
+    hover: HoverProps
+}
+
+function Hexagon(props: HexProps){
     const {pos} = props
     const point = pos.canvas
     const {radius} = defines.map
     const {color} = defines.styles
     const {x, y} = point
     const text = <Text text={`${pos.col}:${pos.row}`} fontSize={12}
-        fill={'#0f0'} x={x-radius/2} y={y-radius/4} />
+        fill={'#0f0'} x={x-radius/2} y={y-radius/4} {...props.hover} />
     return <Group>
-      <RegularPolygon sides={6} radius={radius} x={x} y={y} 
-      onMouseLeave={()=>setFill(false)} onMouseOver={()=>setFill(true)}
-      stroke={color.hex_border} fill={fill ? color.hex_fill : undefined}
+      <RegularPolygon sides={6} radius={radius} x={x} y={y} {...props.hover}
+      stroke={color.hex_border} fill={props.fill ? color.hex_fill : undefined}
       strokeWidth={1} />
-      {fill && text}
+      {props.fill && text}
     </Group>
 }
 
-export function HexLayer(props){
+function HexItem(props: HexProps & {entity: Item}){
+    const {entity, pos} = props
+    const [image] = useImage(Images.item(entity))
+    const point = pos.canvas
+    point.x -= image?.width/2 || 0
+    point.y -= image?.height/2 || 0
+    return <KImage image={image} {...point} {...props.hover} />
+}
+
+function HexShip(props: HexProps & {entity: PlanetShip}){
+    const {entity, pos} = props
+    const [image] = useImage(Images.ship(entity))
+    const point = pos.canvas
+    point.x -= image?.width/2 || 0
+    point.y -= image?.height/2 || 0
+    return <KImage image={image} {...point} {...props.hover} />
+}
+
+function reduce_by_location(p, c: {location: Location}){
+    const {pos} = c.location
+    const col = p[pos.col] = p[pos.col]||{}
+    const row = col[pos.row] = col[pos.row]||[]
+    row.push(c)
+    return p
+}
+
+export function HexLayer(props: {planet: PlanetInfo}){
     const hexes = []
     const {size, radius} = defines.map
     const countw = Math.floor(size.width/radius/Math.sqrt(3))
     const counth = Math.floor(size.height/radius*2/3)
-    for (let col=0; col<countw; col++)
-        for (let row=0; row<counth; row++)
-            hexes.push(<Hexagon key={`${col}:${row}`} pos={new Pos(col, row)} />)
+    const items_by_pos = props.planet.items?.reduce(reduce_by_location, {})||{}
+    const ships_by_pos = props.planet.ships?.reduce(reduce_by_location, {})||{}
+    for (let col=0; col<countw; col++){
+        for (let row=0; row<counth; row++){
+            const [fill, setFill] = React.useState(false)
+            const fillProps = {hover: {onMouseLeave: ()=>setFill(false),
+                onMouseOver: ()=>setFill(true)}, fill}
+            const key = `${col}:${row}`, pos = new Pos(col, row)
+            hexes.push(<Hexagon key={`${col}:${row}`} pos={pos} {...fillProps} />)
+            const items = items_by_pos[col] ? items_by_pos[col][row]||[] : []
+            for (let k of items as Item[])
+                hexes.push(<HexItem key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
+            const ships = ships_by_pos[col] ? ships_by_pos[col][row]||[] : []
+            for (let k of items as PlanetShip[])
+                hexes.push(<HexShip key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
+        }
+    }
+    
     return <Layer>{hexes}</Layer>
 }

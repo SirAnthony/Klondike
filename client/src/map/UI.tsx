@@ -10,7 +10,7 @@ export type UIButtonCallbacks = {
     onInventoryClick?: ()=>void
     onJournalClick?: ()=>void
 }
-
+/*
 function DateUI(props: UIProps){
     const {width, date} = props
     const rwidth = 135, rheight = 40
@@ -27,6 +27,7 @@ function DateUI(props: UIProps){
         x={x+55} y={20} />
     </Group>
 }
+*/
 
 function ActionUI(props: UIProps){
     const [hidden, setHidden] = React.useState(false)
@@ -58,7 +59,6 @@ function ActionUI(props: UIProps){
 type UIProps = {
     width: number
     height: number
-    date: Date
 } & UIButtonCallbacks
 
 export class UILayer extends React.Component<UIProps> {
@@ -67,7 +67,6 @@ export class UILayer extends React.Component<UIProps> {
     }
     render(){
         return <Layer>
-          <DateUI {...this.props} />
           <ActionUI {...this.props} />
         </Layer>
     }

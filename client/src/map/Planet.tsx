@@ -2,7 +2,7 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
 import * as F from '../Fetcher'
-import {Planet as CPlanet, PlanetZone, User} from '../common/entity';
+import {PlanetInfo, PlanetZone, User} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
@@ -22,7 +22,7 @@ function Celestial(props: {zone: PlanetZone}){
       stroke={color.planet_border} strokeWidth={1}/>
 }
 
-function Planet(props: {planet: CPlanet}){
+function Planet(props: {planet: PlanetInfo}){
     const {planet} = props
     const zones = planet.zones.map(z=>
         <Celestial key={`zone_${z.center.col}_${z.center.row}`} zone={z} />)
@@ -34,20 +34,19 @@ function Planet(props: {planet: CPlanet}){
     </Layer>
 }
 
-function CanvasView(props: {planet: CPlanet, date: Date} & UIButtonCallbacks){
+function CanvasView(props: {planet: PlanetInfo} & UIButtonCallbacks){
     const {planet} = props
     const {width, height} = defines.map.size
     return <Stage width={width} height={height} className="map">
       <Planet planet={planet} />
-      <HexLayer />
+      <HexLayer {...props} />
       <UILayer width={width} height={height} {...props} />
     </Stage>
 }
 
 type PlanetState = {
     id: string
-    planet?: CPlanet
-    date?: Date
+    planet?: PlanetInfo
     ui_ship: Boolean
     ui_inventory: Boolean
     ui_journal: Boolean
@@ -68,8 +67,8 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         return `/api/planet/${id}`
     }
     fetchState(data: any = {}){
-        const {planet, ship, date} = data
-        return {item: data, planet, ship, date: new Date(date)}
+        const {item, ship} = data
+        return {item: data, planet: item, ship}
     }
     menus(){
         const {state} = this
@@ -85,11 +84,11 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         </RB.Container>
     }
     render() {
-        const {planet, date} = this.state
+        const {planet} = this.state
         if (!planet)
             return <div>{L('not_found')}</div>
         return <RB.Container className="map-container">
-          <CanvasView planet={planet} date={date} 
+          <CanvasView planet={planet} 
             onShipClick={()=>this.setState({ui_ship: true})}
             onJournalClick={()=>this.setState({ui_journal: true})}
             onInventoryClick={()=>this.setState({ui_inventory: true})} />

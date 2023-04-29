@@ -284,9 +284,9 @@ export class Flight extends ID {
 export type PlanetShip = {
     _id: string
     name: string
-    class: ShipClass
+    kind: ShipClass
     img: string
-    pos: Pos
+    location: Location
 }
 
 export enum PlanetType { Frost = 'frost', FrostSat = 'frostsat',

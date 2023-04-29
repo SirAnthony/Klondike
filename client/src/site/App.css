@@ -1,5 +1,6 @@
 body, #root, .App {
     min-height: 100%;
+    background: #000;
 }
 
 .App {
@@ -302,8 +303,6 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
 
 .map-container.container {
     position: relative;
-    margin-right: 0px;
-    margin-left: 0px;
     padding-right: 0px;
     padding-left: 0px;
 }
