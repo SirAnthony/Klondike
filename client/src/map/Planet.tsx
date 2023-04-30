@@ -2,7 +2,7 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
 import * as F from '../Fetcher'
-import {PlanetInfo, PlanetZone, User} from '../common/entity';
+import {PlanetInfo, PlanetZone, User, Item, Ship} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
@@ -11,6 +11,7 @@ import ShipDetails from '../ship/Details';
 import defines from '../common/defines'
 import L from './locale'
 import useImage from 'use-image';
+import * as util from '../common/util'
 
 function Celestial(props: {zone: PlanetZone}){
     const {zone} = props
@@ -67,7 +68,8 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         return `/api/planet/${id}`
     }
     fetchState(data: any = {}){
-        const {item, ship} = data
+        const {item, ship} : {item: PlanetInfo, ship: any} = data
+        item.items = item.items.map(i=>new Item(i))
         return {item: data, planet: item, ship}
     }
     menus(){
