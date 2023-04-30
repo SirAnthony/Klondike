@@ -3,13 +3,15 @@ import * as RB from 'react-bootstrap'
 import {Item, ResourceType, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {ItemRow, ItemRowDesc, ItemRowNew} from '../inventory/Item'
+import {ItemSend} from '../inventory/Item/RowNew'
 import {NumberInput} from '../util/inputs';
-import {default as L, LR} from './locale'
-import * as util from '../common/util'
 import {ConfigFetcher} from '../site/Config';
 import {Config} from '../common/config'
 import {Delimeter} from '../util/components'
 import {ErrorMessage} from '../util/errors';
+import {ClientError} from '../common/errors'
+import {default as L, LR} from './locale'
+import * as util from '../common/util'
 
 type ListState = {
 }
@@ -87,37 +89,40 @@ class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState
 
 class List extends UList<ListProps, ListState> {
     L = L
-    get fetchUrl() { return `/api/admin/items/` }
+    get fetchUrl() { return `/api/admin/item/list` }
     get containerClass() { return 'menu-container-full' }
-    async createItem(item: Item){
-        let data = new item.class()
-        for (let k of data.keys)
-            data[k] = item[k]
-        const res = await util.wget('/api/admin/item/create',
-            {method: 'POST', data: {data}})
-        if (res.err)
-            return void this.setState({err: res.err})
-        this.setState({err: null})
-        this.fetch()
-    }
     async deleteItem(item: Item){
         if (!item?._id)
             return null
         const res = await util.wget(`/api/admin/item/${item._id}/delete`,
             {method: 'DELETE'})
         if (res.err)
-            return this.setState({err: res.err})
+            return void this.setState({err: res.err})
         this.fetch()
+        return true
+    }
+    async changeItem(item: ItemSend){
+        let data = new (Item.class(item.type))()
+        for (let k of data.keys)
+            data[k] = item[k]
+        this.setState({err: null})
+        const ret = await util.wget(`/api/admin/item/${item._id||0}/set`, {
+            method: 'POST', data: util.toFormData(item, 'imgFile')})
+        if (ret.err)
+            return void this.setState({err: ret.err})
+        this.fetch()
+        return true
     }
     newItem(){
         return <RB.Container key='new_item_ctrl'>
-          <ItemRowNew onCreate={(item: Item)=>this.createItem(item)} />
+          <ItemRowNew onSubmit={(item: Item)=>this.changeItem(item)} add={true} />
         </RB.Container>
     }
     body(){
         const {list} = this.state
         const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
-          onDelete={item=>this.deleteItem(item)} item={l} long={true} user={this.props.user} />)
+          onSubmit={item=>this.changeItem(item)} onDelete={item=>this.deleteItem(item)}
+          item={l} long={true} user={this.props.user} />)
         return [
           <ConfigControl />,
           <Delimeter key='res_delimeter' />,

@@ -10,35 +10,43 @@ import {MultiOwnerSelect, MultiResourceSelect} from '../../util/inputs'
 import {ApiError, FormError} from '../../common/errors'
 import {default as L, LR} from '../locale'
 import * as iutil from './util'
+import { EditButtons } from 'src/util/buttons'
 
 const TypeString = (t: ItemType = 0)=>ItemType[t].toLowerCase()
 
-type ItemRowNewProps = {
-    onCreate: (item: Item)=>void
-}
-type ItemRowNewState = {
-    type?: ItemType
-    name: string
-    owner?: Owner
-    location?: Location
-    price?: number
+export type ItemSend = {
     kind?: number
     value?: number
-    data?: string
-    mass?: number
-    weight?: number
-    energy?: number
+    // known: Owner[] // no need
+    // Coordinates
     target?: Location
-    resourceCost?: {kind: ResourceType, value: number}[]
+    // Module
+    mass?: number
+    energy?: number
+    installed?: boolean
     boosts?: {kind: string, value: number}[]
+    // Patent
+    weight?: number
     owners?: Owner[]
-    err?: ApiError
+    resourceCost?: {kind: ResourceType, value: number}[]
+    // Img?
+    imgFile?: File
+} & Omit<Item, 'keys' | 'class'>
+
+type ItemRowNewProps = {
+    add?: boolean
+    item?: ItemSend
+    onSubmit: (item: Item)=>void
+    onCancel?: ()=>void
 }
+type ItemRowNewState = {
+    err?: ApiError
+} & ItemSend
 
 export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState> {
     constructor(props){
         super(props)
-        this.state = {name: ''}
+        this.state = Object.assign({}, props.item)
     }
     stateChange(obj: any){
         this.setState(Object.assign({err: null}, obj)) }
@@ -54,7 +62,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const item = new (Item.class(this.state.type))()
         for (let k of item.keys)
             item[k] = this.state[k]
-        this.props.onCreate(item)
+        // imgFile omited if present
+        this.props.onSubmit(item)
     }
     get row_size(){ return 2 }
     hasField(name: string){
@@ -152,7 +161,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const typeChange = type=>this.stateChange({type})
         const priceChange = price=>this.stateChange({price})
         return <RB.Row className='menu-input-row'>
-          <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>
+          {this.props.add && <RB.Col sm={row_size}>{L('act_item_create')}</RB.Col>}
           <RB.Col sm={row_size}>
             <TypeSelect value={type} onChange={typeChange}/>
           </RB.Col>
@@ -161,8 +170,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             <NumberInput placeholder={LR('item_desc_price')} value={price} onChange={priceChange} />}
           </RB.Col>
           <RB.Col sm={row_size}>
-            <RB.Button disabled={this.errors.length} onClick={()=>this.create()}>
-              {L('act_create')}</RB.Button>
+            <EditButtons disabled={this.errors.length} add={this.props.add}
+              onSubmit={()=>this.create()} onCancel={this.props.onCancel} />
           </RB.Col>
         </RB.Row>
     }

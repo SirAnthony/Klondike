@@ -75,7 +75,8 @@ export class Select extends USelect<{type: InstitutionType}, {}> {
     get optName(){ return 'item_desc_owner' }
     get fetchUrl(){ return `/api/corp/list/${this.props.type}` }
     get canFetch(){ return !isNaN(+this.props.type) }
-    getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getValue(v){ 
+        return v===this.defaultValue ? null : this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
         return list?.filter(this.props.filter||Boolean)
             .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []

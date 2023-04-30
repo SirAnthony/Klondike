@@ -14,7 +14,11 @@ export type ItemActionsState = {
     patent?: Patent
 }
 
-export class ItemActions extends React.Component<ItemRowProps, ItemActionsState> {
+type ItemActionsProps = {
+    onEdit: ()=>void
+} & ItemRowProps
+
+export class ItemActions extends React.Component<ItemActionsProps, ItemActionsState> {
     constructor(props){
         super(props);
     }
@@ -82,6 +86,12 @@ export class ItemActions extends React.Component<ItemRowProps, ItemActionsState>
           </RB.Col>
         </RB.Row></RB.Container>
     }
+    btn_edit(){
+        const {item, onEdit} = this.props
+        if (!this.is_admin || !onEdit)
+            return null
+        return <RB.Button onClick={()=>onEdit()}>{L('act_change')}</RB.Button>
+    }
     btn_delete(){
         const {item, onDelete} = this.props
         if (!this.is_admin || !onDelete)
@@ -97,6 +107,7 @@ export class ItemActions extends React.Component<ItemRowProps, ItemActionsState>
           {this.btn_loan_pay()}
           {this.btn_sell()}
           {this.btn_delist()}
+          {this.btn_edit()}
           {this.btn_delete()}
         </RB.Col>
     }

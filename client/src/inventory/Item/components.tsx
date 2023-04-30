@@ -1,8 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, Owner} from '../../common/entity'
+import {Item, ItemType, Owner, Resource} from '../../common/entity'
 import {Patent, PatentOwner, Loan} from '../../common/entity'
 import {LoanSelectTrigger, OwnerValueSelectTrigger} from '../../util/popovers'
+import {ResourceImg} from '../../util/components'
 import {PriceFetcher} from '../Prices'
 import {default as L, LR} from '../locale'
 import * as iutil from './util'
@@ -22,6 +23,18 @@ export function LocationCol(props: ItemComponentProps) {
       <span>{location.system}</span>
       <span>{location.name}</span>
       <span>{location.pos?.col}:{location.pos?.row}</span>
+    </RB.Col>
+}
+
+export function ItemKindCol(props: {item: Item, layout: number}){
+    const {item, layout} = props
+    const res = item as Resource, pt = item as Patent
+    const el = ![ItemType.Patent, ItemType.Resource].includes(res.type) ? '-' :
+        item.type==ItemType.Patent ?
+        LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
+        [<ResourceImg res={res} />, LR(`res_kind_${res.kind}`)]
+    return <RB.Col sm={layout}>
+      {el}
     </RB.Col>
 }
 

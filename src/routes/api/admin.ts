@@ -80,10 +80,12 @@ export class AdminApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Master)
     async post_item_change(ctx: RenderContext){
-        const {id} = ctx.params
-        const params: any = ctx.request.body
-        const {data = {}} = params
-        let item = await ItemController.get(id)
+        const {id, data} = ctx.aparams
+        if (!data.name || !ItemType[+data.type])
+            throw 'Should have name and type fields'
+        if (data._id && data._id!=id)
+            throw 'Cannot change id of item'
+        const item = await ItemController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
         await process_data(item, data)
         // Patents adds problems
         if (item.type == ItemType.Patent){

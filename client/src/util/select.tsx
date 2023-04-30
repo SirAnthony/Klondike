@@ -76,7 +76,7 @@ export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: bo
         top_enabled = top_enabled
         numeric = true
         get optName(){ return this.props.title || opt }
-        getValue(value){ return this.numeric ? +value : value }
+        getValue(v){ return v===this.defaultValue ? null : this.numeric ? +v : v }
         async fetch(){
             const keys = Object.keys(TO), numeric = keys.filter(k=>!isNaN(+k))
             this.numeric = !!numeric.length

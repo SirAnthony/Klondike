@@ -15,5 +15,6 @@ export function Delimeter(){
 
 export function ResourceImg(props: {res: Resource}){
     const {res} = props
-    return <img src={urls.Images.item(res)} alt={L(`res_kind_${res.kind}`)} />
+    const src = urls.Images.prefix+urls.Images.item(res)
+    return <img src={src} alt={L(`res_kind_${res.kind}`)} />
 }

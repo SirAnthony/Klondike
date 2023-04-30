@@ -73,9 +73,11 @@ export default class List extends UList<PlanetListProps, PlanetListState> {
 
 export class Select extends USelect<{}, {}> {
     L = LR
+    top_enabled = true
     get fetchUrl(){ return '/api/planet/list' }
     get optName(){ return 'item_desc_location' }
-    getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getValue(v){
+        return v==this.defaultValue ? null : this.state.list.find(f=>f._id==v) }
     getOptions(list: Item[]){
         return list?.reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }

@@ -48,9 +48,9 @@ user_api: {prefix: '/api/user', router: UserApiRouter, opt: {json: true}, urls: 
     '/profile/:id': {func: 'profile', methods: ['get', 'post']}
 }},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
-    '/item/create': {func: 'item_change', methods: ['post']},
+    '/item/list': {func: 'items_list', methods: ['get']},
+    '/item/:id/set': {func: 'item_change', methods: ['post']},
     '/item/:id/delete': {func: 'item', methods: ['delete']},
-    '/items/': {func: 'items_list', methods: ['get']},
     '/order/create': {func: 'order_change', methods: ['post']},
     '/order/:id/delete': {func: 'order', methods: ['delete']},
     '/orders/': {func: 'orders_list', methods: ['get']},

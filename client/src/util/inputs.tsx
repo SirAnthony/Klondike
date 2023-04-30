@@ -10,7 +10,7 @@ import {TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
 import {Images} from '../common/urls'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
-import {ApiStackError} from '../common/errors'
+import {ApiStackError, ClientError} from '../common/errors'
 import L from '../common/locale'
 import config from '../common/config'
 import * as _ from 'lodash'
@@ -76,13 +76,19 @@ type CoordinatesInputProps = {
 export function CoordinatesInput(props: CoordinatesInputProps){
     const {value} = props
     const [coord, setCoord] = React.useState(!value ? undefined : `${value.col}:${value.row}`)
+    const [err, setErr] = React.useState(
+        !/^[0-9]+:[0-9]+$/.test(coord) ? new ClientError('incorrect_input') : null)
     const coordChange = (val)=>{
-      setCoord(val)
+      if (/^[0-9]*(:[0-9]*)?$/.test(val))
+          setCoord(val)
+      if (!/^[0-9]+:[0-9]+$/.test(val))
+          return setErr(new ClientError('incorrect_input'))
+      setErr(null)
       const pos = val?.split(':')
       props.onChange(pos?.length>1 ? {col: +pos[0], row: +pos[1]} : null)
     }
     return <TextInput {...props} value={coord} onChange={coordChange}
-        placeholder={L('loc_desc_coord')} />
+        placeholder={L('loc_desc_coord')} err={err} />
 }
 
 type ImageInputProps = {
@@ -114,6 +120,7 @@ export const PatentTypeSelect = TypedSelect(PatentType, 'patent_kind', 'patent_d
 export const PatentWeightSelect = TypedSelect(PatentWeight, 'patent_weigth', 'patent_desc_weight')
 export const ArtifactTypeSelect = TypedSelect(ArtifactType, 'artifact_kind', 'artifact_desc_kind')
 export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc')
+const FreeInstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc', true)
 export const ShipClassSelect = TypedSelect(ShipClass, '', 'ship_desc_kind')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
@@ -129,14 +136,24 @@ export function PatentSelect(props: {value?: Patent, owner: Owner,
 }
 
 export function LocationSelect(props: {value?: Location, optName?: string, onChange: (loc: Location)=>void}){
-    const {value} = props
-    const coordChange = pos=>props.onChange(Object.assign({}, value, {pos}))
+    const [value, setValue] = React.useState(props.value)
+    const [point, setPoint] = React.useState(props.value?.pos)
+    const check = val=>val===null || (val._id && !isNaN(+val.pos?.col) && !isNaN(+val.pos?.row))
+    const [err, setErr] = React.useState(null)
+    const onChange = (val: Location, pos?: Pos)=>{
+        setPoint(pos)
+        const obj = val===null ? val : {...val, pos}
+        setValue(obj)
+        if (!check(obj))
+            return void setErr(new ClientError('incorrect input'))
+        props.onChange(obj)
+    }
     return <RB.Container><RB.Row>
       <RB.Col>
-        <PSelect value={value} onChange={props.onChange} optName={props.optName} />
+        <PSelect value={value?._id} onChange={val=>onChange(val, point)} optName={props.optName} />
       </RB.Col>
       <RB.Col>
-        <CoordinatesInput value={value?.pos} onChange={coordChange} disabled={!value} />
+        <CoordinatesInput value={point} onChange={pos=>onChange(value, pos)} disabled={!value} />
       </RB.Col>
     </RB.Row></RB.Container>
 }
@@ -150,14 +167,14 @@ export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolea
     const [instType, setInstType] = React.useState(props.value?.type)
     const [id, setId] = React.useState(asID(props.value))
     const ownerChange = (type: InstitutionType, id: ID)=>{
-      const obj = asID(id), owner = Object.assign({type}, obj)
+      const obj = asID(id)
       setInstType(type)
       setId(obj)
-      props.onChange(owner)
+      props.onChange(type===null ? null : {type, ...obj})
     }
     return <RB.Row>
       <RB.Col>
-        <InstitutionTypeSelect value={instType} exclude={props.exclude}
+        <FreeInstitutionTypeSelect value={instType} exclude={props.exclude}
           onChange={type=>ownerChange(type, id)} title={props.title} />
       </RB.Col>
       <RB.Col className='flex-center'>

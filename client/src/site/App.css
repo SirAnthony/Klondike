@@ -102,6 +102,10 @@ div.app-head {
     color: var(--color-ui-error);
 }
 
+.input-error {
+    border-color: var(--color-ui-error);
+}
+
 .left {
     text-align: left;
 }
