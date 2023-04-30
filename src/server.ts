@@ -11,7 +11,7 @@ process.on('unhandledRejection', (reason: any, promise: Promise<any>)=>
     console.error(reason))
 
 async function loadTime(){
-    await Time.load()
+    await Time.start()
     Time.Time.serverTime = +new Date()
     Time.Time.basicTime = Time.Time.basicTime||Time.Time.serverTime
     console.log(`Server time: ${Time.Time.serverTime}`)

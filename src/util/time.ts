@@ -7,7 +7,7 @@ export const Time = new date.Time({
     cycleLength: 4*date.ms.HOUR,
 })
 
-export async function load(){
+async function load(){
     const time = await TimeController.get()
     Object.assign(Time, time)
 }
@@ -17,26 +17,28 @@ export type TimeEvent = (iteration: number)=>{}
 const events : [[number, TimeEvent]] = [] as any
 const cycleEvents : TimeEvent[] = [] as any
 
-const loop = setInterval(function(){
-    let iterations = 0
-return ()=>{
-    for (let event of events){
-        if (!(iterations%event[0]))
-            event[1](iterations)
-    }
-    iterations++
-}}(), date.ms.SEC)
+const InitLoop : Function & {loop: NodeJS.Timer, iterations: number} = (()=>{
+    InitLoop.iterations = 0
+    InitLoop.loop = setInterval(()=>{
+        const {iterations} = InitLoop
+        for (let event of events){
+            if (!(iterations%event[0]))
+                event[1](iterations)
+        }
+        InitLoop.iterations++
+    }, date.ms.SEC)
+}) as any
 
-const emitCycleChange = (()=>{
-    let last_cycle = 1
+const emitCycleChange = (initial: number)=>()=>{
+    let last = initial||1
 return async function(){
-    const cur_cycle = Time.cycle
-    if (last_cycle==cur_cycle)
+    const current = Time.cycle
+    if (last==current)
         return
     for (let ev of cycleEvents)
-        ev(last_cycle)
-    last_cycle = cur_cycle
-}})()
+        ev(last)
+    last = current
+}}
 
 export function addIntervalEvent(interval: number, event: TimeEvent){
     const prev = events.find(f=>f[1]==event)
@@ -50,6 +52,10 @@ export function addCycleEvent(ev: TimeEvent){
         cycleEvents.push(ev)
 }
 
-// Update time each minute
-addIntervalEvent(date.sec.MIN, save)
-addIntervalEvent(date.sec.MIN/2, emitCycleChange)
+export async function start(){
+    await load()
+    InitLoop()
+    // Update time each minute
+    addIntervalEvent(date.sec.MIN, save)
+    addIntervalEvent(date.sec.MIN/2, emitCycleChange(Time.cycle))
+}
