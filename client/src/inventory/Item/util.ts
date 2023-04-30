@@ -8,7 +8,7 @@ export const owners_exclude = (type: ItemType)=>{
         case ItemType.Module: return [InstitutionType.User]
         case ItemType.Patent: return [InstitutionType.User, InstitutionType.Ship,
             InstitutionType.Research, InstitutionType.Organization]
-        case ItemType.Artifact: return []
+        case ItemType.Artifact: return [InstitutionType.User]
     }
     return []
 }

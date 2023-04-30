@@ -6,6 +6,7 @@ import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
 import {User, ProfileFields} from '../common/entity'
 import {ControlBar} from '../util/controls'
+import * as curls from '../common/urls'
 import * as F from '../Fetcher'
 import {default as L, LR} from './locale'
 import EventEmitter from '../common/events'
@@ -80,7 +81,7 @@ function ProfileInfo(props: UserViewProfileProps){
     const {user, viewer} = props
     return <RB.Container className='menu-box-desc'>
       <RB.Row><RB.Col>
-        <img src={`/static/img/users/user.png`} alt='user' />
+        <img src={curls.Images.get(user)} alt='user' />
       </RB.Col></RB.Row>
       <RB.Row>
         <RB.Col>{L('desc_name')}</RB.Col>

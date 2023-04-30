@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType} from '../common/entity'
+import {ItemType, ResourceType, PatentType, Institution} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo} from '../common/entity'
 import {PlanetType, Pos} from '../common/entity'
@@ -8,6 +8,7 @@ import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
 import {TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
+import {Images} from '../common/urls'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
 import {ApiStackError} from '../common/errors'
 import L from '../common/locale'
@@ -83,6 +84,29 @@ export function CoordinatesInput(props: CoordinatesInputProps){
     return <TextInput {...props} value={coord} onChange={coordChange}
         placeholder={L('loc_desc_coord')} />
 }
+
+type ImageInputProps = {
+    placeholder?: string
+    source: Institution | Item
+    onChange: (data: FormData)=>void
+} & Omit<TextInputProps, 'value' | 'placeholder' | 'onChange'>
+export function ImageInput(props: ImageInputProps){
+    const onChange = ({target})=>props.onChange(target.files[0])
+    const src = Images.get(props.source)
+    const cls = props.err ? 'input-error' : ''
+    return <RB.Container>
+      <RB.Row className='form-image-row-image'>
+        <RB.Image src={src} className='form-image' />
+      </RB.Row>
+      <RB.Row>
+        <RB.FormControl type="file" className={cls} {...props} onChange={onChange}
+          accept=".png,.jpg,.jpeg,.webp" />
+      </RB.Row>
+    </RB.Container>
+
+}
+
+// Selects
 
 export const ResourceSelect = TypedSelect(ResourceType, 'res_kind', 'res_desc_kind')
 export const TypeSelect = TypedSelect(ItemType, 'item_type', 'item_desc_type')

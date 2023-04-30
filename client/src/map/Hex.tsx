@@ -4,7 +4,7 @@ import {Pos} from './util'
 import defines from '../common/defines'
 import {Item, PlanetInfo, Ship, Location, PlanetShip} from '../common/entity';
 import useImage from 'use-image';
-import {Images} from '../util/components';
+import * as urls from '../common/urls'
 
 type HoverProps = {
     onMouseLeave: ()=>void,
@@ -35,7 +35,7 @@ function Hexagon(props: HexProps){
 
 function HexItem(props: HexProps & {entity: Item}){
     const {entity, pos} = props
-    const [image] = useImage(Images.item(entity))
+    const [image] = useImage(urls.Images.item(entity))
     const point = pos.canvas
     point.x -= image?.width/2 || 0
     point.y -= image?.height/2 || 0
@@ -44,7 +44,7 @@ function HexItem(props: HexProps & {entity: Item}){
 
 function HexShip(props: HexProps & {entity: PlanetShip}){
     const {entity, pos} = props
-    const [image] = useImage(Images.ship(entity))
+    const [image] = useImage(urls.Images.ship(entity))
     const point = pos.canvas
     point.x -= image?.width/2 || 0
     point.y -= image?.height/2 || 0

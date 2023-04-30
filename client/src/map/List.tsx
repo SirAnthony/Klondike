@@ -48,12 +48,12 @@ export default class List extends UList<PlanetListProps, PlanetListState> {
         super(props)
     }
     get fetchUrl() { return `/api/admin/planet/list` }
-    async changeEntity(planet: Planet) : Promise<boolean> {
+    async changeEntity(planet: Planet, create?: boolean) : Promise<boolean> {
         this.setState({err: null, newForm: null})
         const ret = await util.wget(`/api/admin/planet/${planet._id||0}/set`,
             {method: 'POST', data: {data: planet}})
         if (ret.err)
-            return void this.setState({err: ret.err, newForm: planet})
+            return void this.setState({err: ret.err, newForm: create ? planet : null})
         this.fetch()
         return true  
     }
@@ -61,7 +61,7 @@ export default class List extends UList<PlanetListProps, PlanetListState> {
         const {list, newForm} = this.state
         const rows = list.map(l=><PlanetRow key={`planet_list_${l._id}`} planet={l}
             onChange={e=>this.changeEntity(e)} />)
-        return [<PlanetRowEdit add={true} onChange={e=>this.changeEntity(e)} planet={newForm} />,
+        return [<PlanetRowEdit add={true} onChange={e=>this.changeEntity(e, true)} planet={newForm} />,
         <RB.Row key={'planet_list_title'} className="menu-list-title">
           <RB.Col>{L('desc_name')}</RB.Col>
           <RB.Col>{L('desc_info')}</RB.Col>

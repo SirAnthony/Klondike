@@ -29,13 +29,15 @@ export function DataViewerButtons(props: {show: boolean,
     </RB.Col>
 }
 
-export function EditButtons(props: {onCancel?: ()=>void, onSubmit: (v: any)=>void, add?: boolean}){
+export function EditButtons(props: {onCancel?: ()=>void, onSubmit: (v: any)=>void,
+    add?: boolean, multiline?: boolean}){
     const {onCancel, onSubmit} = props
+    const size = props.multiline ? {} : {sm: 6}
     return <RB.Container className='btn-box'><RB.Row className='justify-content-end'>
-      <RB.Col sm={6}>
+      <RB.Col {...size}>
         <RB.Button onClick={onSubmit}>{L(props.add ? 'act_add' : 'act_save')}</RB.Button>
       </RB.Col>
-      {onCancel && <RB.Col sm={6}>
+      {onCancel && <RB.Col {...size}>
         <RB.Button onClick={onCancel}>{L('act_cancel')}</RB.Button>
       </RB.Col>}
     </RB.Row></RB.Container>

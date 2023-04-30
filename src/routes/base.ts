@@ -1,10 +1,12 @@
 
 import * as KoaRouter from 'koa-router'
+import  * as multer from '@koa/multer'
 import {RenderContext} from '../middlewares'
 import {UserType} from '../../client/src/common/entity'
 import {UserController} from '../entity'
 import {ApiError, Codes} from '../../client/src/common/errors'
 import {IDMatch} from '../util/server'
+const Uploader = multer()
 
 export function CheckAuthenticated(){
     return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
@@ -78,6 +80,14 @@ export class BaseRouter {
             this.add(url, func, urls[r])
         }
     }
+    protected uploads(opt: any){
+        const {uploads} = opt
+        if (!uploads)
+            return []
+        if (Array.isArray(uploads))
+            return [Uploader.fields(uploads)]
+        return [Uploader.single(uploads)]  
+    }
     protected add(uri: string, func: string, opt: any = {}){
         const methods = opt.methods||['get', 'post']
         for (let m of methods){
@@ -87,7 +97,8 @@ export class BaseRouter {
             const json = this.opt.json || opt.json===true ||
                 Array.isArray(opt.json) && opt.json.includes(m)
             const need_admin = this.opt.admin
-            const args: any[] = [uri, async (ctx: RenderContext, next)=>{
+            const uploads = this.uploads(opt)
+            const args: any[] = [uri, ...uploads, async (ctx: RenderContext, next)=>{
                 try {
                     if (need_admin && (!ctx.isAuthenticated() || !ctx.state.user.admin))
                         throw new ApiError(Codes.NOT_ADMIN, 'Permission denied') 

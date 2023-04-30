@@ -168,7 +168,7 @@ export class Institution extends ID {
     cost: number
     img?: string
     get keys(){
-        return '_id name type data cost img'.split(' ')
+        return '_id name type data credit cost img'.split(' ')
     }
     get class(){ return Institution.class(this.type) }
     static class(type: InstitutionType){
@@ -307,6 +307,12 @@ export class Planet extends ID {
     system: string
     data: string
     zones: PlanetZone[]
+    static class(type?: PlanetType){ return Planet }
+    get class(){ return Planet.class(this.type) }
+    get keys(){
+        return `_id name type system data zones`
+            .replace(/\s+/g, ' ').split(' ')
+    }
 }
 
 export class PlanetInfo extends Planet {

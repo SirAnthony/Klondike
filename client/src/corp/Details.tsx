@@ -11,7 +11,7 @@ import {InventoryEvents} from '../inventory'
 import * as util from '../common/util'
 import {default as L} from './locale'
 import {Delimeter} from '../util/components'
-import { TimeDetails } from 'src/inventory/Time'
+import {TimeDetails} from '../inventory/Time'
 
 type OrderDetailsState = {
     orders?: Order[]
@@ -26,7 +26,7 @@ type OrderDetailsProps = {
 export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState> {
     constructor(props){
         super(props)
-        this.state = {cycle: 1}
+        this.state = {cycle: TimeDetails.Time?.cycle||1}
         InventoryEvents.onreloadOrders(()=>this.fetch())
         InventoryEvents.ontimeChanged(()=>
             this.setState({cycle: TimeDetails.Time?.cycle}))

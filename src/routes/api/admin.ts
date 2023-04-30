@@ -1,12 +1,70 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, CorpController, PlanetController, ConfigController, institutionController} from '../../entity'
+import {UserController, CorpController, PlanetController, ConfigController, institutionController, ShipController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
-import {UserType, PatentOwner, PatentStatus} from '../../../client/src/common/entity'
+import {UserType, Patent, PatentStatus, ItemType} from '../../../client/src/common/entity'
 import {InstitutionType, PlanetType, Planet} from '../../../client/src/common/entity'
+import {Owner, Location} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
+import {IDMatch} from '../../util/server'
 import {Time} from '../../util/time'
+import * as curls from '../../../client/src/common/urls'
 import * as util from '../../../client/src/common/util'
+import config from '../../config'
+import {promises as fs} from 'fs'
+
+type AllInstControllers = UserController | CorpController | ShipController
+type AllControllers = (AllInstControllers | ItemController | OrderController | PlanetController) & {
+    owner?: Owner
+    assignee?: Owner
+    relation?: Owner
+    captain?: Owner
+    owners?: Owner[]
+    location?: Location
+}
+async function process_data(obj: AllControllers, data){
+    const keys = obj.keys
+    const fields = Object.keys(data).filter(f=>!keys.includes(f))
+    if (fields.length)
+        console.error(`sent incorrect fields: ${JSON.stringify(fields)}`)
+    for (let k in data)
+        obj[k] = data[k]
+    if (data.owner?._id)
+        obj.owner = (await institutionController(+data.owner.type).get(data.owner._id)).asOwner
+    if (data.location?._id){
+        const planet = await PlanetController.get(data.location._id);
+        obj.location = PlanetController.location(planet, data.location.pos)
+    }
+    if (data.assignee?._id)
+        obj.assignee = (await CorpController.get(data.assignee._id)).asOwner
+    if (data.relation?._id){
+        const ctrl = institutionController(+data.relation.type)
+        obj.relation = (await ctrl.get(data.relation._id)).asOwner
+    }
+    if (data.owners){
+        const owners = []
+        for (let k of data.owners){
+            const owner = await institutionController(+k.type).get(k._id)
+            const prev = obj.owners.find(o=>IDMatch(o._id, owner._id))
+            owners.push(Object.assign({}, prev, owner.asOwner))
+        }
+        obj.owners = owners
+    }
+    if (data.captain?._id){
+        const ctrl = institutionController(+data.captain.type);
+        obj.captain = (await ctrl.get(data.captain._id)).asOwner
+    }
+    return obj
+}
+async function process_img(ctx: RenderContext, obj: AllInstControllers){
+    if (!ctx.file)
+        return
+    // Save id to img name
+    obj.img = obj._id
+    const filename = config.static_dir+curls.Images.get(obj)
+        .replace(config.static_url, '')
+    await fs.writeFile(filename, ctx.file.buffer)
+}
 
 export class AdminApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -26,20 +84,11 @@ export class AdminApiRouter extends BaseRouter {
         const params: any = ctx.request.body
         const {data = {}} = params
         let item = await ItemController.get(id)
-        for (let k in data)
-            item[k] = data[k]
-        if (data.owner)
-            item.owner = (await institutionController(data.owner.type).get(data.owner._id)).asOwner
-        if (data.location?._id){
-            const planet = await PlanetController.get(data.location._id);
-            item.location = PlanetController.location(planet, data.location.pos)
-        }
-        if (data.owners){
-            const owners = (item as any).owners = [] as PatentOwner[]
-            for (let k of data.owners as PatentOwner[]){
-                const owner = (await institutionController(+k.type).get(k._id))
-                owners.push(Object.assign({status: PatentStatus.Created}, owner.asOwner))
-            }
+        await process_data(item, data)
+        // Patents adds problems
+        if (item.type == ItemType.Patent){
+            ((item as unknown) as Patent).owners.forEach(o=>
+                o.status = o.status || PatentStatus.Created)
         }
         await item.save()
     }
@@ -65,10 +114,7 @@ export class AdminApiRouter extends BaseRouter {
         const params: any = ctx.request.body
         const {data = {}} = params
         let item = await OrderController.get(id)
-        for (let k in data)
-            item[k] = data[k]
-        if (data.assignee?._id)
-            item.assignee = (await CorpController.get(data.assignee._id)).asOwner
+        await process_data(item, data)
         await item.save()
     }
 
@@ -107,13 +153,9 @@ export class AdminApiRouter extends BaseRouter {
             throw new ApiError(Codes.INCORRECT_PARAM, 'email')
         if (data.phone && !util.isPhone(data.phone))
             throw new ApiError(Codes.INCORRECT_PARAM, 'phone')
-        for (let k in data)
-            user[k] = data[k]
-        if (user.relation?._id){
-            const ctrl = institutionController(user.relation.type)
-            user.relation = (await ctrl.get(user.relation._id)).asOwner
-        }
-        if (user.password)
+        await process_data(user, data)
+        await process_img(ctx, user)
+        if (data.password)
             user.password = await UserController.hash_password(data.password)
         await user.save()        
     }
@@ -135,22 +177,10 @@ export class AdminApiRouter extends BaseRouter {
         if (data._id && data._id!=id)
             throw 'Cannot change id of item'
         const controller = institutionController(+type)
-        const obj = await controller.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
-        for (let k in data)
-            obj[k] = data[k]
-        if (data.owner?._id){
-            const ctrl = institutionController(+data.owner.type);
-            (obj as any).owner = (await ctrl.get(data.owner._id)).asOwner
-        }
-        if (data.location?._id){
-            const planet = await PlanetController.get(data.location._id);
-            (obj as any).location = PlanetController.location(planet, data.location.pos)
-        }
-        if (data.captain?._id){
-            const ctrl = institutionController(+data.captain.type);
-            (obj as any).captain = (await ctrl.get(data.captain._id)).asOwner
-        }
-        await obj.save()
+        const item = await controller.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
+        await process_data(item, data)
+        await process_img(ctx, item)
+        await item.save()
     }
 
     @CheckRole(UserType.Navigator)
@@ -162,14 +192,13 @@ export class AdminApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async post_planet_set(ctx: RenderContext){
         const {id, data} = ctx.aparams
-        if (!data.name || !PlanetType[data.type])
+        if (!data.name || !Object.values(PlanetType).includes(data.type))
             throw 'Should have name and type fields'
         if (data._id && data._id!=id)
             throw 'Cannot change id of item'
-        const obj = await PlanetController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
-        for (let k in data)
-            obj[k] = data[k]
-       await obj.save()
+        const item = await PlanetController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
+        await process_data(item, data)
+        await item.save()
     }
     
     @CheckRole(UserType.Master)

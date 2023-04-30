@@ -5,11 +5,12 @@ import {Owner, InstitutionType, Loan} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
-import {EntityRowEdit} from './RowEdit'
+import {EntityRowEdit, InstitutionSave} from './RowEdit'
 import {DataViewerButtons} from '../util/buttons'
+import * as curls from '../common/urls'
 import * as util from '../common/util'
 
-function CorpRow(props: {entity: Corporation, onChange: (entity: Institution)=>Promise<boolean>}) {
+function CorpRow(props: {entity: Corporation, onChange: (entity: InstitutionSave)=>Promise<boolean>}) {
     const {entity} = props
     const [showData, setShowData] = React.useState(false)
     const [showEdit, setShowEdit] = React.useState(false)
@@ -18,7 +19,7 @@ function CorpRow(props: {entity: Corporation, onChange: (entity: Institution)=>P
         return <EntityRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
     return <RB.Row className="menu-list-row">
       <RB.Container><RB.Row>
-        <RB.Col><img src={`/static/corp/${entity._id}.png`} /></RB.Col>
+        <RB.Col><img src={curls.Images.get(entity)} /></RB.Col>
         <RB.Col>{entity.name}</RB.Col>
         <RB.Col>{entity.credit}</RB.Col>
         <RB.Col>
@@ -37,7 +38,7 @@ function CorpRow(props: {entity: Corporation, onChange: (entity: Institution)=>P
 
 type CorpListState = {
     list?: Corporation[]
-    newForm?: Institution
+    newForm?: InstitutionSave
 }
 type CorpListProps = {
     user: User
@@ -45,10 +46,10 @@ type CorpListProps = {
 export default class List extends UList<CorpListProps, CorpListState> {
     L = L
     get fetchUrl() { return `/api/admin/entity/list` }
-    async changeEntity(entity: Institution) : Promise<boolean> {
+    async changeEntity(entity: InstitutionSave) : Promise<boolean> {
         this.setState({err: null, newForm: null})
         const ret = await util.wget(`/api/admin/entity/${entity.type}/${entity._id||0}/set`,
-            {method: 'POST', data: {data: entity}})
+            {method: 'POST', data: util.toFormData(entity, 'imgFile')})
         if (ret.err)
             return void this.setState({err: ret.err, newForm: entity})
         this.fetch()

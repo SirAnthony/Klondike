@@ -19,9 +19,11 @@ const no_csrf = ['get']
 export const wget = async (_url: string, opt?: any)=>{
     let data = Object.assign({redirect: 'follow', method: 'GET'}, opt)
     const method = data.method.toLowerCase()
+    if (data.data instanceof FormData)
+        data.headers = Object.assign({}, data.headers, {'ContentType': 'multipart/form-data'})
     if (params_csrf.includes(method))
         data.params = Object.assign({_csrf: get_csrf()}, data.params)
-    else if (!no_csrf.includes(method))
+    else if (!no_csrf.includes(method) && !(data.data instanceof FormData))
         data.data = Object.assign({_csrf: get_csrf()}, data.data)
     try {
         let r = await axios(url(_url), data)
@@ -33,6 +35,16 @@ export const wget = async (_url: string, opt?: any)=>{
         return {err, code}
     }
 }
+export const toFormData = <T>(obj: T, key: keyof T)=>{
+    if (!obj[key])
+        return {data: obj}
+    const form = new FormData()
+    form.append('file', obj[key] as any)
+    delete obj[key]
+    form.append('data', JSON.stringify(obj))
+    return form
+}
+
 export const capitalize = (str: string)=>str.substring(0, 1).toUpperCase()+str.substring(1)
 export const array_join = (arr: any[], sep?: string)=>arr.filter(Boolean).join(sep||' ')
 export const obj_copyto = (data: any, target: any, keys?: string | string[])=>{

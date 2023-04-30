@@ -7,6 +7,7 @@ import * as parameter from 'koa-parameter'
 import * as KoaRouter from 'koa-router'
 import * as logger from 'koa-logger'
 import * as serve from 'koa-static-server'
+import * as multer from '@koa/multer'
 //import * as CSRF from 'koa-csrf'
 import * as Koa from 'koa'
 import config from './config'
@@ -20,6 +21,9 @@ export const NJ = nunjucks.configure('templates', {})
 
 export interface RenderContext extends KoaRouter.IRouterContext {
     aparams: any
+    // Fields from multer extended context
+    file: multer.File
+    files: {[fieldname: string]: multer.File[]} | multer.File[] | undefined;
     render(view: string, r_ctx: any)
     json(r_ctx: any),
     flash(key: string, value: any)
@@ -81,8 +85,14 @@ const add_render = (ctx: RenderContext, next: Function)=>{
     ctx.state.debug = Object.assign({
         errors: env.NODE_ENV!='production'
     }, ctx.state.debug)
-    Object.defineProperty(ctx, 'aparams', {
-        get: ()=>Object.assign({}, ctx.query, ctx.request.body, ctx.params) })
+    const is_multipart = ctx.request.headers['content-type']?.toLowerCase()
+        .startsWith('multipart/form-data')
+    Object.defineProperty(ctx, 'aparams', {get: ()=>{
+        const params = Object.assign({}, ctx.query, ctx.request.body, ctx.params)
+        if (typeof params.data==='string' && is_multipart)
+            params.data = JSON.parse(params.data)
+        return params
+    }})
     ctx.debug = obj=>merge(ctx.state.debug, obj)
     ctx.state.flash = ctx.state.flash||{}
     ctx.flash = (k, v)=>ctx.state.flash[k]=v

@@ -1,33 +1,34 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {User, UserType} from '../common/entity'
+import {InstitutionType, User, UserType} from '../common/entity'
 import * as util from '../common/util'
 import {List as UList} from '../util/controls'
 import {ErrorMessage} from '../util/errors'
 import {default as L, LR} from './locale'
 import {Delimeter} from '../util/components'
-import {LoginInput, TextInput, NumberInput} from '../util/inputs'
+import {LoginInput, TextInput, NumberInput, ImageInput} from '../util/inputs'
 import {UserTypeSelect, OwnerSelect} from '../util/inputs'
 import {ProfileDataInfo} from './Profile'
 import {ApiStackError, ClientError} from '../common/errors'
+import { DataViewerButtons, EditButtons } from 'src/util/buttons'
 
 type UserSend = Omit<User, 'type' | 'admin' | 'displayName' | 'fullName'
-    | 'keys' | 'cost' | 'class'> & {password: string}
+    | 'keys' | 'cost' | 'class'> & {password: string, imgFile: any}
 
 type UserRowProps = {
     user?: User
     viewer?: User
     add?: boolean
     err?: ApiStackError,
-    onChange: (u: UserSend)=>void
+    onChange: (u: UserSend)=>Promise<boolean>
     onCancel?: ()=>void
 }
 
 function UserRowEdit(props: UserRowProps){
-    const {user, onChange, onCancel} = props
+    const {user, onChange} = props
     const [email, setEmail] = React.useState(user?.email)
     const [kind, setKind] = React.useState(user?.kind)
-    const [password, setPassword] = React.useState(null)
+    const [password, setPassword] = React.useState(undefined)
     const [name, setName] = React.useState(user?.name)
     const [first, setFirst] = React.useState(user?.first_name)
     const [last, setLast] = React.useState(user?.last_name)
@@ -36,9 +37,11 @@ function UserRowEdit(props: UserRowProps){
     const [credit, setCredit] = React.useState(user?.credit)
     const [relation, setRelation] = React.useState(user?.relation)
     const [data, setData] = React.useState(user?.data)
+    const [imgFile, setImgFile] = React.useState(undefined)
+    // Do not pass img from here, only imgFile
     const onSubmit = ()=>onChange({email, kind, password, name,
         first_name: first, last_name: last, alias, phone, credit,
-        relation, data})
+        relation, data, imgFile})
     return <RB.Row key={`user_edit_${user?._id||'new'}`} className="menu-input-row">
       {props.err && <ErrorMessage field={props.err} />}
       <RB.Form autoComplete='off'>
@@ -53,11 +56,13 @@ function UserRowEdit(props: UserRowProps){
           <RB.Col><TextInput value={phone} onChange={setPhone}
             placeholder={L('field_phone')} /></RB.Col>
           <RB.Col>
-            <RB.Button onClick={onSubmit}>{LR(props.add ? 'act_add' : 'act_save')}</RB.Button>
-            {onCancel && <RB.Button onClick={onCancel}>{LR('act_cancel')}</RB.Button>}
+            <EditButtons {...props} onSubmit={onSubmit} multiline={true} />
           </RB.Col>
         </RB.Row>
         <RB.Row className='menu-input-row'>
+          <RB.Col sm={2}>
+            <ImageInput source={user} onChange={setImgFile} />
+          </RB.Col>
           <RB.Col>
             <TextInput as='textarea' rows={10} placeholder={L('desc_data')}
               value={data} onChange={setData} />
@@ -81,7 +86,7 @@ function UserRowEdit(props: UserRowProps){
               </RB.Row>
               <RB.Row className='menu-input-row'>
                 <RB.Col>
-                  <OwnerSelect value={relation} onChange={setRelation} />
+                  <OwnerSelect value={relation} onChange={setRelation} exclude={[InstitutionType.User]} />
                 </RB.Col>
               </RB.Row>
               <RB.Row className='menu-input-row'>
@@ -98,8 +103,14 @@ function UserRow(props: UserRowProps) {
     const {user, viewer} = props
     const [showData, setShowData] = React.useState(false)
     const [showEdit, setShowEdit] = React.useState(false)
+    const onChange = async u=>{
+        if (!(await props.onChange(u)))
+            return false
+        setShowEdit(false)
+        return true
+    }
     if (showEdit)
-        return <UserRowEdit {...props} onCancel={()=>setShowEdit(false)} />
+        return <UserRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
     const rel = !user.relation ? '-' :
         LR(`institution_type_${user.relation.type}`)+' '+user.relation.name
     return <RB.Row key={`user_${user._id}`} className="menu-list-row">
@@ -111,10 +122,7 @@ function UserRow(props: UserRowProps) {
           <RB.Col>{rel}</RB.Col>
           <RB.Col>{user.credit}</RB.Col>
           <RB.Col>{user.phone}</RB.Col>
-          <RB.Col>
-            <RB.Button onClick={()=>setShowData(!showData)}>{L('act_show_data')}</RB.Button>
-            <RB.Button onClick={()=>setShowEdit(true)}>{LR('act_edit')}</RB.Button>
-          </RB.Col>
+          <DataViewerButtons onEdit={setShowEdit} onShow={setShowData} show={showData} />
         </RB.Row>
         {showData && <RB.Row>
           <ProfileDataInfo user={user} viewer={viewer} />
@@ -154,20 +162,21 @@ export default class List extends UList<UserListProps, UserListState> {
         const {user} = this.props
         this.setState({err: null, newForm: null})
         const empty = user.keys.concat(['password'])
-            .filter(k=>!['_id', 'type', 'info', 'relation'].includes(k))
+            .filter(k=>!['_id', 'type', 'password', 'info', 'img', 'relation'].includes(k))
             .filter(k=>util.isEmpty(u[k])).join(' ')
         const err = msg=>this.setState({err: new ClientError(msg), newForm: u})
         if (empty)
-            return err(`Missing ${empty}`)
+            return void err(`Missing ${empty}`)
         if (!/^[a-zA-Z0-9_.+-]+$/.test(u.email))
-            return err('Incorrect email format')
+            return void err('Incorrect email format')
         if (u.phone && !util.isPhone(u.phone))
-            throw err('Incorrect phone format')
+            return void err('Incorrect phone format')
         const ret = await util.wget(`/api/admin/user/${target}`, {
-            method: 'POST', data: {data: u}})
+            method: 'POST', data: util.toFormData(u, 'imgFile')})
         if (ret.err)
-            return this.setState({err: ret.err, newForm: u})
-        this.fetch()        
+            return void this.setState({err: ret.err, newForm: u})
+        this.fetch()
+        return true
     }
     body(){
         const {user} = this.props

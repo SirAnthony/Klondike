@@ -1,6 +1,5 @@
-import {Item, ItemType, ItemTypePrefix} from '../common/entity'
-import {PlanetShip, Resource, ResourceType} from '../common/entity'
-import {Ship, User} from '../common/entity'
+import {Item, ItemTypePrefix, Resource} from '../common/entity'
+import * as urls from '../common/urls'
 import L from '../common/locale'
 
 export function IDField(props: {item: Item}){
@@ -16,17 +15,5 @@ export function Delimeter(){
 
 export function ResourceImg(props: {res: Resource}){
     const {res} = props
-    return <img src={Images.item(res)} alt={L(`res_kind_${res.kind}`)} />
-}
-
-export const Images = {
-    item: (item: Item)=>{
-        const name = item.type === ItemType.Resource ?
-            ResourceType[(item as Resource).kind].toLowerCase() : 'none'
-        return `/static/img/res/${name}.png`
-    },
-    ship: (ship: Ship | PlanetShip)=>
-        `/static/img/ships/${ship.img}.png`,
-    user: (user: User)=>
-        `/static/img/users/${user.img||'user'}.png`
+    return <img src={urls.Images.item(res)} alt={L(`res_kind_${res.kind}`)} />
 }

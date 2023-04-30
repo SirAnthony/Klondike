@@ -27,7 +27,7 @@ export function PlanetRowEdit(props: RowNewProps){
     const [data, setData] = React.useState(planet?.data)
     const [zones, setZones] = React.useState(planet?.zones)
     const onSubmit = ()=>onChange({_id: planet?._id, type, name, system,
-        data, zones})
+        data, zones} as Planet)
     return <RB.InputGroup>
       <RB.Row className='menu-input-row'>
         {props.err && <ErrorMessage field={props.err} />}

@@ -1,22 +1,25 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Institution, InstitutionType, Item} from '../common/entity'
+import {Institution, InstitutionType, ResourceValueInfo} from '../common/entity'
 import {Corporation} from '../common/entity'
 import {TextInput, InstitutionTypeSelect, ResourceValueSelect} from '../util/inputs'
-import {NumberInput} from '../util/inputs'
+import {ImageInput, NumberInput} from '../util/inputs'
 import {ErrorMessage} from '../util/errors'
 import {EditButtons} from '../util/buttons'
 import {ApiStackError} from '../common/errors'
-import {default as L, LR} from './locale'
+import {LR} from './locale'
 
-const TypeString = (t: InstitutionType = 0)=>InstitutionType[t].toLowerCase()
+export type InstitutionSave = {
+    resourceValue?: ResourceValueInfo
+    imgFile?: File
+} & Omit<Institution, 'keys' | 'class'>
 
 type RowNewProps = {
     add?: boolean
-    entity?: Institution
+    entity?: InstitutionSave
     err?: ApiStackError
     onCancel?: ()=>void
-    onChange: (entity: Institution)=>void
+    onChange: (entity: InstitutionSave)=>void
 }
 
 export function EntityRowEdit(props: RowNewProps){
@@ -28,8 +31,9 @@ export function EntityRowEdit(props: RowNewProps){
     const [data, setData] = React.useState(entity?.data)
     const [resourceValue, setResourceValue] =
         React.useState((entity as Corporation)?.resourceValue)
-    const onSubmit = ()=>onChange({_id: entity?._id, type, name, credit, cost,
-        data, resourceValue} as Corporation)
+    const [imgFile, setImgFile] = React.useState(undefined)
+    const onSubmit = ()=>onChange({_id: entity?._id, type, name,
+      credit, cost, data, resourceValue, imgFile})
     const has = k=>(new (Institution.class(type)))?.keys.includes(k)
     return <RB.InputGroup>
       <RB.Row className='menu-input-row'>
@@ -53,6 +57,9 @@ export function EntityRowEdit(props: RowNewProps){
       {has('resourceValue') && <ResourceValueSelect value={resourceValue}
         onChange={setResourceValue} />}
       <RB.Row className='menu-input-row'>
+        <RB.Col sm={2}>
+            <ImageInput source={entity as Institution} onChange={setImgFile} />
+        </RB.Col>
         <RB.Col sm={6}>
           <TextInput as='textarea' rows={3} placeholder={LR('item_desc_data')}
             value={data} onChange={setData} />

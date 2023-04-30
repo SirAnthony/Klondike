@@ -29,7 +29,7 @@ const defaults = {
     },
     price: {
         low_modifier: 0.8,
-        high_modifier: 1.2,
+        high_modifier: 900000,
     },
     date: new Date('06.05.2523'),
 }
