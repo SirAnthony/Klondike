@@ -6,7 +6,7 @@ export async function get_prices() : Promise<{[k in ResourceType]: number}> {
     const prices : {[k in ResourceType]: number}  = {} as any
     const conf = await ConfigController.get()
     const cycle = Time.cycle
-    const res = conf.price.res[cycle]
+    const res = conf.price.res.slice(0, cycle+1).pop()
     for (let k in res)
         prices[k] = res[k]
     const entries = await LogController.all({'item.type': ItemType.Resource,
