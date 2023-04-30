@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Institution, Item, User} from '../../common/entity'
-import {Resource, Patent, Loan} from '../../common/entity'
+import {Resource, Patent, Order, Loan} from '../../common/entity'
 import {LocationCol, ResourceCostCol, ItemPriceCol} from './components'
 import {ItemOwnerCol, ItemPriceInputProps, ItemKindCol} from './components'
 import {ItemActions} from './Actions'
@@ -24,7 +24,7 @@ export type ItemRowProps = {
     onSubmit?: (item: Item)=>Promise<boolean>
     onDelete?: (item: Item)=>Promise<boolean>
     onPatentPay?: (item: Item, patent: Patent)=>Promise<boolean>
-    onOrderPay?: (item: Item)=>Promise<boolean>
+    onOrderPay?: (item: Item, order: Order)=>Promise<boolean>
     onLoanPay?: (item: Item, loan: Loan)=>Promise<boolean>
     onDelist?: (item: Item)=>Promise<boolean>
 } & ItemPriceInputProps & ItemRowTitleProps

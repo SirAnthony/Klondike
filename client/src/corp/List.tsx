@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Corporation, User, Item, Patent, Institution} from '../common/entity'
-import {Owner, InstitutionType, Loan} from '../common/entity'
+import {Corporation, User, Item, Patent} from '../common/entity'
+import {Owner, InstitutionType, Loan, Order} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
@@ -94,7 +94,9 @@ export class PatentSelect extends USelect<PatentSelectProps, {}> {
     L = LR
     get optName(){ return 'item_desc_name' }
     get fetchUrl(){
-        return `/api/corp/patents/${this.props.owner?._id}` }
+        const {owner} = this.props
+        return `/api/inventory/${owner?.type}/${owner?._id}/patents`
+    }
     get canFetch(){ return !!this.props.owner?._id }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptions(list: Patent[]){
@@ -111,13 +113,35 @@ export class LoanSelect extends USelect<LoanSelectProps, {}>{
     get optName(){ return 'suitable_loans' }
     get fetchUrl(){
         const {owner} = this.props
-        return `/api/inventory/${owner.type}/${owner._id}/loans`
+        return `/api/inventory/${owner?.type}/${owner?._id}/loans`
     }
     get canFetch(){ return !isNaN(+this.props.owner.type) }
     getValue(v){ return this.state.list.find(f=>f._id==v) }
     getOptionValue(opt: Loan) : String { 
         return `${opt.lender.name}: ${opt.amount}` }
     getOptions(list: Loan[]){
+        return list?.filter(this.props.filter||Boolean)
+            .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
+    }
+}
+
+type OrderSelectProps = {
+    owner: Owner
+}
+export class OrderSelect extends USelect<OrderSelectProps, {}> {
+    L = LR
+    get optName(){ return 'item_desc_type' }
+    get fetchUrl(){
+        const {owner} = this.props
+        return `/api/inventory/${owner?.type}/${owner?._id}/orders`
+    }
+    get canFetch(){ return !!this.props.owner?._id }
+    getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getOptionValue(opt: Order) : String {
+        return opt.resourceCost.map(c=>
+            `${LR(`res_kind_${c.kind}`)}: ${c.value|0}`).join('; ')
+    }
+    getOptions(list: Order[]){
         return list?.filter(this.props.filter||Boolean)
             .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }

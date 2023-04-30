@@ -2,7 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import {ItemType, ResourceType, PatentType, Institution} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
-import {ArtifactType, UserType, ResourceValueInfo} from '../common/entity'
+import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
 import {PlanetType, Pos} from '../common/entity'
 import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
@@ -10,6 +10,7 @@ import {TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
 import {Images} from '../common/urls'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
+import {OrderSelect as OSelect} from '../corp/List'
 import {ApiStackError, ClientError} from '../common/errors'
 import L from '../common/locale'
 import config from '../common/config'
@@ -135,6 +136,15 @@ export function PatentSelect(props: {value?: Patent, owner: Owner,
     return <RPSelect filter={filter} {...props} />
 }
 
+export function OrderSelect(props: {value?: Order, owner: Owner,
+    item: Item, onChange: (p: Order)=>void}){
+    const {item} = props
+    const res = item as Resource
+    const filter = (o: Order)=>o.resourceCost.some(c=>
+        +c.kind===+res.kind && (c.value|0)>(c.provided|0))
+    return <OSelect filter={filter} {...props} />
+}
+
 export function LocationSelect(props: {value?: Location, optName?: string, onChange: (loc: Location)=>void}){
     const [value, setValue] = React.useState(props.value)
     const [point, setPoint] = React.useState(props.value?.pos)
@@ -178,7 +188,7 @@ export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolea
           onChange={type=>ownerChange(type, id)} title={props.title} />
       </RB.Col>
       <RB.Col className='flex-center'>
-        <CSelect value={id} type={instType} filter={props.filter}
+        <CSelect value={id?._id} type={instType} filter={props.filter}
           onChange={id=>ownerChange(instType, id)} disabled={isNaN(instType)} />
       </RB.Col>
     </RB.Row>

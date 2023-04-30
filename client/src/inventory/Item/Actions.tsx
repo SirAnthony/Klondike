@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {MarketType, InstitutionType, Patent, MultiOwnedItem, ItemType} from '../../common/entity'
-import {PatentSelectTrigger} from '../../util/popovers'
+import {OrderSelectTrigger, PatentSelectTrigger} from '../../util/popovers'
 import {PopupButton} from '../../util/buttons'
 import {ItemLoanInput, ItemPriceInput} from './components'
 import {ItemRowProps} from './Row'
@@ -53,7 +53,8 @@ export class ItemActions extends React.Component<ItemActionsProps, ItemActionsSt
         const {item, entity, onOrderPay} = this.props
         if (!onOrderPay || !this.check(ItemType.Resource, InstitutionType.Corporation))
             return null
-        return <RB.Button onClick={()=>onOrderPay(item)}>{L('act_order_pay')}</RB.Button>
+        return <OrderSelectTrigger item={item} owner={entity} desc={L('act_order_pay')}
+            onClick={order=>onOrderPay(item, order)} />
     }
     btn_loan_pay(){
         const {item, onLoanPay} = this.props

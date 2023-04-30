@@ -1,8 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, Patent} from '../common/entity'
+import {Item, Patent, Order} from '../common/entity'
 import {Owner, Loan, InstitutionType} from '../common/entity'
-import {NumberInput, OwnerSelect, PatentSelect} from './inputs'
+import {NumberInput, OwnerSelect} from './inputs'
+import {OrderSelect, PatentSelect} from './inputs'
 import L from '../common/locale'
 import {LoanSelect} from '../corp/List'
 
@@ -20,6 +21,27 @@ export function PatentSelectTrigger(props: PatentSelectProps){
       <RB.PopoverBody>
         <PatentSelect value={patent} owner={owner} item={item} onChange={setPatent} />
         <RB.Button disabled={!patent} onClick={onClick}>{desc}</RB.Button>
+      </RB.PopoverBody>
+    </RB.Popover>
+    return <RB.OverlayTrigger placement='top' trigger={'click'} overlay={btn} rootClose={true}>
+      <RB.Button>{desc}</RB.Button>
+    </RB.OverlayTrigger>
+}
+
+type OrderSelectProps = {
+    item: Item
+    owner: Owner
+    desc: string
+    onClick: (order: Order)=>void
+}
+export function OrderSelectTrigger(props: OrderSelectProps){
+    const {item, owner, desc} = props
+    const [order, setPatent] = React.useState(null)
+    const onClick = ()=>order && props.onClick(order)
+    const btn = <RB.Popover>
+      <RB.PopoverBody>
+        <OrderSelect value={order} owner={owner} item={item} onChange={setPatent} />
+        <RB.Button disabled={!order} onClick={onClick}>{desc}</RB.Button>
       </RB.PopoverBody>
     </RB.Popover>
     return <RB.OverlayTrigger placement='top' trigger={'click'} overlay={btn} rootClose={true}>

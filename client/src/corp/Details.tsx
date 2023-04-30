@@ -125,10 +125,10 @@ export class ItemDetails extends ItemDetailsBase {
             InventoryEvents.reloadPatents()
         return res
     }
-    async onOrderPay(item: Item) : Promise<boolean> {
+    async onOrderPay(item: Item, order: Order) : Promise<boolean> {
         const {owner} = this.props
         const res = await this.onItemAction(item, ()=>owner.type==InstitutionType.Corporation,
-            `pay/order`)
+            `pay/order/${order._id}`)
         if (res)
             InventoryEvents.reloadOrders()
         return res

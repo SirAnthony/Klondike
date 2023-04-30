@@ -29,15 +29,15 @@ export class InventoryApiRouter extends BaseRouter {
     @CheckIDParam()
     @CheckRole(UserType.Scientist)
     async put_item_pay_patent(ctx: RenderContext){
-        const {id, itemid, target} = ctx.aparams
-        if (!itemid || !target)
+        const {stype, id, itemid, target} = ctx.aparams
+        if (!itemid || !target || !InstitutionType[+stype])
             throw 'Required fields missing'
         // Always use corp controller
-        const corp = await CorpController.get(id)
+        const corp = await institutionController(+stype).get(id)
         const resource = await ItemController.get(itemid)
-        const patent = await ItemController.get(target)
         if (!IDMatch(resource.owner._id, corp._id))
             throw 'Wrong owner of resource'
+        const patent = await ItemController.get(target)
         const pt = (patent as unknown) as Patent
         pt.resourceCost.forEach(k=>k.provided |= 0)
         if (pt.owners.some(o=>o.status!=PatentStatus.Created)){
@@ -66,19 +66,15 @@ export class InventoryApiRouter extends BaseRouter {
     @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async put_item_pay_order(ctx: RenderContext){
-        const {id, itemid} = ctx.aparams
-        if (!itemid)
+        const {stype, id, itemid, orderid} = ctx.aparams
+        if (!itemid || !InstitutionType[+stype])
             throw 'Required fields missing'
         // Always use corp controller
-        const corp = await CorpController.get(id)
+        const corp = await institutionController(+stype).get(id)
         const resource = await ItemController.get(itemid)
         if (!IDMatch(resource.owner._id, corp._id))
             throw 'Wrong owner of resource'
-        const orders = await OrderController.all({
-            'assignee._id': corp._id, cycle: Time.cycle})
-        const res = (resource as any) as Resource
-        const order = orders.find(o=>o.resourceCost.some(k=>
-            k.kind==res.kind && k.provided>=k.value))
+        const order = await OrderController.get(orderid)
         if (!order)
             throw 'No order for corp'
         order.resourceCost.forEach(k=>k.provided |= 0)
@@ -91,9 +87,10 @@ export class InventoryApiRouter extends BaseRouter {
         })
         if (!order.resourceCost.some(k=>k.provided<k.value)){
             const conf = await ConfigController.get()
+            const value = (corp as unknown as CorpController).resourceValue||{}
             const points = order.resourceCost.reduce((p, c)=>{
-                const type = corp.resourceValue[c.kind]
-                return p+conf.points.order[type]
+                const type = value[c.kind]
+                return p+(conf.points.order[type]|0)
             }, 0)
             await LogController.log({
                 name: 'order_close', info: 'put_item_pay_order',
@@ -107,7 +104,7 @@ export class InventoryApiRouter extends BaseRouter {
     @CheckAuthenticated()
     async put_item_pay_loan(ctx: RenderContext){
        const {stype, id, itemid, loanid} = ctx.aparams
-        if (!itemid)
+        if (!itemid || !InstitutionType[+stype])
             throw 'Required fields missing'
         const srcController = institutionController(+stype)
         const src = await srcController.get(id)
@@ -328,6 +325,21 @@ export class InventoryApiRouter extends BaseRouter {
         const list = await ItemController.all(filter)
         return {list}
     }
+
+    @CheckIDParam()
+    @CheckRole([UserType.Corporant])
+    async get_orders_list(ctx: RenderContext){
+        const {stype, id} = ctx.params
+        const srcController = institutionController(+stype)
+        if (!srcController)
+            throw 'No source type'
+        const src = await srcController.get(id)
+        const list = await OrderController.all({
+            'assignee._id': src._id, cycle: Time.cycle})
+        return {list: list?.filter(o=>o.resourceCost.some(c=>
+            (c.value|0)>(c.provided|0)))}
+    }
+    
 
     @CheckIDParam()
     @CheckAuthenticated()
