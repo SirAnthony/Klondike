@@ -284,6 +284,7 @@ export class Flight extends ID {
 export type PlanetShip = {
     _id: string
     name: string
+    type: InstitutionType
     kind: ShipClass
     img: string
     location: Location

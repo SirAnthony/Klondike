@@ -33,18 +33,9 @@ function Hexagon(props: HexProps){
     </Group>
 }
 
-function HexItem(props: HexProps & {entity: Item}){
+function HexItem(props: HexProps & {entity: Item | PlanetShip}){
     const {entity, pos} = props
-    const [image] = useImage(urls.Images.item(entity))
-    const point = pos.canvas
-    point.x -= image?.width/2 || 0
-    point.y -= image?.height/2 || 0
-    return <KImage image={image} {...point} {...props.hover} />
-}
-
-function HexShip(props: HexProps & {entity: PlanetShip}){
-    const {entity, pos} = props
-    const [image] = useImage(urls.Images.ship(entity))
+    const [image] = useImage(urls.Images.get(entity))
     const point = pos.canvas
     point.x -= image?.width/2 || 0
     point.y -= image?.height/2 || 0
@@ -71,7 +62,7 @@ function Hex(props: {col: number, row: number,
         hexes.push(<HexItem key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
     const ship_arr = ships[key]||[]
     for (let k of ship_arr)
-        hexes.push(<HexShip key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
+        hexes.push(<HexItem key={`${k._id}${key}`} entity={k} pos={pos} {...fillProps} />)
     return <>{hexes}</>
 }
 

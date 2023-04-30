@@ -9,7 +9,7 @@ export const Images = {
             ResourceType[(item as Resource).kind].toLowerCase() : 'none'
         return `/res/${name}.png`
     },
-    entity: (entity: Institution)=>
+    entity: (entity: Institution | PlanetShip)=>
         (Images[InstitutionType[entity.type]?.toLowerCase()] || Images.corp)(entity),
     user: (user: User)=>
         `/users/${user.img||'user'}.png`,
@@ -17,6 +17,6 @@ export const Images = {
         `/corps/${entity.img||'corp'}.png`,
     ship: (ship: Ship | PlanetShip)=>
         `/ships/${ship.img}.png`,
-    get: (src?: Institution | Item)=>!src ? '' :
+    get: (src?: Institution | PlanetShip | Item)=>!src ? '' :
         Images.prefix+(src instanceof Item ? Images.item(src) : Images.entity(src)),
 }
