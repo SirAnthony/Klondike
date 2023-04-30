@@ -21,7 +21,7 @@ export function LocationCol(props: ItemComponentProps) {
     return <RB.Col sm={props.layout}>
       <span>{location.system}</span>
       <span>{location.name}</span>
-      <span>{location.pos.col}:{location.pos.row}</span>
+      <span>{location.pos?.col}:{location.pos?.row}</span>
     </RB.Col>
 }
 

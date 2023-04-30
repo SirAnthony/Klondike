@@ -79,7 +79,7 @@ export function CoordinatesInput(props: CoordinatesInputProps){
     const coordChange = (val)=>{
       setCoord(val)
       const pos = val?.split(':')
-      props.onChange(pos?.length>1 ? {col: pos[0], row: pos[1]} : null)
+      props.onChange(pos?.length>1 ? {col: +pos[0], row: +pos[1]} : null)
     }
     return <TextInput {...props} value={coord} onChange={coordChange}
         placeholder={L('loc_desc_coord')} />
