@@ -2,14 +2,14 @@ import {BaseRouter, CheckRole, CheckIDParam} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
 import {institutionController, LogController} from '../../entity'
-import {ItemType, UserType, Resource} from '../../../client/src/common/entity'
+import {UserType} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
-import {InstitutionType, LogAction} from '../../../client/src/common/entity'
+import {LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
+import * as cutil from '../../../client/src/common/util'
 import * as Rating from '../../util/rating'
-import {Time} from '../../util/time'
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -43,13 +43,13 @@ export class CorpApiRouter extends BaseRouter {
         if (!id || !requester)
             throw 'Required fields missing'
         const item = await ItemController.get(id)
-        const patent = new Patent(item)
+        const patent = item as unknown as Patent
         const owner = await CorpController.get(requester)
         if (!patent.owners.some(o=>IDMatch(o._id, owner._id)))
             throw new ApiError(Codes.WRONG_USER, 'Not an owner');
         const prevOwners = patent.owners.map(o=>Object.assign({}, o));
         // Serve parts
-        ((item as any) as Patent).owners.forEach(o=>{
+        patent.owners.forEach(o=>{
             if (IDMatch(o._id, owner._id))
                 o.status = PatentStatus.Served
         })
