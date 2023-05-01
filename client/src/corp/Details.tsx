@@ -98,11 +98,11 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
         return true
     }
     async onDelist(item: Item) : Promise<boolean> {
-        const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type)
+        const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type|0)
         return await this.onItemAction(item, check, 'delist')
     }
     async onSell(item: Item, target: Owner, price: number) : Promise<boolean>  {
-        const check = ()=>[MarketType.None].includes(item.market?.type)
+        const check = ()=>[MarketType.None].includes(item.market?.type|0)
         return await this.onItemAction(item, check, 'sell', {
             data: {target: target._id, dtype: target.type, price: price}})
     }
