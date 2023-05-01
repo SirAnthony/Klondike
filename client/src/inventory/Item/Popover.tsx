@@ -90,7 +90,9 @@ class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
 
 export function ItemPopover(props: ItemPopoverProps){
     const {item} = props
-    const obj = new (Item.class(item.type))(item)
+    const obj = new (Item.class(item.type))()
+    for (let k in item)
+        obj[k] = item[k]
     const rows = obj.keys.map(k=>
         <ItemKeyRow item={item} field={k} key={`item_popover_${item._id}_${k}`} />)
     return <RB.Popover>
@@ -108,7 +110,9 @@ type ItemPopoverOverlayProps = {
 
 export function ItemPopoverOverlay(props: ItemPopoverOverlayProps){
     const {item, children} = props
-    const obj = new (Item.class(item.type))(item)
+    const obj = new (Item.class(item.type))()
+    for (let k in item)
+        obj[k] = item[k]
     const rows = obj.keys.map(k=>
         <ItemKeyRow item={item} field={k} key={`item_popover_${item._id}_${k}`} />)
     const popover = <RB.Popover>
