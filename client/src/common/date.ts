@@ -68,6 +68,19 @@ export const get = (d?: Date | string | number | null, _new?: boolean)=>{
         return new Date(d);
 }
 
+export const nextTime = (input: string)=>{
+    const now = new Date();
+    const [hours, minutes] = input.split(':').map(Number);
+
+    // If the given time is already passed today, add 1 day to the date
+    if (hours < now.getHours() || (hours === now.getHours() && minutes < now.getMinutes()))
+        now.setDate(now.getDate() + 1);
+    now.setTime(hours)
+    now.setMinutes(minutes)
+    now.setSeconds(0)
+    return now
+}
+
 export const add = (d, dur)=>{
     d = get(d, true);
     dur = normalize_dur(dur);
@@ -100,11 +113,12 @@ export const diff = (a, b, period = ms.DAY)=>
     Math.ceil((+get(a) - +get(b)) / period)
 export const weekday = d=>
     get(d).toLocaleDateString(config.locale, {weekday: 'long'})
-export const longdate = d=>get(d).toLocaleDateString(
-    config.locale, {weekday: 'long', day: 'numeric', month: 'long'})
-export const daymonth = d=>get(d).toLocaleDateString(
-    config.locale, {day: 'numeric', month: 'long'})
+export const longdate = (d, format = {})=>get(d).toLocaleDateString(
+    config.locale, {weekday: 'long', day: 'numeric', month: 'long', ...format})
+export const daymonth = (d, format = {})=>get(d).toLocaleDateString(
+    config.locale, {day: 'numeric', month: 'long', ...format})
 export const time = d=>get(d).getHours()+':'+pad(get(d).getMinutes())
+export const timeday = (d, format = {})=>time(d)+' '+daymonth(d, format)
 export const interval = (d: number, opt?: {days?: Boolean, hours?: Boolean, min?: Boolean, sec?: Boolean})=>{
     opt = Object.assign({days: true, hours: true, min: true, sec: true}, opt)
     const days = (d/ms.DAY)|0

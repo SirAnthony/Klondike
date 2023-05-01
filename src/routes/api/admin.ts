@@ -1,5 +1,5 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, CorpController, PlanetController, ConfigController, institutionController, ShipController} from '../../entity'
+import {UserController, CorpController, PlanetController, ConfigController, institutionController, ShipController, FlightController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
 import {UserType, Patent, PatentStatus, ItemType} from '../../../client/src/common/entity'
 import {InstitutionType, PlanetType, Planet} from '../../../client/src/common/entity'
@@ -14,7 +14,8 @@ import config from '../../config'
 import {promises as fs} from 'fs'
 
 type AllInstControllers = UserController | CorpController | ShipController
-type AllControllers = (AllInstControllers | ItemController | OrderController | PlanetController) & {
+type AllControllers = (AllInstControllers | ItemController | OrderController |
+    FlightController | PlanetController) & {
     owner?: Owner
     relation?: Owner
     captain?: Owner
@@ -180,6 +181,33 @@ export class AdminApiRouter extends BaseRouter {
         await process_data(item, data)
         await process_img(ctx, item)
         await item.save()
+    }
+
+    @CheckRole(UserType.Master)
+    async get_flight_list(ctx: RenderContext){
+        const list = await FlightController.all()
+        return {list}
+    }
+
+    @CheckRole(UserType.Master)
+    async post_flight_change(ctx: RenderContext){
+        const {id, data} = ctx.aparams
+        if (!data.ts)
+            throw 'Should specify time of the flight'
+        if (data._id && data._id!=id)
+            throw 'Cannot change id of item'
+        const item = await FlightController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
+        await process_data(item, data)
+        await item.save()
+    }
+
+    @CheckRole(UserType.Master)
+    async delete_flight(ctx: RenderContext){
+        const {id} = ctx.params
+        let item = await FlightController.get(id)
+        if (!item)
+            throw new ApiError(Codes.INCORRECT_PARAM, 'not_found')
+        return await item.delete()
     }
 
     @CheckRole(UserType.Navigator)

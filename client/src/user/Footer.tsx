@@ -2,7 +2,9 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
 import {User, InstitutionType} from '../common/entity'
+import {ButtonNavigator} from '../admin';
 import {default as L} from './locale'
+import { Delimeter } from 'src/util/components';
 
 export type FooterProps = {
     user: User
@@ -64,6 +66,10 @@ export function UserFooter(props: FooterProps){
       <RB.Col><RB.TabContent>
         {relation && <EntityPane {...props} />}
         <ProfilePane {...props} />
+        {user.admin && <RB.Row>
+          <Delimeter />
+          <ButtonNavigator {...props} />
+        </RB.Row>}
       </RB.TabContent></RB.Col>
     </RB.Row></RB.TabContainer>
     </RB.Container>

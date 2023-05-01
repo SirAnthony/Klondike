@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, Institution} from '../common/entity'
+import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
 import {ResourceCost} from '../common/entity'
@@ -15,6 +15,7 @@ import {OrderSelect as OSelect} from '../corp/List'
 import {ApiStackError, ClientError} from '../common/errors'
 import L from '../common/locale'
 import config from '../common/config'
+import * as date from '../common/date'
 import * as _ from 'lodash'
 
 export const RandomID = ()=>(Math.random() + 1).toString(36).substring(7)
@@ -111,7 +112,27 @@ export function ImageInput(props: ImageInputProps){
           accept=".png,.jpg,.jpeg,.webp" />
       </RB.Row>
     </RB.Container>
+}
 
+type TimeInputProps = {
+    value: number
+    placeholder?: string
+    onChange: (ts: number)=>void
+} & Omit<TextInputProps, 'value' | 'onChange' | 'placeholder'>
+export function TimeInput(props: TimeInputProps){
+    const test_re = /^((?:[01]?\d|2[0-3]):[0-5]\d)(?::[0-5]\d)?$/
+    const check = (s: string)=>!test_re.test(s) ? new ClientError('incorrect_input') : null
+    const [value, setValue] = React.useState(date.time(props.value))
+    const [err, setErr] = React.useState(check(value))
+    const onChange = (s: string)=>{
+        setValue(s)
+        setErr(check(s))
+        const match = test_re.exec(s)
+        if (match)
+            props.onChange(+date.nextTime(match[1]))
+    }
+    return <TextInput placeholder={L('desc_time')} {...props} err={err}
+        value={value} onChange={onChange} />
 }
 
 // Selects
@@ -126,6 +147,8 @@ const FreeInstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type
 export const ShipClassSelect = TypedSelect(ShipClass, '', 'ship_desc_kind')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
+export const FlightTypeSelect = TypedSelect(FlightType, 'flight_type', 'flight_desc_type')
+export const FlightStatusSelect = TypedSelect(FlightStatus, 'flight_status', 'flight_desc_status')
 export const PlanetTypeSelect = TypedSelect(PlanetType, '', 'planet_desc_kind')
 
 export function PatentSelect(props: {value?: Patent, owner: Owner,
@@ -146,7 +169,8 @@ export function OrderSelect(props: {value?: Order, owner: Owner,
     return <OSelect filter={filter} {...props} />
 }
 
-export function LocationSelect(props: {value?: Location, optName?: string, onChange: (loc: Location)=>void}){
+export function LocationSelect(props: {value?: Location, optName?: string,
+    disabled?: boolean, onChange: (loc: Location)=>void}){
     const [value, setValue] = React.useState(props.value)
     const [point, setPoint] = React.useState(props.value?.pos)
     const check = val=>val===null || (val._id && !isNaN(+val.pos?.col) && !isNaN(+val.pos?.row))
@@ -164,7 +188,8 @@ export function LocationSelect(props: {value?: Location, optName?: string, onCha
         <PSelect value={value?._id} onChange={val=>onChange(val, point)} optName={props.optName} />
       </RB.Col>
       <RB.Col>
-        <CoordinatesInput value={point} onChange={pos=>onChange(value, pos)} disabled={!value} />
+        <CoordinatesInput value={point} onChange={pos=>onChange(value, pos)}
+          disabled={props.disabled || !value} />
       </RB.Col>
     </RB.Row></RB.Container>
 }

@@ -11,6 +11,7 @@ load(mod, {
     'link_ships': 'Корабли',
     'link_corps': 'Корпорации',
     'link_planets': 'Планеты',
+    'link_flights': 'Таблица вылетов',
     'link_users': 'Пользователи',
     'act_save': 'Сохранить',
     'res_create': 'Создать ресурс',

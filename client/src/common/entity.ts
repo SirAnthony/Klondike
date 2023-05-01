@@ -273,10 +273,12 @@ export enum FlightType {Planetary, Drone}
 export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked}
 export class Flight extends ID {
     ts: number
-    ship?: ID
     type: FlightType
-    target: Location
     status: FlightStatus
+    owner?: Owner
+    location: Location
+    get keys(){
+        return `ts type status owner location`.split(' ') }
 }
 
 export type PlanetShip = {

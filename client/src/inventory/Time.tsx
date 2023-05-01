@@ -29,6 +29,7 @@ export class TimeDetails extends F.Fetcher<TimeProps, TimeState> {
     }
     render(){
         const {time} = this.state
-        return <a href='/' className='nav-link'>{time?.format}</a>
+        const text = [].concat.call([], date.timeday(undefined), time?.format).join(' | ')
+        return <a href='/' className='nav-link'>{text}</a>
     }
 }
