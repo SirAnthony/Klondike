@@ -32,7 +32,8 @@ export class MainRouter extends BaseRouter {
         const {relation} = user
         if (!user.admin && !IDMatch(relation?._id, from._id) && to?._id && !IDMatch(to._id, user.relation?._id))
             throw 'Not found'
-        const host = [util.localhost_to_ip(config.server.host), config.server.port].join(':')
+        const host = [util.localhost_to_ip(config.server.host),
+            config.client.server.port].filter(Boolean).join(':')
         const url = `http://${host}/confirm/item/${item._id}/buy/${item.market.code}`
         const code = await QRCode.toDataURL(url, {width: 400})
         return {user, code, item}        

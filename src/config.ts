@@ -7,4 +7,4 @@ export default Object.assign({
     static_url: '/static',
     client_static: __dirname+'/../client/build/static',
     client_url: '/client',
-}, common, secrets)
+}, common, secrets, {client: common})
