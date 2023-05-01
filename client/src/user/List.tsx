@@ -86,7 +86,8 @@ function UserRowEdit(props: UserRowProps){
               </RB.Row>
               <RB.Row className='menu-input-row'>
                 <RB.Col>
-                  <OwnerSelect value={relation} onChange={setRelation} exclude={[InstitutionType.User]} />
+                  <OwnerSelect value={relation} onChange={setRelation} nullable={true}
+                    exclude={[InstitutionType.User]} />
                 </RB.Col>
               </RB.Row>
               <RB.Row className='menu-input-row'>
