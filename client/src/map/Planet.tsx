@@ -69,7 +69,11 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
     }
     fetchState(data: any = {}){
         const {item, ship} : {item: PlanetInfo, ship: any} = data
-        item.items = item.items.map(i=>new (Item.class(i.type))(i))
+        item.items = item.items.map(i=>{
+            const cls = Item.class(i.type)
+            const val = new cls(i)
+            return val
+        })
         return {item: data, planet: item, ship}
     }
     menus(){
