@@ -1,9 +1,10 @@
-import {BaseRouter, CheckRole} from '../base'
+import {BaseRouter, CheckIDParam, CheckRole} from '../base'
 import {UserController, ShipController, FlightController, ItemController} from '../../entity'
 import {ItemType, Module, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {Time} from '../../util/time'
 import {IDMatch} from '../../util/server'
+import * as date from '../../../client/src/common/date'
 
 export class ShipApiRouer extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -31,9 +32,22 @@ export class ShipApiRouer extends BaseRouter {
 
     @CheckRole([UserType.Guard, UserType.Captain])
     async get_flights(ctx: RenderContext){
+        const d = new Date()
         const list = await FlightController.all({
-            ts: Time.cycleInterval(Time.cycle)})
+            ts: {$gte: +date.add(d, {'min': -30}), $lt: +date.add(d, {'hour': 2})}})
         return {list}
+    }
+
+    @CheckIDParam()
+    @CheckRole([UserType.Guard, UserType.Captain])
+    async put_flight_action(ctx: RenderContext){
+        const {user}: {user: UserController} = ctx.state
+        const {id, action} = ctx.aparams
+        const flight = await FlightController.get(id)
+        if (!flight)
+            throw 'Incorrect flight'
+        switch(action){
+        }        
     }
 
     @CheckRole([UserType.Guard, UserType.Captain])

@@ -51,7 +51,7 @@ function FlightActions(params: FlightRowParams){
        [FlightStatus.SOS]: sp('arrival help'),
        [FlightStatus.Blocked]: sp('unblock'),
     }
-    const btns = statuses[flight.status]
+    const btns = statuses[flight.status|0]
         .filter(s=>flight.owner || s==='signup')
         .filter(s=>actions[user.kind].includes(s))
         .map(t=><RB.Button onClick={()=>onAction(t, flight)}>
@@ -112,7 +112,8 @@ export class List extends BaseList<FlightListProps, FlightListState> {
     L = L
     async onAction(name: string, flight: Flight){
         this.setState({err: null})
-        const ret = await util.wget(`/api/ship/flight/${name}`, {method: 'PUT'})
+        const ret = await util.wget(`/api/ship/flight/${flight._id}/action/${name}`,
+            {method: 'PUT'})
         if (ret.err)
             this.setState({err: ret.err})
         this.fetch()

@@ -36,7 +36,7 @@ function FlightRowNew(props: FlightRowNewParams){
         !location || (location._id && !isNaN(+location.pos.col) &&
         !isNaN(location.pos.row))) && !isNaN(+status) && !isNaN(+type)))
     const onSubmit = async ()=>check() && (await props.onSubmit({_id: flight?._id,
-        type, ts, owner, location, status})) && props.onCancel()
+        type, ts: +date.get(ts), owner, location, status})) && props.onCancel()
     return <RB.Row className='menu-input-row'>
       <RB.Col>
         <TimeInput value={ts} onChange={setTime} />

@@ -45,7 +45,14 @@ load(mod, {
     'mod_slot': 'Слот',
     'mod_empty': 'ПУСТО',
     'mod_stat': name=>L('stat_'+name)+' модуля',
-    'mod_stat_c': name=>'MOD'+L(`stat_${name}_c`)
+    'mod_stat_c': name=>'MOD'+L(`stat_${name}_c`),
+    'act_flight_signup': 'Заявиться на вылет',
+    'act_flight_delist': 'Отменить заявку',
+    'act_flight_block': 'Заблокировать',
+    'act_flight_unblock': 'Разблокировать',
+    'act_flight_help': 'Выслать помощь',
+    'act_flight_arrival': 'Прилет',
+    'act_flight_departure': 'Вылет',
 })
 
 export function LR(str: string, ...args): string {
