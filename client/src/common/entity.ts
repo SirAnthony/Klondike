@@ -23,7 +23,9 @@ export class ID implements Identifier {
     _id?: string
     name: string
     constructor(data?: any){
-        Object.assign(this, data) }
+        for (let k in data||{})
+            this[k] = data[k]
+    }
 }
 
 export type Owner = ID & {type: InstitutionType}
