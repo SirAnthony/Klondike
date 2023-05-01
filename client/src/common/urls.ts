@@ -6,7 +6,9 @@ export const Images = {
     prefix: '/static/img',
     item: (item: Item)=>{
         const name = item.type === ItemType.Resource ?
-            ResourceType[(item as Resource).kind].toLowerCase() : 'none'
+            ResourceType[(item as Resource).kind].toLowerCase() :
+            item.type == ItemType.Artifact ? 'artifact' :
+            item.type == ItemType.Coordinates ? 'point' : 'none'
         return `/res/${name}.png`
     },
     entity: (entity: Institution | PlanetShip)=>
