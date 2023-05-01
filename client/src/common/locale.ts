@@ -54,6 +54,7 @@ const aliases = {
     'item_type_4': 'Артефакт',
     'res_desc_kind': 'Тип ресурса',
     'res_desc_value': 'Количество',
+    'res_desc_provided': 'Предоставлено',
     'res_kind_0': 'Минералы',
     'res_kind_1': 'Энергия',
     'res_kind_2': 'Сплавы',

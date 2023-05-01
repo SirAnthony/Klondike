@@ -47,7 +47,7 @@ export const toFormData = <T>(obj: T, key: keyof T)=>{
 
 export const capitalize = (str: string)=>str.substring(0, 1).toUpperCase()+str.substring(1)
 export const array_join = (arr: any[], sep?: string)=>arr.filter(Boolean).join(sep||' ')
-export const obj_copyto = (data: any, target: any, keys?: string | string[])=>{
+export const obj_copyto = <T>(data: any, target: T, keys?: string | string[])=>{
     if (!data)
         return target
     keys = keys ? (Array.isArray(keys) ? keys : keys.split(/\s+/)) : Object.keys(data)

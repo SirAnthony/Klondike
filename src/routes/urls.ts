@@ -52,7 +52,7 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
     '/item/list': {func: 'items_list', methods: ['get']},
     '/item/:id/set': {func: 'item_change', methods: ['post']},
     '/item/:id/delete': {func: 'item', methods: ['delete']},
-    '/order/create': {func: 'order_change', methods: ['post']},
+    '/order/:id/set': {func: 'order_change', methods: ['post']},
     '/order/:id/delete': {func: 'order', methods: ['delete']},
     '/orders/': {func: 'orders_list', methods: ['get']},
     '/user/:id/set': {func: 'user_set', methods: ['post'], uploads: 'file'},

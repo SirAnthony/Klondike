@@ -3,6 +3,7 @@ import * as RB from 'react-bootstrap'
 import {ItemType, ResourceType, PatentType, Institution} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
+import {ResourceCost} from '../common/entity'
 import {PlanetType, Pos} from '../common/entity'
 import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
@@ -15,6 +16,8 @@ import {ApiStackError, ClientError} from '../common/errors'
 import L from '../common/locale'
 import config from '../common/config'
 import * as _ from 'lodash'
+
+export const RandomID = ()=>(Math.random() + 1).toString(36).substring(7)
 
 type TextInputProps = {
     value: string
@@ -42,8 +45,7 @@ export function TextInput(props: TextInputProps){
     const onChange = ({target: {value}})=>props.onChange(value)
     const cls = props.err ? 'input-error' : ''
     const complete = props.autoComplete ? undefined : 'new-password'
-    const controlId = (Math.random() + 1).toString(36).substring(7);
-    return <RB.FloatingLabel controlId={controlId} label={props.placeholder}>
+    return <RB.FloatingLabel controlId={RandomID()} label={props.placeholder}>
       <RB.FormControl {...props} className={cls} onChange={onChange}
         aria-label={props.placeholder} aria-describedby={props.described}
         autocomplete={complete} />
@@ -62,8 +64,7 @@ export function NumberInput(props: NumberInputProps){
     const val =  empty ? undefined : +props.value
     const onChange = ({target: {value}})=>props.onChange(isNaN(+value) ? val : +value)
     const cls = props.err ? 'input-error' : ''
-    const controlId = (Math.random() + 1).toString(36).substring(7);
-    return <RB.FloatingLabel controlId={controlId} label={props.placeholder}>
+    return <RB.FloatingLabel controlId={RandomID()} label={props.placeholder}>
       <RB.FormControl placeholder={props.placeholder} value={empty ? '' : val}
         className={cls} onChange={onChange} />
     </RB.FloatingLabel>
@@ -243,6 +244,54 @@ export function MultiResourceSelect(props: {value?: ResItem[],
         {resources}
       </RB.Col>
     </RB.Row>
+}
+
+export type ResourceCostID = {_id: number} & ResourceCost
+export function ResourceCostSelect(props: {value?: ResourceCostID, className?: string,
+    onChange: (values: ResourceCostID)=>void, onDelete?: ()=>void}){
+    const [kind, setKind] = React.useState(props.value?.kind)
+    const [value, setValue] = React.useState(props.value?.value)
+    const [provided, setProvided] = React.useState(props.value?.provided)
+    const onChange = (kind, value, provided)=>{
+        setKind(kind)
+        setValue(value)
+        setProvided(provided)
+        props.onChange({kind, value, provided, _id: props.value?._id})
+    }
+    const errClass = (v: boolean)=>v ? new ClientError('value error') : null
+    return <RB.Row className={props.className}>
+      <RB.Col>
+        <ResourceSelect value={kind} onChange={v=>onChange(v, value, provided)}/>
+      </RB.Col>
+      <RB.Col>
+        <NumberInput placeholder={L('res_desc_value')} value={value}
+          onChange={v=>onChange(kind, v, provided)} err={errClass(isNaN(+value))} />
+      </RB.Col>
+      <RB.Col>
+        <NumberInput placeholder={L('res_desc_provided')} value={provided}
+          onChange={v=>onChange(kind, value, v)} />
+      </RB.Col>
+      {props.onDelete && <RB.Col>
+        <RB.Button onClick={props.onDelete}>{L('act_remove')}</RB.Button>
+      </RB.Col>}
+    </RB.Row>
+}
+
+export function MultiResourceCostSelect(props: {value?: ResourceCostID[],
+    className?: string, onChange: (values: ResourceCostID[])=>void}){
+    const {value = [], onChange} = props
+    const onDelete = (item: ResourceCost)=>onChange(value.filter(f=>f!=item))
+    const onResChange = (res: ResourceCost, prev: ResourceCost)=>{
+        const costs = [].concat.apply([], value)
+        const cur = costs.find(p=>p===prev)
+        Object.assign(cur, res)
+        onChange(costs)
+    }
+    const list = value.map(o=><ResourceCostSelect key={`res_cost_select_${o._id}`}
+        value={o} onChange={n=>onResChange(n, o)} onDelete={()=>onDelete(o)} />)
+    return <RB.Container>
+      {list}
+    </RB.Container>
 }
 
 export function ResourceValueSelect(props: {value?: ResourceValueInfo, onChange: (info: ResourceValueInfo)=>void}){

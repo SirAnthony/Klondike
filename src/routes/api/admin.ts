@@ -112,10 +112,10 @@ export class AdminApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Master)
     async post_order_change(ctx: RenderContext){
-        const {id} = ctx.params
+        const {id} = ctx.aparams
         const params: any = ctx.request.body
         const {data = {}} = params
-        let item = await OrderController.get(id)
+        const item = await OrderController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
         await process_data(item, data)
         await item.save()
     }

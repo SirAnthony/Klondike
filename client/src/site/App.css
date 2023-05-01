@@ -102,10 +102,6 @@ div.app-head {
     color: var(--color-ui-error);
 }
 
-.input-error {
-    border-color: var(--color-ui-error);
-}
-
 .left {
     text-align: left;
 }
@@ -365,6 +361,12 @@ input.form-control, select.form-select, textarea.form-control {
     background-color: var(--color-ui-input);
     font-size: 10pt;
 }
+
+input.form-control.input-error, select.form-select.input-error,
+textarea.form-control.input-error {
+    border-color: var(--color-ui-error);
+}
+
 
 button.btn.disabled, button.btn:disabled, fieldset:disabled button.btn,
 input.form-control.disabled, input.form-control:disabled,

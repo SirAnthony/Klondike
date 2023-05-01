@@ -20,12 +20,13 @@ export function PopupButton(props: {url: string, desc: string, opt?: any}){
     return <RB.Button onClick={onClick}>{props.desc}</RB.Button>
 }
 
-export function DataViewerButtons(props: {show: boolean,
-    onShow: (v: boolean)=>void, onEdit: (v: boolean)=>void}){
-    const {show, onShow, onEdit} = props
+export function DataViewerButtons(props: {show?: boolean,
+    onShow?: (v: boolean)=>void, onEdit?: (v: boolean)=>void, onDelete?: ()=>void}){
+    const {onShow, onEdit, onDelete} = props
     return <RB.Col>
-      <RB.Button onClick={()=>onShow(!show)}>{L('act_show_data')}</RB.Button>
-      <RB.Button onClick={()=>onEdit(true)}>{L('act_edit')}</RB.Button>
+      {onShow && <RB.Button onClick={()=>onShow(!props.show)}>{L('act_show_data')}</RB.Button>}
+      {onEdit && <RB.Button onClick={()=>onEdit(true)}>{L('act_edit')}</RB.Button>}
+      {onDelete && <RB.Button onClick={onDelete}>{L('act_remove')}</RB.Button>}
     </RB.Col>
 }
 
