@@ -28,8 +28,9 @@ export class MainRouter extends BaseRouter {
         const item = await ItemController.get(id)
         if (!item || item.market?.type!=MarketType.Sale)
             throw 'Not found'
-        const {to} = item.market||{}
-        if (!user.admin && to?._id && !IDMatch(to._id, user.relation?._id))
+        const {from, to} = item.market||{}
+        const {relation} = user
+        if (!user.admin && !IDMatch(relation?._id, from._id) && to?._id && !IDMatch(to._id, user.relation?._id))
             throw 'Not found'
         const host = [util.localhost_to_ip(config.server.host), config.server.port].join(':')
         const url = `http://${host}/confirm/item/${item._id}/buy/${item.market.code}`

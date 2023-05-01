@@ -271,6 +271,7 @@ export class Ship extends Institution {
 
 export enum FlightType {Planetary, Drone}
 export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked}
+export enum FlightActions {}
 export class Flight extends ID {
     ts: number
     type: FlightType
