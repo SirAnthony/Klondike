@@ -50,7 +50,7 @@ export function OrderRow(props: RowProps){
     return <RB.Row key={`order_${order._id}`} className={props.className}>
         <RB.Col><RB.Container>{reqs}</RB.Container></RB.Col>
         <RB.Col sm={1}>{order.cycle}</RB.Col>
-        <RB.Col sm={2}>{order.assignee?.name}</RB.Col>
+        <RB.Col sm={2}>{order.owner?.name}</RB.Col>
         <RB.Col sm={2}>
           {is_admin && <DataViewerButtons onEdit={setShowEdit} onDelete={onDelete} />}
         </RB.Col>
@@ -82,7 +82,7 @@ type RowNewProps = {
     onCancel?: ()=>void
 } & RowDescProps
 type RowNewState = {
-    assignee?: Owner
+    owner?: Owner
     cycle: number
     resourceCost: ResourceCostID[]
     err?: ClientError
@@ -96,8 +96,8 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     stateChange(obj: any){
         this.setState(Object.assign({err: null}, obj)) }
     onCreate(){
-        const {assignee, cycle, resourceCost} = this.state
-        if (!assignee || isNaN(+cycle))
+        const {owner, cycle, resourceCost} = this.state
+        if (!owner || isNaN(+cycle))
             return this.setState({err: new ClientError('Wrong owner or cycle')})
         if (!resourceCost?.length)
             return this.setState({err: new ClientError('Empty request')})
@@ -107,7 +107,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             return this.setState({err: new ClientError('Incorrect parameters')})
         const costs = resourceCost.map(r=>({kind: r.kind, value: r.value, provided: r.provided|0}))
         this.props.onSubmit({_id: this.props.order?._id,
-            assignee, cycle, resourceCost: costs})
+            owner, cycle, resourceCost: costs})
     }
     addRow(){
         this.stateChange({resourceCost: [].concat(this.state.resourceCost||[],
@@ -122,8 +122,8 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             {state.err && <RB.Row><ErrorMessage field={state.err} /></RB.Row>}
             <RB.Col>{L('act_order_create')}</RB.Col>
             <RB.Col>
-              <OwnerSelect value={state.assignee} exclude={exclude}
-                onChange={assignee=>this.stateChange({assignee})} />
+              <OwnerSelect value={state.owner} exclude={exclude}
+                onChange={owner=>this.stateChange({owner})} />
             </RB.Col>
             <RB.Col sm={1}>{LR('cycle')}</RB.Col>
             <RB.Col>

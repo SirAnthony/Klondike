@@ -335,7 +335,7 @@ export class InventoryApiRouter extends BaseRouter {
             throw 'No source type'
         const src = await srcController.get(id)
         const list = await OrderController.all({
-            'assignee._id': src._id, cycle: Time.cycle})
+            'owner._id': src._id, cycle: Time.cycle})
         return {list: list?.filter(o=>o.resourceCost.some(c=>
             (c.value|0)>(c.provided|0)))}
     }

@@ -29,16 +29,17 @@ const InitLoop : Function & {loop: NodeJS.Timer, iterations: number} = (()=>{
     }, date.ms.SEC)
 }) as any
 
-const emitCycleChange = (initial: number)=>()=>{
+const emitCycleChange = (initial: number)=>{
     let last = initial||1
-return async function(){
-    const current = Time.cycle
-    if (last==current)
-        return
-    for (let ev of cycleEvents)
-        ev(last)
-    last = current
-}}
+    return async ()=>{
+        const current = Time.cycle
+        if (last==current)
+            return
+        for (let ev of cycleEvents)
+            ev(last)
+        last = current
+    }
+}
 
 export function addIntervalEvent(interval: number, event: TimeEvent){
     const prev = events.find(f=>f[1]==event)

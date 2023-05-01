@@ -31,13 +31,13 @@ export type Owner = ID & {type: InstitutionType}
 export class Order extends ID {
     resourceCost: ResourceCost[]
     cycle: number
-    assignee: Owner
+    owner: Owner
     static plan(o: Order){
         return o.resourceCost.reduce((p, r)=>
             p+(r.provided|0)/(r.value||1), 0)/(o.resourceCost.length||1)
     }
     get plan(){ return Order.plan(this) }
-    get keys(){ return '_id resourceCost cycle assignee'.split(' ') }
+    get keys(){ return '_id resourceCost cycle owner'.split(' ') }
     get class(){ return Order }
 }
 

@@ -95,7 +95,6 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         const targetChange = target=>this.stateChange({target})
         return [<RB.Col sm={4} key='coord_target_select'>
           <LocationSelect onChange={targetChange} value={target} optName='item_desc_target' />
-
         </RB.Col>]
     }
     rows_coordinates(){
@@ -178,7 +177,6 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_bottom(){
         const {type, name, data, owner, location} = this.state
         const btm_fields = (this[`fields_${TypeString(type)}_b`] || (()=>[])).call(this)
-        const dataChange = ({target: {value}})=>this.stateChange({data: value})
         const ownerChange = owner=>this.stateChange({owner})
         const locChange = location=>this.stateChange({location})
         return <RB.Row className='menu-input-row'>
@@ -191,7 +189,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
               placeholder={LR('item_desc_name')} />
           </RB.Col>}
           {this.hasField('owner') && <RB.Col sm={4}>
-            <OwnerSelect value={owner} onChange={ownerChange} exclude={this.ownerExclude} />
+            <OwnerSelect value={owner} onChange={ownerChange} exclude={this.ownerExclude}
+              nullable={true} />
           </RB.Col>}
           {this.hasField('location') && <RB.Col sm={4}>
             <LocationSelect onChange={locChange} value={location} />

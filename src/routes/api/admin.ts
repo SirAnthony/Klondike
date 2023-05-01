@@ -16,7 +16,6 @@ import {promises as fs} from 'fs'
 type AllInstControllers = UserController | CorpController | ShipController
 type AllControllers = (AllInstControllers | ItemController | OrderController | PlanetController) & {
     owner?: Owner
-    assignee?: Owner
     relation?: Owner
     captain?: Owner
     owners?: Owner[]
@@ -35,8 +34,6 @@ async function process_data(obj: AllControllers, data){
         const planet = await PlanetController.get(data.location._id);
         obj.location = PlanetController.location(planet, data.location.pos)
     }
-    if (data.assignee?._id)
-        obj.assignee = (await CorpController.get(data.assignee._id)).asOwner
     if (data.relation?._id){
         const ctrl = institutionController(+data.relation.type)
         obj.relation = (await ctrl.get(data.relation._id)).asOwner

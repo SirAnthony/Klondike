@@ -32,7 +32,7 @@ export class CorpApiRouter extends BaseRouter {
     async get_orders(ctx: RenderContext){
         const {id} = ctx.params
         const corp = await CorpController.get(id)
-        const list = await OrderController.all({'assignee._id': corp._id})
+        const list = await OrderController.all({'owner._id': corp._id})
         return {list}
     }
 

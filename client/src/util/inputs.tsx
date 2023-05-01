@@ -174,7 +174,7 @@ const asID = (obj: ID) : ID|null => {
 }
 
 export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolean,
-    exclude?: number[], title?: string, onChange: (owner: Owner)=>void}){
+    exclude?: number[], title?: string, nullable?: boolean, onChange: (owner: Owner)=>void}){
     const [instType, setInstType] = React.useState(props.value?.type)
     const [id, setId] = React.useState(asID(props.value))
     const ownerChange = (type: InstitutionType, id: ID)=>{
@@ -185,8 +185,10 @@ export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolea
     }
     return <RB.Row>
       <RB.Col>
-        <FreeInstitutionTypeSelect value={instType} exclude={props.exclude}
-          onChange={type=>ownerChange(type, id)} title={props.title} />
+        {props.nullable && <FreeInstitutionTypeSelect value={instType} exclude={props.exclude}
+          onChange={type=>ownerChange(type, id)} title={props.title} />}
+        {!props.nullable && <InstitutionTypeSelect value={instType} exclude={props.exclude}
+          onChange={type=>ownerChange(type, id)} title={props.title} />}
       </RB.Col>
       <RB.Col className='flex-center'>
         <CSelect value={id?._id} type={instType} filter={props.filter}
