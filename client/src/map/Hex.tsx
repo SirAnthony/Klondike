@@ -43,7 +43,7 @@ function HexItem(props: HexProps & {entity: Item | PlanetShip}){
 }
 
 function reduce_by_location(p, c: {location: Location}){
-    const {pos} = c.location, key = `${pos?.col|0}:${pos?.row|0}`;
+    const {pos} = c.location||{}, key = `${pos?.col|0}:${pos?.row|0}`;
     (p[key] = p[key]||[]).push(c)
     return p
 }
