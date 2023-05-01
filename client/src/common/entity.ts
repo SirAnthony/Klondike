@@ -22,8 +22,8 @@ export interface Identifier {
 export class ID implements Identifier {
     _id?: string
     name: string
-    constructor(data?: any){
-        for (let k in data||{})
+    constructor(data: any = {}){
+        for (let k in data)
             this[k] = data[k]
     }
 }
