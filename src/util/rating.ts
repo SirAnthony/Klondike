@@ -55,7 +55,7 @@ async function entityPoints(owner: Owner, cycle: number){
     const {cycleLength, basicTime} = Time.Time
     const interval = {$gte: cycleLength*(cycle-1), $lt: cycleLength*cycle}
     const events = await LogController.all({'owner._id': asID(owner._id),
-        'owner.type': owner.type, ts: interval, action: {$in: RatingActions}})
+        'owner.type': owner.type, cycle, action: {$in: RatingActions}})
     return events.reduce((p, c)=>p+c.points|0, 0)    
 }
 

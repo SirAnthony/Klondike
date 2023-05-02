@@ -366,4 +366,5 @@ export class LogEntry extends ID {
     ts?: number
     points?: number
     data?: any
+    cycle: number
 }

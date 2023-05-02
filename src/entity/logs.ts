@@ -19,9 +19,10 @@ export class Controller extends LogDB {
     }
     get identifier(): Identifier { return {_id: asID(this._id), name: this.name} }
 
-    static async log(entry: LogEntry){
+    static async log(entry: Omit<LogEntry, 'cycle'>){
         const l = new Controller(entry)
         l.ts = l.ts||Time.time
+        l.cycle = l.cycle||Time.cycle
         await l.save()
     }
 
