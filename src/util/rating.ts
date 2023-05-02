@@ -45,7 +45,7 @@ async function getForAll(){
     const ret = []
     for (let i=1; i<last_cycle+1; i++)
         ret.push(await getForCycle(i))
-    return ret
+    return ret.flat()
 }
 
 const RatingActions = [LogAction.PatentForwardFull, LogAction.PatentForwardPart,

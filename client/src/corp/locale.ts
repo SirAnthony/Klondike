@@ -8,6 +8,7 @@ load(mod, {
     'balance': 'Текущий счет',
     'currency': 'Кредиты',
     'corporations_rating': 'Рейтинг корпораций',
+    'rating_total': 'Итого',
     'suitable_loans': 'Подходящие займы',
 })
 
