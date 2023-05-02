@@ -4,7 +4,8 @@ import {
 } from '../../client/src/common/entity';
 import {
     CorpController, InstitutionController, LoanController,
-    LogController
+    LogController,
+    OrderController
 } from '../entity'
 import {
     ItemController, ShipController, institutionController
@@ -151,6 +152,14 @@ async function calcExpenses(entity: InstitutionController, expenses: LoanControl
     }
     for (let loan of loans)
         await close_loan(entity, loan, {info: `calcExpenses ${cycle}`, cycle})
+    // Add finances from next cycle orders
+    const orders = await OrderController.all({'owner._id': asID(entity._id),
+        'owner.type': +entity.type, cycle: cycle+1})
+    for (let o of orders)
+        entity.credit = (entity.credit|0) + o.cost
+    if (orders.length)
+        await entity.save()
+    // Reduce expenses for ships
     if (entity.type == InstitutionType.Ship){
         const cost = entity.cost|0
         entity.credit = (entity.credit|0) - cost
