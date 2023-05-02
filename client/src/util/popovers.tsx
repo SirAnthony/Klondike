@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, Patent, Order} from '../common/entity'
+import {Item, Patent, Order, OwnerMatch} from '../common/entity'
 import {Owner, Loan, InstitutionType} from '../common/entity'
 import {NumberInput, OwnerSelect} from './inputs'
 import {OrderSelect, PatentSelect} from './inputs'
@@ -93,6 +93,7 @@ type OwnerValueSelectProps = {
     valDesc: string
     placement?: any
     exclude: InstitutionType[]
+    rangeExclude?: InstitutionType[]
     source?: Owner
     nullable?: boolean
     inputRange?: [number, number]
@@ -102,7 +103,8 @@ export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
     const {desc, valDesc, exclude, source, nullable, inputRange} = props
     const [owner, setOwner] = React.useState(null)
     const [value, setValue] = React.useState(null)
-    const checkRange = (val: number)=>!inputRange ||
+    const skipCheck = props.rangeExclude?.includes(+owner?.type)
+    const checkRange = (val: number)=>!inputRange || skipCheck ||
         (val>=inputRange[0] && val<=inputRange[1])
     const check = ()=>nullable || (owner?._id &&
         !isNaN(+owner?.type) && !isNaN(+value) && checkRange(+value))
@@ -111,8 +113,8 @@ export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
     const btn = <RB.Popover>
       <RB.PopoverBody>
         <OwnerSelect value={owner} onChange={setOwner} exclude={exclude} nullable={nullable}
-          filter={source ? v=>!(+v.type===+source.type&&''+v._id===''+source._id) : undefined} />
-        <RangeWarning value={value} range={inputRange} />
+          filter={source ? v=>!OwnerMatch(v, source) : undefined} />
+        {!skipCheck && <RangeWarning value={value} range={inputRange} />}
         <NumberInput value={value} onChange={setValue} placeholder={valDesc} />
         <RB.Row className='menu-input-row'>
           <RB.Button disabled={!check()} onClick={onClick}>{desc}</RB.Button>

@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, Owner, Resource} from '../../common/entity'
+import {InstitutionType, Item, ItemType, Owner, Resource} from '../../common/entity'
 import {Patent, Loan} from '../../common/entity'
 import {LoanSelectTrigger, OwnerValueSelectTrigger} from '../../util/popovers'
 import {ResourceImg} from '../../util/components'
@@ -94,6 +94,7 @@ export type ItemPriceInputProps = {
     nullable?: boolean
     noRange?: boolean
     source?: Owner
+    rangeExclude?: InstitutionType[]
     onSell?: (item: Item, target: Owner, price: number)=>Promise<boolean>
 }
 
@@ -105,9 +106,8 @@ export class ItemPriceInput extends PriceFetcher<ItemPriceInputProps, {}> {
             noRange ? 1 : base_price*defines.price.low_modifier,
             noRange ? Number.MAX_SAFE_INTEGER : base_price*defines.price.high_modifier
         ]
-        return <OwnerValueSelectTrigger onClick={(owner, price)=>onSell(item, owner, price)}
+        return <OwnerValueSelectTrigger {...this.props} onClick={(owner, price)=>onSell(item, owner, price)}
           inputRange={inputRange} desc={L('act_sell')} valDesc={LR('item_desc_price')}
-          exclude={iutil.owners_exclude(item.type)} source={this.props.source}
-          nullable={nullable} />
+          exclude={iutil.owners_exclude(item.type)} />
     }
 }

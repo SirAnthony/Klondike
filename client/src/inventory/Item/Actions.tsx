@@ -67,7 +67,7 @@ export class ItemActions extends React.Component<ItemActionsProps, ItemActionsSt
         if (!onSell || !this.check())
             return null
         return <ItemPriceInput item={item} onSell={onSell} source={entity}
-            nullable={nullable} />
+            nullable={nullable} rangeExclude={[InstitutionType.Research]} />
     }
     btn_code(){
         const {item} = this.props
