@@ -8,7 +8,8 @@ export function currentDate(){
     return new Date(+defines.date + diff)
 }
 
-export function asID(a: string | ObjectId): string { return ''+a }
+export function asID(id: string | ObjectId): string { return ''+id }
+export function isID(id: string){ return /^[a-f0-9]{12,24}$/.test(id) }
 export function IDMatch(a, b){
     return asID(a)===asID(b)
 }

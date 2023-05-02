@@ -6,10 +6,11 @@ import {UserType, Patent, PatentStatus, ItemType, InstitutionType,
     PlanetType, Planet, Owner, Location} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
-import {IDMatch, asID} from '../../util/server'
+import {IDMatch, asID, isID} from '../../util/server'
 import {Time} from '../../util/time'
 import * as curls from '../../../client/src/common/urls'
 import * as util from '../../../client/src/common/util'
+import * as uutil from '../../util/user'
 import config from '../../config'
 import {promises as fs} from 'fs'
 
@@ -82,7 +83,7 @@ export class AdminApiRouter extends BaseRouter {
             throw 'Should have name and type fields'
         if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
-        const item = await ItemController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
+        const item = await ItemController.get(isID(id) ? id : {})
         await process_data(item, data)
         // Patents adds problems
         if (item.type == ItemType.Patent){
@@ -112,7 +113,7 @@ export class AdminApiRouter extends BaseRouter {
         const {id} = ctx.aparams
         const params: any = ctx.request.body
         const {data = {}} = params
-        const item = await OrderController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
+        const item = await OrderController.get(isID(id) ? id : {})
         await process_data(item, data)
         await item.save()
     }
@@ -153,6 +154,8 @@ export class AdminApiRouter extends BaseRouter {
         if (data.phone && !util.isPhone(data.phone))
             throw new ApiError(Codes.INCORRECT_PARAM, 'phone')
         await process_data(user, data)
+        if (data.data)
+            user.info = await uutil.process_data(data.data)
         await process_img(ctx, user)
         if (data.password)
             user.password = await UserController.hash_password(data.password)
@@ -176,7 +179,7 @@ export class AdminApiRouter extends BaseRouter {
         if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
         const controller = institutionController(+type)
-        const item = await controller.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
+        const item = await controller.get(isID(id) ? id : data)
         await process_data(item, data)
         await process_img(ctx, item)
         await item.save()
@@ -195,7 +198,7 @@ export class AdminApiRouter extends BaseRouter {
             throw 'Should specify time of the flight'
         if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
-        const item = await FlightController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
+        const item = await FlightController.get(isID(id) ? id : {})
         await process_data(item, data)
         await item.save()
     }
@@ -222,7 +225,7 @@ export class AdminApiRouter extends BaseRouter {
             throw 'Should have name and type fields'
         if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
-        const item = await PlanetController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
+        const item = await PlanetController.get(isID(id) ? id : data)
         await process_data(item, data)
         await item.save()
     }

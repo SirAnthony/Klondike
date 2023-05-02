@@ -39,7 +39,7 @@ export {UserController, LogController, ConfigController}
 
 export type InstitutionController = UserController | CorpController | ShipController
 export function institutionController(type: InstitutionType){
-    switch(type){
+    switch(+type){
         case InstitutionType.User: return UserController
         case InstitutionType.Research: return CorpController
         case InstitutionType.Corporation: return CorpController

@@ -22,7 +22,7 @@ load(mod, {
     'field_confirm': 'Повторите пароль',
     'reset_password': 'Сбросить пароль',
     'error_restricted': 'Нет доступа',
-    'desc_name': 'Имя игрока',
+    'desc_name': 'ФИО',
     'desc_fullname': 'Имя персонажа',
     'desc_role': 'Роль',
     'desc_relation': 'Принадлежность',

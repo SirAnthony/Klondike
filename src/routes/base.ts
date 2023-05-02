@@ -41,7 +41,7 @@ export function CheckRole(roles: UserType[] | UserType){
             if (!types.includes(UserType.Master))
                 types.push(UserType.Master)
             const {user}: {user: UserController} = ctx.state
-            if (types.length && !types.includes(user.kind))
+            if (types.length && !types.includes(+user.kind))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}

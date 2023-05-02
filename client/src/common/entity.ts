@@ -261,22 +261,25 @@ export class Ship extends Institution {
     defence: number
     crew: number
     slots: number
+    flight?: ID
     get keys(){
         return super.keys.concat(`kind location price port captain
             integrity mass engine speed movement size attack defence 
-            crew`.replace(/\s+/g, ' ').split(' '))
+            crew `.replace(/\s+/g, ' ').split(' '))
     }
 }
 
-export enum FlightType {Planetary, Drone}
 export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked}
+export enum FlightType {Planetary, Drone}
 export enum FlightActions {}
 export class Flight extends ID {
     ts: number
     type: FlightType
     status: FlightStatus
+    departure?: number 
+    arrival?: number
     owner?: Owner
-    location: Location
+    location?: Location
     get keys(){
         return `ts type status owner location`.split(' ') }
     get class(){ return Flight }
@@ -350,6 +353,8 @@ export enum LogAction {
     FineCycleClose, LoanCycleClose, CostCycleClose,
     BonusRating,
     MoneyLeftovers, ResourceLeftovers,
+    FlightAction, FlightSignup, FlightDelist, FlightBlock, FlightUnblock,
+    FlightDeparture, FlightArrival, FlightHelp,
     CycleRating, 
 }
 export class LogEntry extends ID {
@@ -359,6 +364,7 @@ export class LogEntry extends ID {
     item?: Item
     institution?: Owner
     order?: Order
+    flight?: Flight
     ts?: number
     points?: number
     data?: any
