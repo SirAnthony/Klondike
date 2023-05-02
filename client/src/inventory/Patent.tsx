@@ -42,7 +42,7 @@ export function PatentRow(props: RowProps){
     const ownership = patent.owners.length<2 ? LR('patent_ownership_full') :
         LR(`patent_ownership_shared`)+` [${owners}/${len}]`
     const is_served = Patent.served(patent, owner)
-    const cls = props.className+(is_served ? 'patent-served' : '')
+    const cls = props.className+(is_served ? ' patent-served' : '')
     return <RB.Row key={`patent_${patent._id}`} className={cls}>
         <RB.Col><IDField item={patent} /></RB.Col>
         <RB.Col>{patent.name}</RB.Col>
