@@ -45,12 +45,16 @@ export class InventoryApiRouter extends BaseRouter {
             await patent.save()
             throw 'Wrong patent status'
         }
-        if (await balance.pay_with_resource(resource, pt, corp.asOwner, 'post_patent_pay'))
+        let closed = false
+        if (await balance.pay_with_resource(resource, pt, corp.asOwner, 'post_patent_pay')){
+            if (closed = !pt.resourceCost.some(k=>k.provided<k.value)){
+                pt.ready = true
+                pt.served = []
+            }
             await patent.save()
-        // Patent closed
-        if (!pt.resourceCost.some(k=>k.provided<k.value)){
-            pt.ready = true
-            pt.served = []
+        }
+        // Points for patent closed
+        if (closed){
             const conf = await ConfigController.get()
             const points = +conf.points.patent.pay
             await LogController.log({
