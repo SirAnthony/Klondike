@@ -15,6 +15,7 @@ export class Time {
     get cycle(){ return Math.floor(this.time/this.cycleLength)+1 }
     get format(){ return interval(this.time) }
     get hoursInCycle(){ return this.cycleLength/ms.HOUR }
+    segments(len: number){ return Math.floor(this.time/len)+1 }
     cycleInterval(cycle: number){
         return {$gte: this.cycleLength*(cycle-1), $lt: this.cycleLength*cycle} }
 }

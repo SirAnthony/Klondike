@@ -13,7 +13,7 @@ function FlightActions(props: FlightRowParams){
     </RB.Col>
 }
 
-type FlightSend = Omit<Flight, 'name' | 'keys'>
+type FlightSend = Omit<Flight, 'name' | 'keys' | 'class'>
 type FlightRowNewParams = {
     onSubmit: (f: FlightSend)=>Promise<boolean>
 } & Omit<FlightRowParams, 'actionsClass'>

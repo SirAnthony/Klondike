@@ -19,6 +19,7 @@ export function OrderRowDesc(props: RowDescProps){
       <RB.Col>{L('res_required')}</RB.Col>
       <RB.Col>{L('res_filled')}</RB.Col>
       <RB.Col sm={1}>{LR('cycle')}</RB.Col>
+      <RB.Col sm={1}>{LR('item_desc_price')}</RB.Col>
       <RB.Col sm={2}>{LR('assignee')}</RB.Col>
       <RB.Col sm={2}>{LR('item_desc_actions')}</RB.Col>
     </RB.Row>
@@ -50,6 +51,7 @@ export function OrderRow(props: RowProps){
     return <RB.Row key={`order_${order._id}`} className={props.className}>
         <RB.Col><RB.Container>{reqs}</RB.Container></RB.Col>
         <RB.Col sm={1}>{order.cycle}</RB.Col>
+        <RB.Col sm={1}>{order.cost}</RB.Col>
         <RB.Col sm={2}>{order.owner?.name}</RB.Col>
         <RB.Col sm={2}>
           {is_admin && <DataViewerButtons onEdit={setShowEdit} onDelete={onDelete} />}
@@ -85,6 +87,7 @@ type RowNewState = {
     owner?: Owner
     cycle: number
     resourceCost: ResourceCostID[]
+    cost: number
     err?: ClientError
 }
 export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
@@ -96,7 +99,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
     stateChange(obj: any){
         this.setState(Object.assign({err: null}, obj)) }
     onCreate(){
-        const {owner, cycle, resourceCost} = this.state
+        const {owner, cycle, cost, resourceCost} = this.state
         if (!owner || isNaN(+cycle))
             return this.setState({err: new ClientError('Wrong owner or cycle')})
         if (!resourceCost?.length)
@@ -107,7 +110,7 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             return this.setState({err: new ClientError('Incorrect parameters')})
         const costs = resourceCost.map(r=>({kind: r.kind, value: r.value, provided: r.provided|0}))
         this.props.onSubmit({_id: this.props.order?._id,
-            owner, cycle, resourceCost: costs})
+            owner, cycle, resourceCost: costs, cost})
     }
     addRow(){
         this.stateChange({resourceCost: [].concat(this.state.resourceCost||[],
@@ -129,6 +132,11 @@ export class OrderRowNew extends React.Component<RowNewProps, RowNewState> {
             <RB.Col>
               <NumberInput placeholder={LR('cycle')} value={state.cycle}
                 onChange={cycle=>this.stateChange({cycle})} />
+            </RB.Col>
+            <RB.Col sm={1}>{LR('item_desc_price')}</RB.Col>
+            <RB.Col>
+              <NumberInput placeholder={LR('item_desc_price')} value={state.cost}
+                onChange={cost=>this.stateChange({cost})} />
             </RB.Col>
             <RB.Col>
               <RB.Button onClick={this.addRow}>{L('act_add_row')}</RB.Button>

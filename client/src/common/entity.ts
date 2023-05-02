@@ -30,6 +30,7 @@ export class Order extends ID {
     resourceCost: ResourceCost[]
     cycle: number
     owner: Owner
+    cost: number
     static plan(o: Order){
         return o.resourceCost.reduce((p, r)=>
             p+(r.provided|0)/(r.value||1), 0)/(o.resourceCost.length||1)
@@ -128,7 +129,7 @@ export class Patent extends MultiOwnedItem {
     owners: PatentOwner[]
     resourceCost: ResourceCost[]
     get keys(){
-        return super.keys.concat('kind weight resourceCost status'
+        return super.keys.concat('kind weight resourceCost'
             .split(' ')).filter(k=>!['location'].includes(k))
     }
     get ownership(){ 
@@ -278,6 +279,7 @@ export class Flight extends ID {
     location: Location
     get keys(){
         return `ts type status owner location`.split(' ') }
+    get class(){ return Flight }
 }
 
 export type PlanetShip = {

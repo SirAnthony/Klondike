@@ -28,20 +28,20 @@ export class ItemActions extends React.Component<ItemActionsProps, ItemActionsSt
         const {relation} = user||{}
         const owners = [item?.owner?._id].concat(
             (item as MultiOwnedItem).owners?.map(o=>o._id)).filter(Boolean)
-        return relation && owners.includes(relation._id)
+        return this.is_admin || (relation && owners.includes(relation._id))
     }
     check(itype?: ItemType, etype?: InstitutionType, mtype: MarketType[] = [MarketType.None]){
-        if (this.is_admin)
-            return true
-        const {item} = this.props, mtp = +item.market?.type
-        if (!isNaN(mtp) && (mtp==MarketType.Protected || !mtype.includes(mtp)))
+        const {item} = this.props
+        if (!this.check_market(mtype))
             return false
         if (!isNaN(+itype) && +itype!=item.type)
             return false
         return this.is_owner && (isNaN(+etype) || +etype==this.props.entity.type)
     }
     check_market(mtype: MarketType[]){
-        return mtype.includes(+this.props.item?.market?.type) }
+        const {item} = this.props, mtp = +item.market?.type
+        return isNaN(mtp) || (mtp!==MarketType.Protected && mtype.includes(mtp))
+    }
     btn_patent_pay(){
         const {item, entity, onPatentPay} = this.props
         if (!onPatentPay || !this.check(ItemType.Resource, InstitutionType.Research))
@@ -63,16 +63,18 @@ export class ItemActions extends React.Component<ItemActionsProps, ItemActionsSt
         return <ItemLoanInput item={item} onPay={onLoanPay} />
     }
     btn_sell(){
-        const {item, entity, onSell} = this.props
+        const {item, entity, nullable, onSell} = this.props
         if (!onSell || !this.check())
             return null
-        return <ItemPriceInput item={item} onSell={onSell} source={entity} />
+        return <ItemPriceInput item={item} onSell={onSell} source={entity}
+            nullable={nullable} />
     }
     btn_code(){
         const {item} = this.props
-        if (item.market?.type==MarketType.Loan)
-            return <div>{L('loan_proposed', item.market.to.name)}</div>
-        return <PopupButton url={`/item/${item._id}/code`} desc={L('act_show_code')} />
+        return <RB.Col>
+          <div>{L('market_proposed', item.market.to?.name||'')}</div>
+          <PopupButton url={`/item/${item._id}/code`} desc={L('act_show_code')} />
+        </RB.Col>
     }
     btn_delist(){
         const {item, onDelist} = this.props

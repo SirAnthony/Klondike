@@ -21,6 +21,7 @@ export type ItemRowProps = {
     item: Item
     entity?: Institution
     layout?: number
+    nullable?: boolean
     onSubmit?: (item: Item)=>Promise<boolean>
     onDelete?: (item: Item)=>Promise<boolean>
     onPatentPay?: (item: Item, patent: Patent)=>Promise<boolean>

@@ -5,6 +5,7 @@ import {Controller as LogController} from './logs'
 import {Controller as ConfigController} from './config'
 import {MakeController} from './base'
 import {Time} from '../util/time';
+import {asID} from '../util/server'
 
 export class ItemController extends MakeController(Item, 'items') {}
 export class CorpController extends MakeController(Corporation, 'corps') {}
@@ -13,14 +14,14 @@ export class FlightController extends MakeController(Flight, 'flights') {}
 
 export class ShipController extends MakeController(Ship, 'ships'){
     static PlanetShip(ship: Ship): PlanetShip {
-        return {_id: ship._id, name: ship.name, type: ship.type,
+        return {_id: asID(ship._id), name: ship.name, type: ship.type,
             kind: ship.kind, img: ship.img, location: ship.location}
     }
 }
 
 export class PlanetController extends MakeController(Planet, 'planets'){
     static location(p: PlanetController, pos: Pos): Location {
-        return {_id: p._id, name: p.name, pos, system: p.system} }
+        return {_id: asID(p._id), name: p.name, pos, system: p.system} }
 }
 
 export class LoanController extends MakeController(Loan, 'loans') {
@@ -36,6 +37,7 @@ export class LoanController extends MakeController(Loan, 'loans') {
 
 export {UserController, LogController, ConfigController}
 
+export type InstitutionController = UserController | CorpController | ShipController
 export function institutionController(type: InstitutionType){
     switch(type){
         case InstitutionType.User: return UserController

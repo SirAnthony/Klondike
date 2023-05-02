@@ -5,10 +5,9 @@ import {ConfigController, LogController} from '../../entity'
 import {PlanetInfo, UserType, LogAction, InstitutionType} from '../../../client/src/common/entity'
 import {ItemType, Resource} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import * as server_util from '../../util/server'
+import {asID} from '../../util/server'
 import * as cutil from '../../util/config'
 import {Time} from '../../util/time'
-import {ObjectId} from 'mongodb';
 
 export class ApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -34,14 +33,14 @@ export class ApiRouter extends BaseRouter {
         const {user}: {user: UserController} = ctx.state
         const entity = await institutionController(user.relation?.type)?.get(user.relation?._id)
         const planet: PlanetInfo = await PlanetController.get(id)
-        const ships = await ShipController.all({'location._id': planet._id})
+        const ships = await ShipController.all({'location._id': asID(planet._id)})
         planet.ships = ships.map(s=>ShipController.PlanetShip(s))
         const filter = user.kind==UserType.Master ? {} : {$or: [
-            {'owner._id': entity._id, 'owner.type': entity.type},
-            {'known._id': entity._id, 'known.type': entity.type}
+            {'owner._id': asID(entity._id), 'owner.type': +entity.type},
+            {'known._id': asID(entity._id), 'known.type': +entity.type}
         ]}
         const items = await ItemController.all(Object.assign({
-            'location._id': planet._id,
+            'location._id': asID(planet._id),
             'type': {$in: [ItemType.Resource, ItemType.Coordinates]}
         }, filter))
         planet.items = items
@@ -51,7 +50,7 @@ export class ApiRouter extends BaseRouter {
     @CheckRole(UserType.Navigator)
     async get_planet_list_short(ctx: RenderContext){
         const planets = await PlanetController.all()
-        const list = planets.map(p=>({_id: p._id, name: p.name}))
+        const list = planets.map(p=>({_id: asID(p._id), name: p.name}))
         return {list}
     }
 

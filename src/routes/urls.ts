@@ -37,6 +37,7 @@ inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json
     '/:stype/:id/balance': {func: 'balance', methods: ['get']},
     '/:stype/:id/transfer': {func: 'transfer', methods: ['post']},
     '/:stype/:id/loans': {func: 'loans', methods: ['get']},
+    '/:stype/:id/proposals': {func: 'proposals', methods: ['get']},
     '/:stype/:id/item/:itemid/pay/patent/:target': {func: 'item_pay_patent', methods: ['put']},
     '/:stype/:id/item/:itemid/pay/order/:orderid': {func: 'item_pay_order', methods: ['put']},
     '/:stype/:id/item/:itemid/pay/loan/:loanid': {func: 'item_pay_loan', methods: ['put']},
@@ -44,7 +45,8 @@ inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json
     '/:stype/:id/item/:itemid/reject/loan': {func: 'item_reject_loan', methods: ['put']},
     '/:stype/:id/item/:itemid/sell': {func: 'item_sell', methods: ['put']},
     '/:stype/:id/item/:itemid/delist': {func: 'item_delist', methods: ['put']},
-    '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['post']},
+    '/:stype/:id/item/:itemid/buy': {func: 'item_buy', methods: ['put']},
+    '/:stype/:id/item/:itemid/reject': {func: 'item_reject', methods: ['put']},
 }},
 user_api: {prefix: '/api/user', router: UserApiRouter, opt: {json: true}, urls: {
     '/profile/:id': {func: 'profile', methods: ['get', 'post']}

@@ -94,6 +94,7 @@ export class ItemLoanInput extends PriceFetcher<ItemLoanInputProps, {}> {
 
 export type ItemPriceInputProps = {
     item: Item
+    nullable?: boolean
     noRange?: boolean
     source?: Owner
     onSell?: (item: Item, target: Owner, price: number)=>Promise<boolean>
@@ -101,14 +102,15 @@ export type ItemPriceInputProps = {
 
 export class ItemPriceInput extends PriceFetcher<ItemPriceInputProps, {}> {
     render(){
-        const {item, noRange, onSell} = this.props
+        const {item, noRange, nullable, onSell} = this.props
         const base_price = iutil.item_base_price(item, this.state.prices)
-        const inputRange: [number, number] | null = [
+        const inputRange: [number, number] | null = nullable ? null : [
             noRange ? 1 : base_price*defines.price.low_modifier,
             noRange ? Number.MAX_SAFE_INTEGER : base_price*defines.price.high_modifier
         ]
         return <OwnerValueSelectTrigger onClick={(owner, price)=>onSell(item, owner, price)}
           inputRange={inputRange} desc={L('act_sell')} valDesc={LR('item_desc_price')}
-          exclude={iutil.owners_exclude(item.type)} source={this.props.source}/>
+          exclude={iutil.owners_exclude(item.type)} source={this.props.source}
+          nullable={nullable} />
     }
 }

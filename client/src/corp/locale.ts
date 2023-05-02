@@ -7,10 +7,6 @@ load(mod, {
     'desc_name': 'Название',
     'balance': 'Текущий счет',
     'currency': 'Кредиты',
-    'order': tpl`Текущий заказ на цикл ${0}`,
-    'plan': tpl`Выполнение плана: ${0}%`,
-    'res_cur': 'Собственность',
-    'patent_cur': 'Доступные патенты',
     'corporations_rating': 'Рейтинг корпораций',
     'suitable_loans': 'Подходящие займы',
 })

@@ -28,6 +28,7 @@ const aliases = {
     'reset_password_sent': 'Письмо с инструкциями отправлено',
     'error_account_retrive': 'Аккаунт создан, но авторизация не удалась, '+
         'обновите страницу и войдите',
+    'error_no_funds': 'Недостаточно средств',
     'institution_desc': 'Принадлежность',
     'institution_type_0': 'Физ. Лицо',
     'institution_type_1': 'Организация',

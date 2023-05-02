@@ -5,15 +5,15 @@ import {Time} from '../util/time'
 export async function get_prices() : Promise<{[k in ResourceType]: number}> {
     const prices : {[k in ResourceType]: number}  = {} as any
     const conf = await ConfigController.get()
-    const cycle = Time.cycle
-    const res = conf.price.res.slice(0, cycle+1).pop()
+    const index = Time.segments(Time.cycleLength/2)
+    const res = conf.price.res.slice(0, index+1).pop()
     for (let k in res)
         prices[k] = res[k]
-    const entries = await LogController.all({'item.type': ItemType.Resource,
-        action: LogAction.ItemPurchase, ts: Time.cycleInterval(cycle)})
-    for (let l of entries){
-        const res = l.item as Resource
-        prices[res.kind] = (prices[res.kind]+(res.price/res.value||prices[res.kind]))/2
-    }
+    // const entries = await LogController.all({'item.type': ItemType.Resource,
+    //     action: LogAction.ItemPurchase, ts: Time.cycleInterval(cycle)})
+    // for (let l of entries){
+    //     const res = l.item as Resource
+    //     prices[res.kind] = (prices[res.kind]+(res.price/res.value||prices[res.kind]))/2
+    // }
     return prices
 }

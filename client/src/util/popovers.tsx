@@ -94,22 +94,23 @@ type OwnerValueSelectProps = {
     placement?: any
     exclude: InstitutionType[]
     source?: Owner
+    nullable?: boolean
     inputRange?: [number, number]
     onClick: (owner: Owner, value: number)=>Promise<boolean>
 }
 export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
-    const {desc, valDesc, exclude, source, inputRange} = props
+    const {desc, valDesc, exclude, source, nullable, inputRange} = props
     const [owner, setOwner] = React.useState(null)
     const [value, setValue] = React.useState(null)
     const checkRange = (val: number)=>!inputRange ||
         (val>=inputRange[0] && val<=inputRange[1])
-    const check = ()=>owner?._id && !isNaN(+owner?.type) &&
-        !isNaN(+value) && checkRange(+value)
+    const check = ()=>nullable || (owner?._id &&
+        !isNaN(+owner?.type) && !isNaN(+value) && checkRange(+value))
     const onClick = async ()=>check() &&
         (await props.onClick(owner, value)) && document.body.click()
     const btn = <RB.Popover>
       <RB.PopoverBody>
-        <OwnerSelect value={owner} onChange={setOwner} exclude={exclude}
+        <OwnerSelect value={owner} onChange={setOwner} exclude={exclude} nullable={nullable}
           filter={source ? v=>!(+v.type===+source.type&&''+v._id===''+source._id) : undefined} />
         <RangeWarning value={value} range={inputRange} />
         <NumberInput value={value} onChange={setValue} placeholder={valDesc} />

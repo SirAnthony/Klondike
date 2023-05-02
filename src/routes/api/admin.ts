@@ -1,20 +1,19 @@
 import {BaseRouter, CheckRole} from '../base'
-import {UserController, CorpController, PlanetController, ConfigController, institutionController, ShipController, FlightController} from '../../entity'
-import {OrderController, ItemController} from '../../entity'
-import {UserType, Patent, PatentStatus, ItemType} from '../../../client/src/common/entity'
-import {InstitutionType, PlanetType, Planet} from '../../../client/src/common/entity'
-import {Owner, Location} from '../../../client/src/common/entity'
+import {UserController, CorpController, PlanetController,
+    ConfigController, institutionController, FlightController,
+    InstitutionController, OrderController, ItemController} from '../../entity'
+import {UserType, Patent, PatentStatus, ItemType, InstitutionType,
+    PlanetType, Planet, Owner, Location} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
-import {IDMatch} from '../../util/server'
+import {IDMatch, asID} from '../../util/server'
 import {Time} from '../../util/time'
 import * as curls from '../../../client/src/common/urls'
 import * as util from '../../../client/src/common/util'
 import config from '../../config'
 import {promises as fs} from 'fs'
 
-type AllInstControllers = UserController | CorpController | ShipController
-type AllControllers = (AllInstControllers | ItemController | OrderController |
+type AllControllers = (InstitutionController | ItemController | OrderController |
     FlightController | PlanetController) & {
     owner?: Owner
     relation?: Owner
@@ -23,7 +22,7 @@ type AllControllers = (AllInstControllers | ItemController | OrderController |
     location?: Location
 }
 async function process_data(obj: AllControllers, data){
-    const keys = obj.keys
+    const keys = (new obj.class()).keys
     const fields = Object.keys(data).filter(f=>!keys.includes(f))
     if (fields.length)
         console.error(`sent incorrect fields: ${JSON.stringify(fields)}`)
@@ -54,11 +53,11 @@ async function process_data(obj: AllControllers, data){
     }
     return obj
 }
-async function process_img(ctx: RenderContext, obj: AllInstControllers){
+async function process_img(ctx: RenderContext, obj: InstitutionController){
     if (!ctx.file)
         return
     // Save id to img name
-    obj.img = obj._id
+    obj.img = asID(obj._id)
     const filename = config.static_dir+curls.Images.get(obj)
         .replace(config.static_url, '')
     await fs.writeFile(filename, ctx.file.buffer)
@@ -81,7 +80,7 @@ export class AdminApiRouter extends BaseRouter {
         const {id, data} = ctx.aparams
         if (!data.name || !ItemType[+data.type])
             throw 'Should have name and type fields'
-        if (data._id && data._id!=id)
+        if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
         const item = await ItemController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
         await process_data(item, data)
@@ -174,7 +173,7 @@ export class AdminApiRouter extends BaseRouter {
             throw 'Should have name and type fields'
         if (+data.type == InstitutionType.User)
             throw 'Cannot change user with this method'
-        if (data._id && data._id!=id)
+        if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
         const controller = institutionController(+type)
         const item = await controller.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
@@ -194,7 +193,7 @@ export class AdminApiRouter extends BaseRouter {
         const {id, data} = ctx.aparams
         if (!data.ts)
             throw 'Should specify time of the flight'
-        if (data._id && data._id!=id)
+        if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
         const item = await FlightController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : {})
         await process_data(item, data)
@@ -221,7 +220,7 @@ export class AdminApiRouter extends BaseRouter {
         const {id, data} = ctx.aparams
         if (!data.name || !Object.values(PlanetType).includes(data.type))
             throw 'Should have name and type fields'
-        if (data._id && data._id!=id)
+        if (data._id && !IDMatch(data._id, id))
             throw 'Cannot change id of item'
         const item = await PlanetController.get(/^[a-f0-9]{12,24}$/.test(id) ? id : data)
         await process_data(item, data)

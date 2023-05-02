@@ -1,8 +1,19 @@
-import {ExpenseType, InstitutionType, Loan, LogAction} from '../../client/src/common/entity';
-import {ResourceCost, Resource, Owner} from '../../client/src/common/entity';
-import {CorpController, LoanController, LogController} from '../entity'
-import {ItemController, ShipController, institutionController} from '../entity';
+import {
+    Coordinates, ExpenseType, InstitutionType, ItemType,
+    LogAction, Patent, PatentStatus, ResourceCost, Resource,
+    Owner
+} from '../../client/src/common/entity';
+import {
+    CorpController, InstitutionController, LoanController,
+    LogController
+} from '../entity'
+import {
+    ItemController, ShipController, institutionController
+} from '../entity';
+import {IDMatch, asID} from './server';
+import * as rating from './rating'
 import * as Time from './time'
+import { ApiError, Codes } from '../../client/src/common/errors';
 
 export async function pay_with_resource(resource: ItemController,
     target: {resourceCost: ResourceCost[]}, owner: Owner, info: string){
@@ -34,10 +45,55 @@ export async function pay_with_resource(resource: ItemController,
     return used
 }
 
+export async function buy_item(src: InstitutionController, item: ItemController) {
+    const {market} = item
+    if (IDMatch(market.from._id, market.to?._id))
+        throw 'Cannot buy owned item'
+    const price = item.market.price
+    if ((src.credit|0) < market.price)
+        throw new ApiError(Codes.INCORRECT_PARAM, 'error_no_funds')
+    const dst = await (institutionController(market.from.type)).get(market.from._id)
+    dst.credit = (dst.credit|0) + price
+    src.credit = (src.credit|0) - price
+    if (item.type==ItemType.Patent) {
+        const pt = (item as unknown) as Patent
+        const status = Patent.served(pt, src) ?
+            PatentStatus.Served : PatentStatus.Ready
+        const prevOwners = pt.owners.map(o=>Object.assign({}, o))
+        pt.owners = pt.owners.filter(o=>!IDMatch(o._id, dst._id) &&
+            !IDMatch(o._id, src._id)).concat(
+            {status: status, ...src.asOwner})
+        const points = await rating.patent_points(pt, src, prevOwners)
+        if (points) {
+            await LogController.log({
+                name: 'patent_forward', info: 'post_item_buy',
+                owner: src.asOwner, item: pt, points,
+                // If patent was sold & already served once
+                // it cannot have FullOwnership, part already calculated
+                action: LogAction.PatentForwardPart,
+            })
+        }
+    } else if (item.type==ItemType.Coordinates) {
+        const pt = (item as unknown) as Coordinates
+        pt.owners = pt.owners.filter(o=>!(o.type==src.type && IDMatch(o._id, src._id)))
+            .concat(src.asOwner)
+    } else {
+        item.owner = src.asOwner }
+    item.market = null
+    await src.save()
+    await dst.save()
+    await item.save()
+    await LogController.log({
+        name: 'item_buy', info: 'buy_item',
+        owner: src.asOwner, item: Object.assign({price}, item.asObject),
+        action: LogAction.ItemPurchase
+    })
+}
+
 export async function provide_loan(src: Owner, dst: Owner, value: number){
     const reverse = await LoanController.find({filled: {$ne: true},
-        'lender._id': dst._id, 'lender.type': dst.type,
-        'creditor._id': src._id, 'creditor.type': src.type})
+        'lender._id': asID(dst._id), 'lender.type': +dst.type,
+        'creditor._id': asID(src._id), 'creditor.type': +src.type})
     if (reverse) {
         const val = Math.min(reverse.amount, value)
         reverse.amount -= val
@@ -51,8 +107,8 @@ export async function provide_loan(src: Owner, dst: Owner, value: number){
     if (!value)
         return
     const loan = (await LoanController.find({filled: {$ne: true},
-        'lender._id': src._id, 'lender.type': src.type,
-        'creditor._id': dst._id, 'creditor.type': dst.type
+        'lender._id': asID(src._id), 'lender.type': +src.type,
+        'creditor._id': asID(dst._id), 'creditor.type': +dst.type
     })) || LoanController.create(src, dst)
     loan.amount = (loan.amount|0) + value
     await loan.save()
@@ -61,7 +117,7 @@ export async function provide_loan(src: Owner, dst: Owner, value: number){
         owner: src, institution: dst})
 }
 
-export async function close_loan(src: CorpController | ShipController, loan: LoanController, log?: any) {
+export async function close_loan(src: InstitutionController, loan: LoanController, log?: any) {
     const amount = loan.amount|0
     const dst = await institutionController(+loan.lender.type).get(loan.lender._id)
     src.credit = (src.credit|0)-amount
@@ -76,9 +132,25 @@ export async function close_loan(src: CorpController | ShipController, loan: Loa
         owner: src.asOwner, institution: dst.asOwner}, log))
 }
 
-async function calcExpenses(entity: CorpController | ShipController, expenses: LoanController[], cycle: number){
+export async function close_with_item(src: InstitutionController, item: ItemController){
+    const price = item.market.price
+    const loan = await LoanController.get(item.market.code)
+    if (!IDMatch(loan?.lender?._id, src._id))
+        throw 'Wrong owner'
+    item.owner = src.asOwner
+    item.market = null
+    await item.save()
+    loan.amount = 0
+    loan.filled = true
+    await loan.save()
+    await LogController.log({action: LogAction.LoanPay, item,
+        name: 'loan_pay_item', info: 'put_item_close_loan',
+        owner: loan.creditor, institution: src.asOwner})
+}
+
+async function calcExpenses(entity: InstitutionController, expenses: LoanController[], cycle: number){
     const own = expenses.filter(f=>
-        f.creditor.type==entity.type && f.creditor._id==entity._id)
+        f.creditor.type==entity.type && IDMatch(f.creditor._id, entity._id))
     const fines = own.filter(f=>f.type==ExpenseType.Fine)
     const loans = own.filter(f=>f.type==ExpenseType.Loan)
     for (let fine of fines){

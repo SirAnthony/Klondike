@@ -3,6 +3,7 @@ import {Identifier, LogEntry} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {Time} from '../util/time';
 import {ObjectId} from 'mongodb';
+import { asID } from '../util/server';
 
 class LogDB extends LogEntry {
     created: Date
@@ -16,7 +17,7 @@ export class Controller extends LogDB {
         util.obj_copyto(data, this, fields)
         return this
     }
-    get identifier(): Identifier { return {_id: this._id, name: this.name} }
+    get identifier(): Identifier { return {_id: asID(this._id), name: this.name} }
 
     static async log(entry: LogEntry){
         const l = new Controller(entry)

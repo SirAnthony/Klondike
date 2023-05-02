@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ResourceType, User} from '../common/entity'
+import {Item, MarketType, Owner, ResourceType, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {ItemRow, ItemRowDesc, ItemRowNew} from '../inventory/Item'
 import {ItemSend} from '../inventory/Item/RowNew'
@@ -30,19 +30,19 @@ type ConfigControlState = {
 type ConfigControlProps = {}
 class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
     L = L
-    res_row(cycle: number, data: {[k in ResourceType]: number}){
+    res_row(index: number, data: {[k in ResourceType]: number}){
         const {item} : {item?: Config} = this.state
         const onChange = (k: ResourceType, val: number)=>{
             const obj = Object.assign({}, item)
-            item.price.res[cycle][k] = val
+            item.price.res[index][k] = val
             this.setState({item: obj})
         }
         const cols = Object.keys(ResourceType).filter(k=>!isNaN(+k)).map(k=><RB.Col>
-            <NumberInput value={item.price.res[cycle][k]} placeholder={LR(`res_kind_${k}`)}
+            <NumberInput value={item.price.res[index][k]} placeholder={LR(`res_kind_${k}`)}
                 onChange={val=>onChange(+k, val)}/>     
           </RB.Col>)
         return <RB.Row className='menu-list-row'>
-            <RB.Col sm={1}>{LR('cycle')+' '+cycle}</RB.Col>
+            <RB.Col sm={1}>{LR('cycle')+' '+(index/2).toFixed(1)}</RB.Col>
             {cols}
         </RB.Row>
     }
@@ -113,6 +113,18 @@ class List extends UList<ListProps, ListState> {
         this.fetch()
         return true
     }
+    async marketItem(market: MarketType, item: ItemSend, owner?: Owner, price?: number){
+        const {user} = this.props
+        const selfowner = {_id: user._id, type: user.type, name: user.name}
+        const data = {_id: item._id, type: item.type, name: item.name, market: {
+            type: market, price: price|0, from: selfowner, to: owner, code: user._id}}
+        const ret = await util.wget(`/api/admin/item/${item._id}/set`, {
+            method: 'POST', data: {data}})
+        if (ret.err)
+            return void this.setState({err: ret.err})
+        this.fetch()
+        return true
+    }
     newItem(){
         return <RB.Container key='new_item_ctrl'>
           <ItemRowNew onSubmit={(item: Item)=>this.changeItem(item)} add={true} />
@@ -122,6 +134,8 @@ class List extends UList<ListProps, ListState> {
         const {list} = this.state
         const rows = list.map(l=><ItemRow className='menu-list-row' key={`item_list_${l._id}`}
           onSubmit={item=>this.changeItem(item)} onDelete={item=>this.deleteItem(item)}
+          onSell={(i, t, p)=>this.marketItem(MarketType.Sale, i, t, p)}
+          onDelist={i=>this.marketItem(MarketType.None, i)} nullable={true}
           item={l} long={true} user={this.props.user} />)
         return [
           <ConfigControl />,

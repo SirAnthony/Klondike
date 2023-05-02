@@ -4,7 +4,7 @@ import {InstitutionType, Owner, LogAction} from '../../client/src/common/entity'
 import {Patent, PatentStatus, PatentOwner} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
 import * as Time from "./time"
-import {IDMatch} from '../util/server'
+import {IDMatch, asID} from '../util/server'
 import * as date from '../../client/src/common/date'
 
 class Cache {
@@ -13,11 +13,11 @@ class Cache {
         if (!this.cache.has(cycle))
             this.cache.set(cycle, new Map())
         let c = this.cache.get(cycle)
-        c.set(owner._id, points)
+        c.set(asID(owner._id), points)
     }
     get(cycle: number, owner?: Owner){
         const ret = this.cache.get(cycle)
-        return owner ? ret?.get(owner._id) : ret
+        return owner ? ret?.get(asID(owner._id)) : ret
     }
 }
 const RatingCache = new Cache()
@@ -27,9 +27,9 @@ async function getForCycle(cycle: number){
     const ret = []
     const c = RatingCache.get(cycle)
     for (let corp of list){
-        let points = c?.get(corp._id)
+        let points = c?.get(asID(corp._id))
         if (isNaN(+points)){
-            const log = await LogController.find({'owner._id': corp._id,
+            const log = await LogController.find({'owner._id': asID(corp._id),
                 name: `cycle_${cycle}`})
             if (log)
                 RatingCache.set(cycle, corp.asOwner, log.points)
@@ -56,15 +56,15 @@ async function calcCycle(cycle: number){
     for (let corp of list)
     {
         const owner = corp.asOwner, name = `cycle_${cycle}`
-        const events = await LogController.all({'owner._id': corp._id,
+        const events = await LogController.all({'owner._id': asID(corp._id),
             ts: Time.Time.cycleInterval(cycle)})
         let points = events.filter(f=>RatingActions.includes(f.action)).reduce(
             (p, c)=>p+c.points|0, 0)
-        const orders = await OrderController.all({'owner._id': owner._id, cycle})
+        const orders = await OrderController.all({'owner._id': asID(owner._id), cycle})
         const conf = await ConfigController.get()
         orders.forEach(o=>points += Order.plan(o)>=0.5 ? conf.points.order.open : 0)
         const prev = await LogController.find({action: LogAction.CycleRating,
-            'owner._id': owner._id, name})
+            'owner._id': asID(owner._id), name})
         if (prev && prev.points!=points) {
             console.error(`Updating points for ${corp.name} `+
                 `cycle ${cycle}: ${prev.points} -> ${points}`);

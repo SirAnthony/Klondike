@@ -4,14 +4,16 @@ import * as F from '../Fetcher'
 import {Institution, InstitutionType, Order, User} from '../common/entity'
 import {Item, MultiOwnedItem, Owner} from '../common/entity'
 import {MarketType, Patent, Loan} from '../common/entity'
-import {ItemRow, ItemRowDesc} from '../inventory'
-import {PatentLabItem, PatentRow, PatentRowDesc} from '../inventory'
-import {OrderRowCompact} from '../inventory'
-import {InventoryEvents} from '../inventory'
+import {ItemRow, ItemRowDesc} from '.'
+import {PatentLabItem, PatentRow, PatentRowDesc} from '.'
+import {ProposalRow} from '.'
+import {OrderRowCompact} from '.'
+import {InventoryEvents} from '.'
 import * as util from '../common/util'
 import {default as L} from './locale'
 import {Delimeter} from '../util/components'
-import {TimeDetails} from '../inventory/Time'
+import {TimeDetails} from './Time'
+import * as date from '../common/date'
 
 type OrderDetailsState = {
     orders?: Order[]
@@ -48,8 +50,8 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
         const plan = cur_orders.reduce((p, c)=>p+Order.plan(c), 0)/(orders.length||1)
         return <RB.Container>
           <RB.Row>
-            <RB.Col>{L('order', cycle)}</RB.Col>
-            <RB.Col>{L('plan', (plan*100).toFixed(2))}</RB.Col>
+            <RB.Col>{L('desc_order', cycle)}</RB.Col>
+            <RB.Col>{L('desc_plan', (plan*100).toFixed(2))}</RB.Col>
           </RB.Row>
           {orders}
         </RB.Container>
@@ -62,6 +64,7 @@ type ItemDetailsState = {
 type ItemDetailsProps = {
     owner: Owner
     user: User
+    asBox?: Boolean
 }
 class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     constructor(props){
@@ -99,14 +102,50 @@ class ItemDetailsBase extends F.Fetcher<ItemDetailsProps, ItemDetailsState> {
     }
     async onDelist(item: Item) : Promise<boolean> {
         const check = ()=>![MarketType.Protected, MarketType.None].includes(item.market?.type|0)
-        return await this.onItemAction(item, check, 'delist')
+        const action = item.market?.from?._id===this.props.owner._id ? 'delist' : 'reject'
+        return await this.onItemAction(item, check, action, {data: {code: item.market.code}})
     }
     async onSell(item: Item, target: Owner, price: number) : Promise<boolean>  {
         const check = ()=>[MarketType.None].includes(item.market?.type|0)
         return await this.onItemAction(item, check, 'sell', {
             data: {target: target._id, dtype: target.type, price: price}})
     }
+    wrap(box: React.ReactElement){
+        if (!this.props.asBox)
+            return box
+        return <RB.Row>
+          <RB.Col className='menu-box'>{box}</RB.Col>
+        </RB.Row>
+    }
 }
+
+export class ProposalDetails extends ItemDetailsBase {
+    loop: NodeJS.Timer
+    constructor(props){
+        super(props)
+        this.state = {}
+        InventoryEvents.onreloadProposals(()=>this.fetch())
+        this.loop = setInterval(()=>this.fetch(), date.ms.MIN*5)
+        // InventoryEvents.ontimeChanged(()=>this.fetch())
+    }
+    get fetchUrl() { 
+        const {owner} = this.props
+        return `/api/inventory/${owner.type}/${owner._id}/proposals`
+    }
+    render(){
+        const {items} = this.state
+        if (!items || !items.length)
+            return null
+        const proposals = items?.map(i=><ProposalRow key={`proposal_row_${i._id}`}
+            {...this.props} onRefuse={i=>this.onDelist(i)} item={i} />)
+        return this.wrap(<RB.Container>
+          <RB.Row><RB.Col>{L('desc_current_proposals')}</RB.Col></RB.Row>
+          <Delimeter />
+          {proposals}
+        </RB.Container>)
+    }
+}
+
 
 export class ItemDetails extends ItemDetailsBase {
     target = 'items'
@@ -144,14 +183,14 @@ export class ItemDetails extends ItemDetailsBase {
         return rows
     }
     render(){
-        return <RB.Container>
+        return this.wrap(<RB.Container>
           <RB.Row className='menu-list-title'>
-            <RB.Col>{L('res_cur')}</RB.Col>
+            <RB.Col>{L('desc_items')}</RB.Col>
           </RB.Row>
           <Delimeter />
           <ItemRowDesc className='menu-list-title' />
           {this.rows()}
-        </RB.Container>
+        </RB.Container>)
     }
 }
 
@@ -197,12 +236,12 @@ export class PatentDetails extends ItemDetailsBase {
         return rows
     }
     render(){
-        return <RB.Container>
+        return this.wrap(<RB.Container>
           <RB.Row className='menu-list-title'>
-            <RB.Col>{L('patent_cur')}</RB.Col>
+            <RB.Col>{L('desc_patents')}</RB.Col>
           </RB.Row>
           <Delimeter />
           {this.rows()}
-        </RB.Container>
+        </RB.Container>)
     }
 }

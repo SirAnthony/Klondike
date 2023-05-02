@@ -3,7 +3,7 @@ import {UserController, ShipController, FlightController, ItemController} from '
 import {ItemType, Module, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {Time} from '../../util/time'
-import {IDMatch} from '../../util/server'
+import {IDMatch, asID} from '../../util/server'
 import * as date from '../../../client/src/common/date'
 
 export class ShipApiRouer extends BaseRouter {
@@ -24,8 +24,8 @@ export class ShipApiRouer extends BaseRouter {
     async get_list(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const filter = user.kind == UserType.Master ? {} :
-            user.kind == UserType.Captain ? {'captain._id': user._id} :
-            {'owner._id': user._id}
+            user.kind == UserType.Captain ? {'captain._id': asID(user._id)} :
+            {'owner._id': asID(user._id)}
         const list = await ShipController.all(filter)
         return {list}
     }
@@ -56,7 +56,7 @@ export class ShipApiRouer extends BaseRouter {
         // From ship api only ship modules is available
         const owner = await ShipController.get(id)
         const list = await ItemController.all({type: ItemType.Module,
-            'owner._id': owner._id, 'owner.type': owner.type})
+            'owner._id': asID(owner._id), 'owner.type': +owner.type})
         return {list}
     }
 
@@ -70,7 +70,7 @@ export class ShipApiRouer extends BaseRouter {
         if (item.owner.type!=ship.type || !IDMatch(item.owner._id, ship._id))
             throw 'Cannot act on foreigh item'
         const active = await ItemController.all({type: ItemType.Module,
-            'owner._id': ship._id, 'owner.type': ship.type, installed: true})
+            'owner._id': asID(ship._id), 'owner.type': +ship.type, installed: true})
         if (active.length >= ship.slots)
             throw 'No space available';
         ((item as unknown) as Module).installed = true

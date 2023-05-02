@@ -2,8 +2,8 @@ import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {Institution, InstitutionType, User} from "../common/entity"
 import {ControlBar} from '../util/controls'
-import {ItemDetails, OrderDetails} from '../corp/Details'
-import {PatentDetails} from '../corp/Details'
+import {ItemDetails, OrderDetails, ProposalDetails} from './Details'
+import {PatentDetails} from './Details'
 import {RatingDetails} from '../corp/Rating'
 import {PriceDetails, BudgetDetails} from '../inventory'
 import {default as L} from './locale'
@@ -42,21 +42,12 @@ export function EntityInventory(props: InstitutionProps){
               <OrderDetails {...param} fields={['plan']} />
             </RB.Col>
           </RB.Row>}
-          {entity.type==InstitutionType.Research && <RB.Row>
-            <RB.Col className='menu-box'>
-              <PatentDetails {...param} />
-            </RB.Col>
-          </RB.Row>}
-          <RB.Row>
-            <RB.Col className='menu-box'>
-              <ItemDetails {...param} />
-            </RB.Col>
-          </RB.Row>
-          {entity.type==InstitutionType.Corporation && <RB.Row>
-            <RB.Col className='menu-box'>
-              <PatentDetails {...param} />
-            </RB.Col>
-          </RB.Row>}
+          <ProposalDetails asBox={true} {...param} />
+          {entity.type==InstitutionType.Research &&
+            <PatentDetails {...param} asBox={true} />}
+          <ItemDetails {...param} asBox={true} />
+          {entity.type==InstitutionType.Corporation && 
+            <PatentDetails {...param} asBox={true} />}
         </RB.Container></RB.Col>
       </RB.Row>
     </RB.Container>

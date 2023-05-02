@@ -6,7 +6,7 @@ import {UserType} from '../../../client/src/common/entity'
 import {Patent, PatentStatus} from '../../../client/src/common/entity'
 import {LogAction} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import {IDMatch} from '../../util/server'
+import {IDMatch, asID} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import * as cutil from '../../../client/src/common/util'
 import * as Rating from '../../util/rating'
@@ -32,7 +32,7 @@ export class CorpApiRouter extends BaseRouter {
     async get_orders(ctx: RenderContext){
         const {id} = ctx.params
         const corp = await CorpController.get(id)
-        const list = await OrderController.all({'owner._id': corp._id})
+        const list = await OrderController.all({'owner._id': asID(corp._id)})
         return {list}
     }
 

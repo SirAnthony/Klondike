@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType, Owner} from '../../common/entity'
+import {Item, ItemType} from '../../common/entity'
 import {Location} from '../../common/entity'
 import {ItemOwnerCol, ItemPriceCol} from './components'
 import {IDField} from '../../util/components'

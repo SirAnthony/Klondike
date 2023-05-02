@@ -2,6 +2,7 @@ import * as mongodb from '../util/mongodb'
 import {ObjectId} from 'mongodb';
 import {Identifier, Owner, Institution} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
+import {asID} from '../util/server';
 
 export class Entity<T> {
     name: string
@@ -91,7 +92,7 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             util.obj_copyto(data, this, fields)
             return this
         }
-        get identifier(): Identifier { return {_id: this._id, name: this.name} }
+        get identifier(): Identifier { return {_id: asID(this._id), name: this.name} }
         get asObject(): any { return {...this} }
         get asOwner(): Owner {
             if (!(this instanceof Institution))
@@ -105,12 +106,12 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             data.created = data.created || new Date()
             data.updated = new Date()
             if (data._id)
-                Cache.set(''+data._id, data)
+                Cache.delete(asID(data._id))
             return await Controller.DB.save(data)
         }
 
         async delete() {
-            Cache.delete(''+this._id)
+            Cache.delete(asID(this._id))
             return await Controller.DB.delete(this)
         }
     
@@ -122,7 +123,7 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
                     data = Cache.get(''+data)
                 else {
                     data = await Controller.DB.get(data)
-                    Cache.set(''+data._id, data)
+                    Cache.set(asID(data._id), data)
                 }
             }
             return new Controller(data, fields)

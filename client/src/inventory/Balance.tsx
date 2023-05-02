@@ -53,7 +53,6 @@ type BudgetDetailsState = {
             cost: number
         } & Owner
         loans?: Loan[]
-        proposes?: Resource[]
     }
 }
 export class BudgetDetails extends F.Fetcher<BudgetDetailsProps, BudgetDetailsState> {
@@ -77,39 +76,30 @@ export class BudgetDetails extends F.Fetcher<BudgetDetailsProps, BudgetDetailsSt
         this.fetch()
         return true
     }
-    async onLoanAgree(item: Item){
-        this.setState({err: null})
-        const res = await util.wget(`${this.base_url}/item/${item._id}/close/loan`,
-            {method: 'PUT'})
-        if (res.err)
-            return this.setState({err: res.err})
-        this.fetch()
-        InventoryEvents.reloadItems()
-    }
-    async onLoanReject(item: Item){
-        this.setState({err: null})
-        const res = await util.wget(`${this.base_url}/item/${item._id}/reject/loan`,
-            {method: 'PUT'})
-        if (res.err)
-            return this.setState({err: res.err})
-        this.fetch()
-    }
-    proposes(){
+    expenses(){
         const {item} : BudgetDetailsState = this.state
-        if (!item?.proposes?.length)
-            return null
-        const rows = item.proposes.map(p=><RB.Row className='menu-list-row'>
-          <RB.Col>{p.market.from.name}</RB.Col>
-          <RB.Col>{LR(`res_kind_${p.kind}`)}</RB.Col>
-          <RB.Col>{p.value}</RB.Col>
-          <RB.Col>
-            <RB.Button onClick={()=>this.onLoanAgree(p)}>{LR('act_agree')}</RB.Button>
-            <RB.Button onClick={()=>this.onLoanReject(p)}>{LR('act_disagree')}</RB.Button>
-          </RB.Col>
+        const {entity} = item||{}
+        const loan_credit = item?.loans?.filter(f=>
+            f.creditor._id==entity._id && f.amount).map(f=><RB.Row>
+          <RB.Col>{f.lender.name}</RB.Col>
+          <RB.Col>{f.amount}</RB.Col>
         </RB.Row>)
-        return [<RB.Row className='menu-input-row'>
-            <RB.Col>{L('loan_proposes')}</RB.Col>
-        </RB.Row>, <Delimeter/>, rows, <Delimeter/>]
+        if (!entity?.cost && !loan_credit?.length)
+              return null
+        return <>
+          <RB.Row>
+            <RB.Col>{L('expenses')}</RB.Col> 
+          </RB.Row>
+          <Delimeter />
+          {entity?.cost && <RB.Row>
+            <RB.Col>{L('current_expenses')}</RB.Col>
+            <RB.Col>{entity.cost}</RB.Col>
+          </RB.Row>}
+          {!!loan_credit?.length && <RB.Row>
+            <RB.Col>{L('loans')}</RB.Col> 
+          </RB.Row>}
+          {loan_credit}
+        </>
     }
     render(){
         const {item} : BudgetDetailsState = this.state
@@ -119,11 +109,6 @@ export class BudgetDetails extends F.Fetcher<BudgetDetailsProps, BudgetDetailsSt
         const loan_debit = item?.loans?.filter(f=>
             f.lender._id==entity._id && f.amount).map(f=><RB.Row>
           <RB.Col>{f.creditor.name}</RB.Col>
-          <RB.Col>{f.amount}</RB.Col>
-        </RB.Row>)
-        const loan_credit = item?.loans?.filter(f=>
-            f.creditor._id==entity._id && f.amount).map(f=><RB.Row>
-          <RB.Col>{f.lender.name}</RB.Col>
           <RB.Col>{f.amount}</RB.Col>
         </RB.Row>)
         return <RB.Col className='menu-box menu-box-col'>
@@ -145,19 +130,7 @@ export class BudgetDetails extends F.Fetcher<BudgetDetailsProps, BudgetDetailsSt
             <RB.Col>{L('loans')}</RB.Col> 
           </RB.Row>}
           {loan_debit}
-          {this.proposes()}
-          <RB.Row>
-            <RB.Col>{L('expenses')}</RB.Col> 
-          </RB.Row>
-          <Delimeter />
-          {entity?.cost && <RB.Row>
-            <RB.Col>{L('current_expenses')}</RB.Col>
-            <RB.Col>{entity.cost}</RB.Col>
-          </RB.Row>}
-          {!!loan_credit?.length && <RB.Row>
-            <RB.Col>{L('loans')}</RB.Col> 
-          </RB.Row>}
-          {loan_credit}
+          {this.expenses()}
         </RB.Container></RB.Col>
     }
 }

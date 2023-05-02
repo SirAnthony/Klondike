@@ -1,4 +1,5 @@
 import {UserController} from '../entity'
+import {asID} from './server'
 
 const id_matches = {}
 async function user_by_match(match: string){
@@ -10,7 +11,7 @@ async function user_by_match(match: string){
         {alias: match}     
     ]} : {alias: match}
     const user = await UserController.find(filter)
-    return id_matches[match] = user?._id || match
+    return id_matches[match] = user?._id ? asID(user._id) : match
 }
 
 export async function process_data(data = ''){
