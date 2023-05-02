@@ -1,7 +1,6 @@
 import {
     Coordinates, ExpenseType, InstitutionType, ItemType,
-    LogAction, Patent, PatentStatus, ResourceCost, Resource,
-    Owner
+    LogAction, Patent, ResourceCost, Resource, Owner, OwnerMatch
 } from '../../client/src/common/entity';
 import {
     CorpController, InstitutionController, LoanController,
@@ -57,26 +56,13 @@ export async function buy_item(src: InstitutionController, item: ItemController)
     src.credit = (src.credit|0) - price
     if (item.type==ItemType.Patent) {
         const pt = (item as unknown) as Patent
-        const status = Patent.served(pt, src) ?
-            PatentStatus.Served : PatentStatus.Ready
-        const prevOwners = pt.owners.map(o=>Object.assign({}, o))
-        pt.owners = pt.owners.filter(o=>!IDMatch(o._id, dst._id) &&
-            !IDMatch(o._id, src._id)).concat(
-            {status: status, ...src.asOwner})
-        const points = await rating.patent_points(pt, src, prevOwners)
-        if (points) {
-            await LogController.log({
-                name: 'patent_forward', info: 'post_item_buy',
-                owner: src.asOwner, item: pt, points,
-                // If patent was sold & already served once
-                // it cannot have FullOwnership, part already calculated
-                action: LogAction.PatentForwardPart,
-            })
-        }
+        pt.owners = pt.owners.filter(o=>!OwnerMatch(o, dst) &&
+            !OwnerMatch(o, src)).concat(src.asOwner)
+        // Add points if last part bought
+        await rating.patent_points(pt, src, pt.served)
     } else if (item.type==ItemType.Coordinates) {
         const pt = (item as unknown) as Coordinates
-        pt.owners = pt.owners.filter(o=>!(o.type==src.type && IDMatch(o._id, src._id)))
-            .concat(src.asOwner)
+        pt.owners = pt.owners.filter(o=>!OwnerMatch(o, src)).concat(src.asOwner)
     } else {
         item.owner = src.asOwner }
     item.market = null

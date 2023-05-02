@@ -1,15 +1,13 @@
 import {BaseRouter, CheckRole, CheckIDParam} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
-import {institutionController, LogController} from '../../entity'
-import {UserType} from '../../../client/src/common/entity'
-import {Patent, PatentStatus} from '../../../client/src/common/entity'
-import {LogAction} from '../../../client/src/common/entity'
+import {institutionController} from '../../entity'
+import {UserType, Patent, OwnerMatch} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import {IDMatch, asID} from '../../util/server'
+import {asID} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
-import * as cutil from '../../../client/src/common/util'
 import * as Rating from '../../util/rating'
+import * as _ from 'lodash'
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -45,26 +43,14 @@ export class CorpApiRouter extends BaseRouter {
         const item = await ItemController.get(id)
         const patent = item as unknown as Patent
         const owner = await CorpController.get(requester)
-        if (!patent.owners.some(o=>IDMatch(o._id, owner._id)))
+        if (!patent.owners.some(o=>OwnerMatch(o, owner)))
             throw new ApiError(Codes.WRONG_USER, 'Not an owner');
-        const prevOwners = patent.owners.map(o=>Object.assign({}, o));
         // Serve parts
-        patent.owners.forEach(o=>{
-            if (IDMatch(o._id, owner._id))
-                o.status = PatentStatus.Served
-        })
+        const served = patent.served.slice()
+        patent.served = _.uniqBy(patent.served.concat(owner.asOwner), f=>asID(f._id))
         await item.save()
         // Calcluate points
-        const points = await Rating.patent_points(patent, owner, prevOwners);
-        if (points){
-            await LogController.log({
-                name: 'patent_forward', info: 'post_patent_forward',
-                owner: owner.asOwner, points, item,
-                action: patent.fullOwnership ?
-                    LogAction.PatentForwardFull :
-                    LogAction.PatentForwardPart,
-            })
-        }
+        await Rating.patent_points(patent, owner, served);
     }
 
     @CheckRole([UserType.Captain, UserType.Corporant,

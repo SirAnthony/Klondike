@@ -29,6 +29,8 @@ export type ItemSend = {
     weight?: number
     owners?: Owner[]
     resourceCost?: {kind: ResourceType, value: number}[]
+    served?: Owner[]
+    ready?: boolean
     // Img?
     imgFile?: File
 } & Omit<Item, 'keys' | 'class'>
@@ -132,15 +134,19 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
         </RB.Col>]
     }
     rows_patent(){
-        const {owners, resourceCost} = this.state
+        const {owners, served, resourceCost} = this.state
         const ownersChange = owners=>this.stateChange({owners})
         const resChange = resourceCost=>this.stateChange({resourceCost})
+        const servedChange = served=>this.stateChange({served})
         return [
           <MultiOwnerSelect value={owners} exclude={this.ownerExclude}
             className='menu-input-row' key='multi_owner_select'
             onChange={ownersChange} />,
           <MultiResourceSelect value={resourceCost} onChange={resChange}
-            className='menu-input-row' key='multi_resource_select' />
+            className='menu-input-row' key='multi_resource_select' />,
+          <MultiOwnerSelect value={served} exclude={this.ownerExclude}
+            className='menu-input-row' key='multi_owner_select'
+            onChange={servedChange} />,
         ]
     }
     // artifact

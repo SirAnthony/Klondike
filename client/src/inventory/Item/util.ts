@@ -2,15 +2,15 @@ import {Item, ItemType, InstitutionType} from '../../common/entity'
 import {Resource, ResourceType} from '../../common/entity'
 
 export const owners_exclude = (type: ItemType)=>{
-    switch(type){
-        case ItemType.Resource: return [InstitutionType.User]
-        case ItemType.Coordinates: return [InstitutionType.User]
-        case ItemType.Module: return [InstitutionType.User]
-        case ItemType.Patent: return [InstitutionType.User, InstitutionType.Ship,
-            InstitutionType.Research, InstitutionType.Organization]
-        case ItemType.Artifact: return [InstitutionType.User]
-    }
-    return []
+    return [InstitutionType.User]
+    // switch(type){
+    //     case ItemType.Resource: return [InstitutionType.User]
+    //     case ItemType.Coordinates: return [InstitutionType.User]
+    //     case ItemType.Module: return [InstitutionType.User]
+    //     case ItemType.Patent: return [InstitutionType.User]
+    //     case ItemType.Artifact: return [InstitutionType.User]
+    // }
+    // return []
 }
 
 const long_fields = ['owner', 'location', 'data']

@@ -2,14 +2,13 @@ import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
 import {CorpController, institutionController, LoanController, LogController} from '../../entity'
 import {ItemController, UserController, ConfigController} from '../../entity'
 import {OrderController} from '../../entity'
-import {UserType, Patent, PatentStatus, InstitutionType, Coordinates} from '../../../client/src/common/entity'
+import {UserType, Patent, InstitutionType} from '../../../client/src/common/entity'
 import {MarketType, ItemType} from '../../../client/src/common/entity'
-import {Resource, ResourceCost, Owner, LogAction} from '../../../client/src/common/entity'
+import {LogAction, OwnerMatch} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch, asID} from '../../util/server'
 import {Time} from '../../util/time'
 import defines from '../../../client/src/common/defines'
-import * as rating from '../../util/rating'
 import * as balance from '../../util/balance'
 import * as iutil from '../../../client/src/inventory/Item/util'
 import * as cutil from '../../util/config'
@@ -35,16 +34,14 @@ export class InventoryApiRouter extends BaseRouter {
         // Always use corp controller
         const corp = await institutionController(+stype).get(id)
         const resource = await ItemController.get(itemid)
-        if (!IDMatch(resource.owner._id, corp._id))
+        if (!OwnerMatch(resource.owner, corp))
             throw 'Wrong owner of resource'
         const patent = await ItemController.get(target)
         const pt = (patent as unknown) as Patent
         pt.resourceCost.forEach(k=>k.provided |= 0)
-        if (pt.owners.some(o=>o.status!=PatentStatus.Created)){
-            pt.owners.forEach(o=>{
-                if (o.status==PatentStatus.Created)
-                    o.status = PatentStatus.Ready
-            })
+        if (pt.ready || pt.served?.length){
+            pt.ready = false
+            pt.served = []
             await patent.save()
             throw 'Wrong patent status'
         }
@@ -52,7 +49,8 @@ export class InventoryApiRouter extends BaseRouter {
             await patent.save()
         // Patent closed
         if (!pt.resourceCost.some(k=>k.provided<k.value)){
-            pt.owners.forEach(o=>o.status=PatentStatus.Ready)
+            pt.ready = true
+            pt.served = []
             const conf = await ConfigController.get()
             const points = +conf.points.patent.pay
             await LogController.log({
@@ -72,7 +70,7 @@ export class InventoryApiRouter extends BaseRouter {
         // Always use corp controller
         const corp = await institutionController(+stype).get(id)
         const resource = await ItemController.get(itemid)
-        if (!IDMatch(resource.owner._id, corp._id))
+        if (!OwnerMatch(resource.owner, corp))
             throw 'Wrong owner of resource'
         const order = await OrderController.get(orderid)
         if (!order)
@@ -106,13 +104,12 @@ export class InventoryApiRouter extends BaseRouter {
        const {stype, id, itemid, loanid} = ctx.aparams
         if (!itemid || !InstitutionType[+stype])
             throw 'Required fields missing'
-        const srcController = institutionController(+stype)
-        const src = await srcController.get(id)
+        const src = await institutionController(+stype).get(id)
         const item = await ItemController.get(itemid)
-        if (!IDMatch(item.owner._id, src._id) || item.type!=ItemType.Resource)
+        if (!OwnerMatch(item.owner, src) || item.type!=ItemType.Resource)
             throw 'Wrong owner of resource'
         const loan = await LoanController.get(loanid)
-        if (!loan || !IDMatch(loan.creditor._id, src._id))
+        if (!OwnerMatch(loan?.creditor, src))
             throw 'Wrong loan'
         if ((item.market?.type|0)!=MarketType.None)
             throw 'Wrong market state'
@@ -154,7 +151,7 @@ export class InventoryApiRouter extends BaseRouter {
         if (+item.market?.type!=MarketType.Loan)
             throw 'Wrong market type'
         const loan = await LoanController.get(item.market.code)
-        if (!IDMatch(loan?.lender?._id, src._id) || item.type!=ItemType.Resource)
+        if (!OwnerMatch(loan?.lender, src) || item.type!=ItemType.Resource)
             throw 'Wrong owner of resource'
         item.market = null
         await item.save()
@@ -179,7 +176,7 @@ export class InventoryApiRouter extends BaseRouter {
             throw 'No source or target type'
         const src = await srcController.get(id)
         const owners = [].concat((item as any).owners, item.owner).filter(Boolean)
-        if (!owners.some(o=>IDMatch(o._id, src._id)))
+        if (!owners.some(o=>OwnerMatch(o, src)))
             throw 'Cannot sell foreign item'
         const dst = !target ? null :
             await institutionController(+dtype).get(target)
@@ -215,7 +212,8 @@ export class InventoryApiRouter extends BaseRouter {
             throw 'No source type'
         const src = await srcController.get(id)
         const market = item.market
-        if (market.to && !IDMatch(market.to._id, src._id))
+        // Allow to pass non-owned items
+        if (market.to && !OwnerMatch(market.to, src))
             throw 'Cannot act on foreign item'
         if (+market.type == MarketType.Loan)
             await balance.close_with_item(src, item)
@@ -262,7 +260,7 @@ export class InventoryApiRouter extends BaseRouter {
             throw 'Wrong market status'
         const src = await institutionController(+stype).get(id)
         const owners = [].concat((item as any).owners, item.owner).filter(Boolean)
-        if (!src || !owners.some(o=>IDMatch(o._id, src._id)))
+        if (!src || !owners.some(o=>OwnerMatch(o, src)))
             throw 'Cannot act on foreign item'
         item.market = null
         await item.save()
@@ -297,9 +295,9 @@ export class InventoryApiRouter extends BaseRouter {
             throw 'No source type'
         const src = await srcController.get(id)
         const filter: any = {type: ItemType.Patent}
-        if (src.type!=InstitutionType.Research) {
-            Object.assign(filter, {'owners._id': asID(src._id),
-                'owners.status': {$exists: true, '$ne': PatentStatus.Created}})
+        if (src.type!=InstitutionType.Research){
+            Object.assign(filter, {ready: true,
+                'owners._id': asID(src._id), 'owners.type': +src.type})
         }
         const list = await ItemController.all(filter)
         return {list}
@@ -333,7 +331,7 @@ export class InventoryApiRouter extends BaseRouter {
         if (!src || !dst)
             throw 'field_error_noempty'
         const value = amount|0
-        if (IDMatch(src._id, dst._id) || value<=0 || value>src.credit)
+        if (OwnerMatch(src, dst) || value<=0 || value>src.credit)
             throw 'field_error_invalid'
         await balance.provide_loan(src.asOwner, dst.asOwner, value)
         src.credit = (src.credit|0) - value

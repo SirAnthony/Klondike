@@ -2,7 +2,7 @@ import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController,
     ConfigController, institutionController, FlightController,
     InstitutionController, OrderController, ItemController} from '../../entity'
-import {UserType, Patent, PatentStatus, ItemType, InstitutionType,
+import {UserType, ItemType, InstitutionType,
     PlanetType, Planet, Owner, Location} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
@@ -20,6 +20,7 @@ type AllControllers = (InstitutionController | ItemController | OrderController 
     relation?: Owner
     captain?: Owner
     owners?: Owner[]
+    served?: Owner[]
     location?: Location
 }
 async function process_data(obj: AllControllers, data){
@@ -41,12 +42,15 @@ async function process_data(obj: AllControllers, data){
     }
     if (data.owners){
         const owners = []
-        for (let k of data.owners){
-            const owner = await institutionController(+k.type).get(k._id)
-            const prev = obj.owners.find(o=>IDMatch(o._id, owner._id))
-            owners.push(Object.assign({}, prev, owner.asOwner))
-        }
+        for (let k of data.owners)
+            owners.push((await institutionController(+k.type).get(k._id)).asOwner)
         obj.owners = owners
+    }
+    if (data.served){
+        const served = []
+        for (let k of data.served)
+            served.push((await institutionController(+k.type).get(k._id)).asOwner)
+        obj.served = served
     }
     if (data.captain?._id){
         const ctrl = institutionController(+data.captain.type);
@@ -85,11 +89,6 @@ export class AdminApiRouter extends BaseRouter {
             throw 'Cannot change id of item'
         const item = await ItemController.get(isID(id) ? id : {})
         await process_data(item, data)
-        // Patents adds problems
-        if (item.type == ItemType.Patent){
-            ((item as unknown) as Patent).owners.forEach(o=>
-                o.status = o.status || PatentStatus.Created)
-        }
         await item.save()
     }
 

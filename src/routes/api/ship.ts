@@ -1,10 +1,13 @@
 import {BaseRouter, CheckIDParam, CheckRole} from '../base'
-import {UserController, ShipController, FlightController, ItemController} from '../../entity'
-import {ItemType, Module, UserType} from '../../../client/src/common/entity'
+import {UserController, ShipController, FlightController, ItemController, LogController} from '../../entity'
+import {Flight, ItemType, LogAction, Module, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {Time} from '../../util/time'
 import {IDMatch, asID} from '../../util/server'
+import * as Flights from '../../util/flights'
 import * as date from '../../../client/src/common/date'
+import { ObjectId } from 'mongodb'
+import * as _ from 'lodash'
 
 export class ShipApiRouer extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -33,21 +36,32 @@ export class ShipApiRouer extends BaseRouter {
     @CheckRole([UserType.Guard, UserType.Captain])
     async get_flights(ctx: RenderContext){
         const d = new Date()
-        const list = await FlightController.all({
+        const flights = await FlightController.all({
             ts: {$gte: +date.add(d, {'min': -30}), $lt: +date.add(d, {'hour': 2})}})
+        const ships = await ShipController.all({'flight._id': {$exists: true}})
+        const ids = ships?.map(s=>(s._id as any) instanceof ObjectId ?
+            s._id : new ObjectId(s._id))
+        const active = ids.length ? await FlightController.all({'_id': {$in: ids}}) : []
+        const list = _.uniqBy(active.concat(flights), f=>f._id).sort((a, b)=>a.ts-b.ts)
         return {list}
     }
 
-    @CheckIDParam()
     @CheckRole([UserType.Guard, UserType.Captain])
     async put_flight_action(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
-        const {id, action} = ctx.aparams
+        const {id, action, data} = ctx.aparams
         const flight = await FlightController.get(id)
         if (!flight)
             throw 'Incorrect flight'
-        switch(action){
-        }        
+        let fn = Flights.Actions[action] 
+        if (!fn)
+            throw `Incorrect request ${action}`
+        await fn(user, flight, data)
+        await LogController.log({
+            name: 'flight_action', info: action,
+            action: LogAction.FlightAction,
+            owner: user.asOwner, data: flight
+        })
     }
 
     @CheckRole([UserType.Guard, UserType.Captain])

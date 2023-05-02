@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Item, ItemType, Owner, Resource} from '../../common/entity'
-import {Patent, PatentOwner, Loan} from '../../common/entity'
+import {Patent, Loan} from '../../common/entity'
 import {LoanSelectTrigger, OwnerValueSelectTrigger} from '../../util/popovers'
 import {ResourceImg} from '../../util/components'
 import {PriceFetcher} from '../Prices'
@@ -40,11 +40,8 @@ export function ItemKindCol(props: {item: Item, layout: number}){
 
 export function ItemOwnerCol(props: ItemComponentProps){
     const {item} = props
-    const pt_owner = (o: PatentOwner)=>`${o.name} (${LR('patent_status_'+o.status)})`
-    const owner = (o: Owner)=>o?.name||'-'
-    const fn = item.type==ItemType.Patent ? pt_owner : owner
     const owners = _.uniqBy([].concat(item.owner, (item as any).owners).filter(Boolean), p=>p._id)
-    const items = owners.map(o=><div key={'d_'+o._id}>{fn(o)}</div>)
+    const items = owners.map(o=><div key={'d_'+o._id}>{o?.name||'-'}</div>)
     if (!items.length)
         items.push(<div key='d_missing_owner'>-</div>)
     return <RB.Col sm={props.layout}>

@@ -25,6 +25,8 @@ export class ID implements Identifier {
 }
 
 export type Owner = ID & {type: InstitutionType}
+export const OwnerMatch = (a: Owner, b: Owner)=>
+    a && b && ''+a._id==''+b._id && +a.type == +b.type
 
 export class Order extends ID {
     resourceCost: ResourceCost[]
@@ -119,15 +121,15 @@ export class Module extends Item {
 
 export enum PatentType {Bio, Enginering, Planet}
 export enum PatentWeight {Minimal, Basic, Premium}
-export enum PatentStatus {Created, Ready, Served}
 export enum PatentOwnership {Partial, Full}
-export type PatentOwner = Owner & {status: PatentStatus}
 export class Patent extends MultiOwnedItem {
     type = ItemType.Patent
     kind: PatentType
     weight: PatentWeight
-    owners: PatentOwner[]
+    owners: Owner[]
     resourceCost: ResourceCost[]
+    ready: boolean
+    served: Owner[]
     get keys(){
         return super.keys.concat('kind weight resourceCost'
             .split(' ')).filter(k=>!['location'].includes(k))
@@ -136,12 +138,8 @@ export class Patent extends MultiOwnedItem {
         return this.fullOwnership ? PatentOwnership.Full : PatentOwnership.Partial }
     get fullOwnership(){ return this.owners.length < 2 }
     get shares(){ return 1/(this.owners.length||1) }
-    static ready(p: Patent){
-        return !p.owners.some(o=>o.status==PatentStatus.Created) }
-    static served(p: Patent, owner: ID){
-        return p.owners.some(o=>(''+o._id)==(''+owner._id) &&
-            o.status==PatentStatus.Served)
-    }
+    static served(p: Patent, owner: Owner){
+        return p.served?.some(o=>OwnerMatch(o, owner)) }
 }
 
 export enum ArtifactType {Bio, Enginering, Anomaly}

@@ -1,11 +1,10 @@
 import {CorpController, LogController, OrderController} from "../entity"
 import {ConfigController} from '../entity'
-import {InstitutionType, Owner, LogAction} from '../../client/src/common/entity'
-import {Patent, PatentStatus, PatentOwner} from '../../client/src/common/entity'
+import {InstitutionType, Owner, LogAction, OwnerMatch, PatentOwnership} from '../../client/src/common/entity'
+import {Patent} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
 import * as Time from "./time"
-import {IDMatch, asID} from '../util/server'
-import * as date from '../../client/src/common/date'
+import {asID} from '../util/server'
 
 class Cache {
     private cache = new Map()
@@ -89,12 +88,24 @@ export const Rating = {
 }
 
 // Need proper calculations
-export async function patent_points(patent: Patent, owner: Owner, prevOwners: PatentOwner[]){
-    const parts = patent.owners.filter(o=>IDMatch(o._id, owner._id))
-    const ready = parts.filter(p=>p.status==PatentStatus.Ready);
+export async function patent_points(patent: Patent, owner: Owner, prev: Owner[]){
+    // Do not calculate points on non-servers
+    if (!patent.served.some(o=>OwnerMatch(o, owner)))
+        return
+    const new_server = !prev.some(o=>OwnerMatch(o, owner))
     const conf = await ConfigController.get()
-    const pts = conf.points.patent[patent.ownership][patent.weight]
-    const points = ready.length != parts.length ? 0 :
-        pts*ready.length/patent.owners.length
-    return points
+    const ownership = patent.fullOwnership && !new_server ?
+        PatentOwnership.Partial : patent.ownership
+    const pts = conf.points.patent[ownership][patent.weight]
+    const points = new_server || patent.fullOwnership ? pts : 0
+    if (!points)
+        return 
+    // Will forwards calulate if 
+    await LogController.log({
+        name: 'patent_points', info: 'patent_points',
+        owner: owner, points, item: patent,
+        action: ownership==PatentOwnership.Full ?
+            LogAction.PatentForwardFull :
+            LogAction.PatentForwardPart,
+    })
 }

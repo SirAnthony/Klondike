@@ -9,7 +9,6 @@ import {ConfigFetcher} from '../site/Config';
 import {Config} from '../common/config'
 import {Delimeter} from '../util/components'
 import {ErrorMessage} from '../util/errors';
-import {ClientError} from '../common/errors'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 

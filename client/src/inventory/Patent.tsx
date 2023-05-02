@@ -73,7 +73,7 @@ function PatentActions(props: RowProps){
         return <RB.Button>{L('act_pay')}</RB.Button>
     const is_served = Patent.served(patent, owner)
     return <RB.Container>
-      {!is_served  && <RB.Row><RB.Col>
+      {!is_served && patent.ready  && <RB.Row><RB.Col>
         <RB.Button onClick={onAction('forward', patent)}>
           {L('act_forward_center')}</RB.Button>
       </RB.Col></RB.Row>}
@@ -81,10 +81,10 @@ function PatentActions(props: RowProps){
         {!is_served && <RB.Col>
           <PatentSellButton {...props} />
         </RB.Col>}
-        <RB.Col>
+        {patent.ready && <RB.Col>
           <RB.Button onClick={onAction('product', patent)}>
             {L('act_product')}</RB.Button>
-        </RB.Col>
+        </RB.Col>}
       </RB.Row>
     </RB.Container>
 }
@@ -97,7 +97,7 @@ export function PatentLabItem(props: RowProps){
       <RB.Col>{r.value}</RB.Col>
       <RB.Col>{r.provided|0}</RB.Col>
     </RB.Row>)
-    const cls = Patent.ready(patent) ? 'patent-ready' : ''
+    const cls = patent.ready ? 'patent-ready' : ''
     return <RB.Container className={`menu-list-box ${cls}`}><RB.Row><RB.Col><RB.Container>
       <RB.Row><IDField item={patent} /></RB.Row>
       <RB.Row>

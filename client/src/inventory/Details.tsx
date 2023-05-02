@@ -225,7 +225,7 @@ export class PatentDetails extends ItemDetailsBase {
         const {items = []} = this.state
         const {owner} = this.props
         if (owner.type==InstitutionType.Research){
-            return items.sort((a: Patent, b: Patent)=>+Patent.ready(a) - +Patent.ready(b)).map(i=>
+            return items.sort((a: Patent, b: Patent)=>+a.ready - +b.ready).map(i=>
                 <PatentLabItem onAction={this.onAction} key={`item_lab_${i._id}`}
                     patent={i as Patent} {...this.props} />)
         }
