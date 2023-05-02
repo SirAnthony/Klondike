@@ -17,6 +17,7 @@ import * as date from '../common/date'
 
 type OrderDetailsState = {
     orders?: Order[]
+    rating?: number 
     cycle: number
 }
 type OrderDetailsProps = {
@@ -38,12 +39,12 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
         return `/api/corp/orders/${owner._id}`
     }
     fetchState(data: any = {}){
-        const {list} = data
-        return {item: data, list, orders: list}
+        const {list, rating} = data
+        return {item: data, list, orders: list, rating}
     }
     has(field: string){ return this.props.fields?.includes(field) }
     render(){
-        const {cycle} = this.state
+        const {cycle, rating} = this.state
         const cur_orders = this.state.orders?.filter(o=>o.cycle==cycle)||[]
         const orders = cur_orders.map(order=><OrderRowCompact
             key={`order_row_compact_${order._id}`} order={order} />)
@@ -52,6 +53,7 @@ export class OrderDetails extends F.Fetcher<OrderDetailsProps, OrderDetailsState
           <RB.Row>
             <RB.Col>{L('desc_order', cycle)}</RB.Col>
             <RB.Col>{L('desc_plan', (plan*100).toFixed(2))}</RB.Col>
+            <RB.Col>{L('desc_rating', rating|0)}</RB.Col>
           </RB.Row>
           {orders}
         </RB.Container>

@@ -8,6 +8,7 @@ import {asID} from '../../util/server'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import * as Rating from '../../util/rating'
 import * as _ from 'lodash'
+import {Time} from '../../util/time'
 
 export class CorpApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -31,7 +32,8 @@ export class CorpApiRouter extends BaseRouter {
         const {id} = ctx.params
         const corp = await CorpController.get(id)
         const list = await OrderController.all({'owner._id': asID(corp._id)})
-        return {list}
+        const rating = await Rating.Rating.entity(corp.asOwner, Time.cycle)
+        return {list, rating}
     }
 
     @CheckIDParam()

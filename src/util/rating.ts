@@ -51,15 +51,20 @@ async function getForAll(){
 const RatingActions = [LogAction.PatentForwardFull, LogAction.PatentForwardPart,
     LogAction.PatentForwardLeftovers, LogAction.OrderClosed, LogAction.BonusRating,
     LogAction.MoneyLeftovers, LogAction.ResourceLeftovers]
+async function entityPoints(owner: Owner, cycle: number){
+    const {cycleLength, basicTime} = Time.Time
+    const interval = {$gte: cycleLength*(cycle-1), $lt: cycleLength*cycle}
+    const events = await LogController.all({'owner._id': asID(owner._id),
+        'owner.type': owner.type, ts: interval, action: {$in: RatingActions}})
+    return events.reduce((p, c)=>p+c.points|0, 0)    
+}
+
 async function calcCycle(cycle: number){
     const list = await CorpController.all({type: InstitutionType.Corporation})
     for (let corp of list)
     {
         const owner = corp.asOwner, name = `cycle_${cycle}`
-        const events = await LogController.all({'owner._id': asID(corp._id),
-            ts: Time.Time.cycleInterval(cycle)})
-        let points = events.filter(f=>RatingActions.includes(f.action)).reduce(
-            (p, c)=>p+c.points|0, 0)
+        let points = await entityPoints(corp.asOwner, cycle)
         const orders = await OrderController.all({'owner._id': asID(owner._id), cycle})
         const conf = await ConfigController.get()
         orders.forEach(o=>points += Order.plan(o)>=0.5 ? conf.points.order.open : 0)
@@ -85,7 +90,8 @@ Time.addCycleEvent(calcCycle)
 export const Rating = {
     get: getForAll,
     getCycle: getForCycle,
-    calc: calcCycle
+    calc: calcCycle,
+    entity: entityPoints
 }
 
 // Need proper calculations

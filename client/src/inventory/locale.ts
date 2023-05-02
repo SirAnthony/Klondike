@@ -44,6 +44,7 @@ load(mod, {
     'location_desc_sector': 'сектор',
     'desc_order': tpl`Текущий заказ на цикл ${0}`,
     'desc_plan': tpl`Выполнение плана: ${0}%`,
+    'desc_rating': tpl`Очков рейтинга в цикле: ${0}`,
     'desc_items': 'Собственность',
     'desc_patents': 'Доступные патенты',
     'desc_current_proposals': 'Текущие предложения',
