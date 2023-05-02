@@ -67,8 +67,8 @@ async function calcCycle(cycle: number){
         let points = await entityPoints(corp.asOwner, cycle)
         const orders = await OrderController.all({'owner._id': asID(owner._id), cycle})
         const conf = await ConfigController.get()
-        orders.forEach(o=>points += Order.plan(o)>=0.5 && Order.plan(o)<1 ?
-            conf.points.order.open : 0)
+        orders.forEach(o=>points += Order.plan(o)<0.5 ? conf.points.order.open|0 :
+            Order.plan(o)<1 ? conf.points.order.halfclosed|0 : 0)
         const prev = await LogController.find({action: LogAction.CycleRating,
             'owner._id': asID(owner._id), name})
         if (prev && prev.points!=points) {

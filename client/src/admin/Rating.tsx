@@ -111,7 +111,8 @@ function PatentConfigChange(conf: Config, onChange: (c: Config)=>void){
 
 function OrderSpecialityChange(props: {conf: Config, onChange: (c: Config)=>void}){
     const {conf, onChange} = props
-    const keys = Object.keys(entity.ResourceSpecialityType).filter(f=>!isNaN(+f)).concat(['open'])
+    const keys = Object.keys(entity.ResourceSpecialityType)
+        .filter(f=>!isNaN(+f)).concat(['open', 'halfclosed'])
     const cols = keys.map(k=>[
       <RB.Col>{LR(`res_spec_value_${k}`)}</RB.Col>,
       <RB.Col>

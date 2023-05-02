@@ -18,7 +18,7 @@ export type Config = {
             } | number
         },
         order: {
-            [k in entity.ResourceSpecialityType | 'open']: number
+            [k in entity.ResourceSpecialityType | 'open' | 'halfclosed']: number
         }
     },
     price: {

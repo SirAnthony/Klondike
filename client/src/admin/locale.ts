@@ -25,7 +25,8 @@ load(mod, {
     'points.patent.pay': 'Оплата патента лабораторией',
     'points.patent': tpl`Очки за закрытие патента. ${0} владение`,
     'points.order': 'Очки за закрытие заказа',
-    'res_spec_value_open': 'Открытый',
+    'res_spec_value_open': '<50%',
+    'res_spec_value_halfclosed': '50% <> 100%',
     'config_setup_prices': 'Настройки цен',
     'act_add_cycle': 'Добавить цикл',
 })
