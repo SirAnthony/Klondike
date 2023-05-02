@@ -100,13 +100,13 @@ function PatentConfigChange(conf: Config, onChange: (c: Config)=>void){
       </RB.Col>
     </RB.Row>,
     <RB.Row className='menu-input-row'>
-      <RB.Col>{L(`points.patent`, LR('patent_ownership_full'))}</RB.Col>
-    </RB.Row>,
-    <PatentWeigthChange conf={conf} type={entity.PatentOwnership.Full} onChange={onChange} />,
-    <RB.Row className='menu-input-row'>
       <RB.Col>{L(`points.patent`, LR('patent_ownership_shared'))}</RB.Col>
     </RB.Row>,
-    <PatentWeigthChange conf={conf} type={entity.PatentOwnership.Partial} onChange={onChange} />]
+    <PatentWeigthChange conf={conf} type={entity.PatentOwnership.Partial} onChange={onChange} />,
+    <RB.Row className='menu-input-row'>
+      <RB.Col>{L(`points.patent`, LR('patent_ownership_full'))}</RB.Col>
+    </RB.Row>,
+    <PatentWeigthChange conf={conf} type={entity.PatentOwnership.Full} onChange={onChange} />]
 }
 
 function OrderSpecialityChange(props: {conf: Config, onChange: (c: Config)=>void}){
