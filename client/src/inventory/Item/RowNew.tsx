@@ -74,8 +74,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     }
     get errors(){
         const item = new (Item.class(this.state.type))()
-        return item.keys.filter(k=>!['_id', 'market', 'owner', 'owners',
-            'location'].includes(k) && !this.state[k] && isNaN(this.state[k]))
+        return item.keys.filter(k=>!['_id', 'market', 'owner', 'owners', 'served',
+            'ready', 'location'].includes(k) && !this.state[k] && isNaN(this.state[k]))
     }
     get ownerExclude(){ return iutil.owners_exclude(this.state.type) }
     // resource

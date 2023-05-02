@@ -59,7 +59,7 @@ export async function buy_item(src: InstitutionController, item: ItemController)
         pt.owners = pt.owners.filter(o=>!OwnerMatch(o, dst) &&
             !OwnerMatch(o, src)).concat(src.asOwner)
         // Add points if last part bought
-        await rating.patent_points(pt, src, pt.served)
+        await rating.patent_points(item, src, pt.served)
     } else if (item.type==ItemType.Coordinates) {
         const pt = (item as unknown) as Coordinates
         pt.owners = pt.owners.filter(o=>!OwnerMatch(o, src)).concat(src.asOwner)

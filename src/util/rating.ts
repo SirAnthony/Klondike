@@ -1,8 +1,9 @@
 import {CorpController, LogController, OrderController} from "../entity"
-import {ConfigController} from '../entity'
+import {ConfigController, ItemController} from '../entity'
 import {InstitutionType, Owner, LogAction, OwnerMatch, PatentOwnership} from '../../client/src/common/entity'
 import {Patent} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
+import * as util from '../../client/src/common/util'
 import * as Time from "./time"
 import {asID} from '../util/server'
 
@@ -88,7 +89,8 @@ export const Rating = {
 }
 
 // Need proper calculations
-export async function patent_points(patent: Patent, owner: Owner, prev: Owner[]){
+export async function patent_points(item: ItemController, owner: Owner, prev: Owner[]){
+    const patent = util.obj_copyto(item, new Patent())
     // Do not calculate points on non-servers
     if (!patent.served.some(o=>OwnerMatch(o, owner)))
         return

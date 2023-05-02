@@ -131,7 +131,7 @@ export class Patent extends MultiOwnedItem {
     ready: boolean
     served: Owner[]
     get keys(){
-        return super.keys.concat('kind weight resourceCost'
+        return super.keys.concat('kind weight resourceCost served ready'
             .split(' ')).filter(k=>!['location'].includes(k))
     }
     get ownership(){ 

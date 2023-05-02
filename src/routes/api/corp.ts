@@ -50,7 +50,7 @@ export class CorpApiRouter extends BaseRouter {
         patent.served = _.uniqBy(patent.served.concat(owner.asOwner), f=>asID(f._id))
         await item.save()
         // Calcluate points
-        await Rating.patent_points(patent, owner, served);
+        await Rating.patent_points(item, owner, served);
     }
 
     @CheckRole([UserType.Captain, UserType.Corporant,

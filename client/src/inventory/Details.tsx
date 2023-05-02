@@ -204,21 +204,25 @@ export class PatentDetails extends ItemDetailsBase {
             this[`on${cmd}`] = this[`on${cmd}`].bind(this))
     }
     onAction(name: string, patent: Patent)  {
+        const method = this[`action_${name}`].bind(this)
+        const fetch = this.fetch.bind(this)
+        const setState = this.setState.bind(this)
         return async function() : Promise<boolean> {
-            const ret = await this[`action_${name}`](patent)
-            if (ret)
-                this.fetch()
+            const ret = await method(patent)
+            if (ret.err)
+                return void setState({err: ret.err})
+            fetch()
             return ret
         }
     }
     async action_forward(patent: Patent){
         const {owner} = this.props
-        let ret = util.wget(`/api/corp/patent/forward/${owner._id}`, {method: 'PUT',
+        return util.wget(`/api/corp/patent/forward/${patent._id}`, {method: 'POST',
             data: {_id: patent._id, requester: owner._id}});
     }
     async action_product(patent: Patent){
         const {owner} = this.props
-        let ret = util.wget(`/api/corp/patent/product/${owner._id}`, {method: 'PUT',
+        return util.wget(`/api/corp/patent/product/${patent._id}`, {method: 'POST',
             data: {_id: patent._id, requester: owner._id}});
     }
     rows(){
