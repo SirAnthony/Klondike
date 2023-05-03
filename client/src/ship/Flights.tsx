@@ -1,6 +1,6 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
-import {Item, Flight, User, UserType, FlightStatus, UserTypeIn} from '../common/entity'
+import {Item, Flight, User, UserType, FlightStatus, UserTypeIn, OwnerMatch} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {LocationCol} from '../inventory/Item/components';
 import {ErrorMessage} from '../util/errors';
@@ -8,11 +8,11 @@ import * as util from '../common/util'
 import * as date from '../common/date'
 import {default as L, LR} from './locale'
 
-export type FlightRowParams = {
+export type FlightRowProps = {
     flight: Flight
     user: User
-    editRow?: (params: FlightRowParams)=>React.ReactElement
-    actionsClass?: (params: FlightRowParams)=>React.ReactElement
+    editRow?: (params: FlightRowProps)=>React.ReactElement
+    actionsClass?: (params: FlightRowProps)=>React.ReactElement
     onAction?: (action: string, flight: Flight)=>void
     onSubmit?: (f: Flight)=>Promise<boolean>
     onDelete?: ()=>void
@@ -20,14 +20,14 @@ export type FlightRowParams = {
     onCancel?: ()=>void
 }
 
-function FlightRowShip(params: FlightRowParams){
+function FlightRowShip(params: FlightRowProps){
     const {flight} = params
     if (flight.owner)
         return <RB.NavLink href={`/ship/${flight.owner._id}`}>{flight.owner.name}</RB.NavLink>
     return 
 }
 
-function FlightLocationCol(params: FlightRowParams){
+function FlightLocationCol(params: FlightRowProps){
     const {flight, user} = params
     if (!flight.owner)
         return <RB.Col>-</RB.Col>
@@ -36,7 +36,7 @@ function FlightLocationCol(params: FlightRowParams){
     return <LocationCol item={(flight as unknown) as Item} layout={null} />
 }
 
-function FlightActions(params: FlightRowParams){
+function FlightActions(params: FlightRowProps){
     const {flight, user, onAction} = params
     const sp = s=>s.split(' ')
     const actions = {
@@ -63,7 +63,20 @@ function FlightActions(params: FlightRowParams){
     </RB.Col>
 }
 
-export function FlightRow(props: FlightRowParams) {
+function FlightStatusCol(props: FlightRowProps){
+    const {flight, user} = props
+    const allowed = OwnerMatch(flight.owner, user.relation) ||
+        UserTypeIn(user, UserType.Guard | UserType.Master)
+    const status = !flight.owner ? ' ' :
+        !allowed ? L('desc_info_hidden') : [
+        !flight.arrival && LR(`flight_status_${flight.status}`),
+        flight.arrival ? L('desc_arrived') + ' ' + date.timeday(flight.arrival) : null,
+        !flight.arrival && date.timeday(flight.departure)
+    ].filter(Boolean).join()
+    return <RB.Col>{status}</RB.Col>
+}
+
+export function FlightRow(props: FlightRowProps) {
     const {flight} = props
     const [edit, setEdit] = React.useState(false)
     if (edit && props.editRow)
@@ -73,7 +86,7 @@ export function FlightRow(props: FlightRowParams) {
       <RB.Col><FlightRowShip {...props} /></RB.Col>
       <RB.Col>{flight.owner ? LR(`flight_type_${flight.type}`) : ' '}</RB.Col>
       <FlightLocationCol {...props} />
-      <RB.Col>{flight.owner ? LR(`flight_status_${flight.status}`) : ' '}</RB.Col>
+      <FlightStatusCol {...props} />
       <props.actionsClass {...props} onEdit={()=>setEdit(true)} />
     </RB.Row>
 }

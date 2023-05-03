@@ -1,13 +1,13 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Flight, InstitutionType, Owner, User} from '../common/entity'
-import {BaseList as FList, FlightRowParams, FlightRow} from '../ship/Flights'
+import {BaseList as FList, FlightRowProps, FlightRow} from '../ship/Flights'
 import {FlightStatusSelect, FlightTypeSelect, LocationSelect, OwnerSelect, TimeInput} from 'src/util/inputs'
 import {DataViewerButtons, EditButtons} from '../util/buttons'
 import * as date from '../common/date'
 import * as util from '../common/util'
 
-function FlightActions(props: FlightRowParams){
+function FlightActions(props: FlightRowProps){
     return <RB.Col>
       <DataViewerButtons {...props} />
     </RB.Col>
@@ -16,7 +16,7 @@ function FlightActions(props: FlightRowParams){
 type FlightSend = Omit<Flight, 'name' | 'keys' | 'class'>
 type FlightRowNewParams = {
     onSubmit: (f: FlightSend)=>Promise<boolean>
-} & Omit<FlightRowParams, 'actionsClass'>
+} & Omit<FlightRowProps, 'actionsClass'>
 function FlightRowNew(props: FlightRowNewParams){
     const {flight} = props
     const [ts, setTime] = React.useState(flight?.ts || date.add(undefined, {min: 15}))

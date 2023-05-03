@@ -41,6 +41,7 @@ load(mod, {
     'desc_owner': 'Владелец корабля',
     'desc_balance': 'Баланс',
     'desc_info_hidden': '[Информация скрыта]',
+    'desc_arrived': 'Прибыл',
     'mod_title': 'Дополнительные модули',
     'mod_values': 'Текущее значение',
     'mod_slot': 'Слот',
