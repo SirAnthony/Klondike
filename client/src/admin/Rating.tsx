@@ -17,28 +17,32 @@ import {Delimeter} from 'src/util/components';
 type TimeControlProps = {}
 type TimeContolState = {
     time: date.Time
+    cycleLength: number
 }
 class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
     L = L
     constructor(props){
         super(props)
-        this.state = {time: new date.Time()}
+        const time = new date.Time()
+        this.state = {time, cycleLength: time.cycleLength/date.ms.HOUR}
     }
     get fetchUrl(){ return '/api/time' }
     fetchState(data: any = {}){
-        return {item: data, time: new date.Time(data)}
+        const time = new date.Time(data)
+        return {item: data, time, cycleLenth: time.cycleLength/date.ms.HOUR}
     }
     async changeTime(value: number){
         this.setState({err: null})
+        const {cycleLength} = this.state
         const res = await util.wget('/api/admin/time', {method: 'PUT',
-            data: {time: value}})
+            data: {time: value, cycleLength: cycleLength*date.ms.HOUR}})
         if (res.err)
             return this.setState({err: res.err})
         this.fetch()
         InventoryEvents.reloadTime()
     }
     render(){
-        const {time, err} = this.state
+        const {time, cycleLength, err} = this.state
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-list-row'>
@@ -51,7 +55,7 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
                 {L('time_decrease', 1)}</RB.Button>
             </RB.Col>
             <RB.Col>
-              <RB.Button onClick={()=>this.changeTime(time.cycleLength)}>
+              <RB.Button onClick={()=>this.changeTime(4*date.ms.HOUR)}>
                 {L('time_decrease', time.hoursInCycle)}</RB.Button>
               </RB.Col>
             <RB.Col>
@@ -59,8 +63,18 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
                 {L('time_increase', 1)}</RB.Button>
             </RB.Col>
             <RB.Col>
-              <RB.Button onClick={()=>this.changeTime(-time.cycleLength)}>
+              <RB.Button onClick={()=>this.changeTime(-4*date.ms.HOUR)}>
                 {L('time_increase', time.hoursInCycle)}</RB.Button>
+            </RB.Col>
+          </RB.Row>
+          <RB.Row className='menu-list-row'>
+            <RB.Col>{L('server_cycle_length')}</RB.Col>
+            <RB.Col>
+              <NumberInput value={cycleLength} placeholder={L('server_cycle_length')}
+                onChange={cycleLength=>this.setState({cycleLength})} />
+            </RB.Col>
+            <RB.Col>
+              <RB.Button onClick={()=>this.changeTime(0)}>{L('act_save')}</RB.Button>
             </RB.Col>
           </RB.Row>
         </RB.Container>

@@ -1,4 +1,4 @@
-import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
+import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated, CheckOwn} from '../base'
 import {CorpController, institutionController, LoanController, LogController} from '../../entity'
 import {ItemController, UserController, ConfigController} from '../../entity'
 import {OrderController} from '../../entity'
@@ -103,7 +103,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckAuthenticated()
+    @CheckOwn()
     async put_item_pay_loan(ctx: RenderContext){
        const {stype, id, itemid, loanid} = ctx.aparams
         if (!itemid || !InstitutionType[+stype])
@@ -135,8 +135,7 @@ export class InventoryApiRouter extends BaseRouter {
         const {stype, id, itemid} = ctx.aparams
         if (!itemid)
             throw 'Required fields missing'
-        const srcController = institutionController(+stype)
-        const src = await srcController.get(id)
+        const src = await institutionController(+stype).get(id)
         const item = await ItemController.get(itemid)
         if (+item.market?.type!=MarketType.Loan)
             throw 'Wrong market type'
@@ -165,11 +164,9 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckRole([UserType.Captain, UserType.Corporant, UserType.Scientist])
+    @CheckOwn()
     async put_item_sell(ctx: RenderContext){
         const {stype, dtype, id, target, itemid, price} = ctx.aparams
-        if (+stype==InstitutionType.User || +dtype==InstitutionType.User)
-            throw 'Users cannot trade'
         const item = await ItemController.get(itemid)
         if (!item)
             throw 'Item not found'
@@ -200,8 +197,6 @@ export class InventoryApiRouter extends BaseRouter {
     async put_item_buy(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const {stype, id, itemid, code} = ctx.aparams
-        if (+stype==InstitutionType.User)
-            throw 'Users cannot trade'
         if (!user.admin && !IDMatch(user.relation?._id, id))
             throw 'Cannot act on foreign item'
         const item = await ItemController.get(itemid)
@@ -230,8 +225,6 @@ export class InventoryApiRouter extends BaseRouter {
     async put_item_reject(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const {stype, id, itemid, code} = ctx.aparams
-        if (+stype==InstitutionType.User)
-            throw 'Users cannot trade'
         if (!user.admin && !IDMatch(user.relation?._id, id))
             throw 'Cannot act on foreign item'
         const item = await ItemController.get(itemid)
@@ -252,11 +245,9 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckRole([UserType.Captain, UserType.Corporant, UserType.Scientist])
+    @CheckOwn()
     async put_item_delist(ctx: RenderContext){
         const {stype, id, itemid} = ctx.aparams
-        if (+stype==InstitutionType.User)
-            throw 'Users cannot trade'
         const item = await ItemController.get(itemid)
         if (!item)
             throw 'Item not found'
@@ -276,7 +267,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckRole([UserType.Captain, UserType.Corporant, UserType.Scientist])
+    @CheckOwn()
     async get_items_list(ctx: RenderContext){
         const {stype, id} = ctx.aparams
         const srcController = institutionController(+stype)
@@ -291,7 +282,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckRole([UserType.Corporant, UserType.Scientist])
+    @CheckOwn()
     async get_patents_list(ctx: RenderContext){
         const {stype, id} = ctx.aparams
         const srcController = institutionController(+stype)
@@ -308,6 +299,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
+    @CheckOwn()
     @CheckRole([UserType.Corporant])
     async get_orders_list(ctx: RenderContext){
         const {stype, id} = ctx.params
@@ -323,7 +315,7 @@ export class InventoryApiRouter extends BaseRouter {
     
 
     @CheckIDParam()
-    @CheckAuthenticated()
+    @CheckOwn()
     async post_transfer(ctx: RenderContext){
         const {stype, dtype, id, target, amount} = ctx.aparams
         const srcController = institutionController(+stype)
@@ -346,7 +338,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckAuthenticated()
+    @CheckOwn()
     async get_balance(ctx: RenderContext){
         const {stype, id} = ctx.aparams
         const srcController = institutionController(+stype)
@@ -365,7 +357,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckAuthenticated()
+    @CheckOwn()
     async get_proposals(ctx: RenderContext){
         const {stype, id} = ctx.aparams
         const srcController = institutionController(+stype)
@@ -376,7 +368,7 @@ export class InventoryApiRouter extends BaseRouter {
     }
 
     @CheckIDParam()
-    @CheckAuthenticated()
+    @CheckOwn()
     async get_loans(ctx: RenderContext){
         const {stype, id} = ctx.aparams
         const srcController = institutionController(+stype)

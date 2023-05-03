@@ -232,8 +232,9 @@ export class AdminApiRouter extends BaseRouter {
     @CheckRole(UserType.Master)
     async put_time(ctx: RenderContext){
         const params: any = ctx.request.body
-        const {time} = params
+        const {time, cycleLength} = params
         Time.basicTime += (+time)|0
+        Time.cycleLength = cycleLength
     }
 
     @CheckRole(UserType.Master)

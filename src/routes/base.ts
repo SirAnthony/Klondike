@@ -2,7 +2,7 @@
 import * as KoaRouter from 'koa-router'
 import  * as multer from '@koa/multer'
 import {RenderContext} from '../middlewares'
-import {UserType, UserTypeIn} from '../../client/src/common/entity'
+import {Identifier, UserType, UserTypeIn} from '../../client/src/common/entity'
 import {UserController} from '../entity'
 import {ApiError, Codes} from '../../client/src/common/errors'
 import {IDMatch} from '../util/server'
@@ -47,6 +47,27 @@ export function CheckRole(roles: UserType[] | UserType){
     }
 }
 
+export function CheckOwn(roles: UserType = 0, param_fn?: (ctx: RenderContext)=>Identifier){
+    param_fn = param_fn || ((ctx: RenderContext)=>{
+        const {id, stype} = ctx.aparams
+        return {_id: id, name: '', type: stype}
+    })
+    return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
+        return {...descriptor, value: async function check(ctx: RenderContext){
+            if (!ctx.isAuthenticated())
+               throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
+            const {user}: {user: UserController} = ctx.state
+            if (!UserTypeIn(user, (roles | UserType.Master))){
+                const test = param_fn(ctx)
+                if (!IDMatch(user, test) && !IDMatch(user.relation, test))
+                    throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
+            }
+            return descriptor.value.apply(this, arguments)
+        }}
+    }
+}
+
+
 export function CheckIDParam(param: string = 'id'){
     return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
         return {...descriptor, value: async function check(ctx: RenderContext){
@@ -54,7 +75,7 @@ export function CheckIDParam(param: string = 'id'){
                throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
             const id = ctx.aparams[param]
             const {user}: {user: UserController} = ctx.state
-            if (!UserTypeIn(user, UserType.Master) && !(id && IDMatch(id, user?.relation?._id)))
+            if (!UserTypeIn(user, UserType.Master) && !(id && (IDMatch(id, user.relation?._id) || IDMatch(id, user._id))))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}

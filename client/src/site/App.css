@@ -129,7 +129,7 @@ hr.delimeter {
     margin: 0.1rem 0 0.6rem 0;
 }
 
-.menu-container, .menu-container-full {
+.menu-container, .menu-container-full, .menu-container-fit {
     background-color: var(--color-ui-box-hover);
     border: solid var(--color-ui-border) 2px;
     border-radius: 10px;
@@ -137,6 +137,10 @@ hr.delimeter {
 
 div.menu-container-full, div.container-full {
     max-width: 100%;
+}
+
+div.menu-container-fit, div.container-fit {
+    max-width: fit-content;
 }
 
 .menu-box {
@@ -185,16 +189,22 @@ div.menu-container-full, div.container-full {
     width: 140px
 }
 
+.menu-box-view {
+    min-width: 1300px;
+}
+
 .menu-box-col-clear {
     max-width: 360px;
 }
 
 .row > .menu-box-col {
     max-width: 300px;
+    min-width: 220px;
 }
 
 .menu-box-clear {
     max-width: 250px;
+    min-width: 220px;
 }
 
 .menu-box-clear div.row {

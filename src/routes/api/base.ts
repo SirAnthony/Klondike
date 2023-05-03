@@ -54,13 +54,13 @@ export class ApiRouter extends BaseRouter {
         return {list}
     }
 
-    @CheckRole([UserType.Corporant, UserType.Captain, UserType.Scientist])
+    @CheckAuthenticated()
     async get_prices(ctx: RenderContext){
         const prices = await cutil.get_prices()
         return {list: prices}
     }
 
-    @CheckRole([UserType.Corporant, UserType.Captain, UserType.Scientist])
+    @CheckAuthenticated()
     async get_balance(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const {relation} = user

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as RR from 'react-router-dom'
-import {User, InstitutionType} from '../common/entity'
+import {User, InstitutionType, UserTypeIn, UserType, Owner} from '../common/entity'
 import {ButtonNavigator} from '../admin';
 import {default as L} from './locale'
 import { Delimeter } from 'src/util/components';
@@ -10,37 +10,44 @@ export type FooterProps = {
     user: User
 }
 
-function Button(props: FooterProps & {type: string}){
-    const {user, type} = props
-    const {relation} = user
+function Button(props: FooterProps & {type: string, relation: Owner}){
+    const {relation, type} = props
     return <RB.Button>
-      <RB.NavLink href={`/${type}/${relation.type}/${relation._id}`}>
+      <RB.NavLink href={`/${type}/${relation?.type}/${relation?._id}`}>
         {L(`pane_${type}`)}
       </RB.NavLink>
     </RB.Button>
 }
 
+function Pane(props: FooterProps & {relation: Owner, buttons: string[], eventKey: string}){
+    const cols = props.buttons.map(b=><RB.Col key={`pane_button_${b}`}>
+      <Button {...props} type={b} relation={props.relation} /></RB.Col>)
+    return <RB.TabPane eventKey={props.eventKey}><RB.Row>
+      {cols}
+    </RB.Row></RB.TabPane>
+}
+
 function EntityPane(props: FooterProps){
     const {user} = props
-    const {relation} = user
+    const relation = user.relation||user
     const sp = s=>s.split(' ')
     const buttons = {
+      [InstitutionType.User]: UserTypeIn(user, UserType.Guard) ?
+        sp('flights inventory') : sp('inventory'),
       [InstitutionType.Corporation]: sp('inventory maps'),
       [InstitutionType.Organization]: sp('inventory'),
       [InstitutionType.Research]: sp('flights inventory maps'),
       [InstitutionType.Ship]: sp('flights inventory maps ship log'),
     }
-    const cols = buttons[relation.type].map(b=><RB.Col key={`pane_button_${b}`}>
-      <Button {...props} type={b} /></RB.Col>)
-    return <RB.TabPane eventKey='entity'><RB.Row>
-      {cols}
-    </RB.Row></RB.TabPane>
+    return <Pane {...props} eventKey='entity' relation={relation}
+      buttons={buttons[+relation.type]} />
 }
 
 function ProfilePane(props: FooterProps){
-    return <RB.TabPane eventKey='profile'><RB.Row>
-      <RB.Col><RB.Button>Personal</RB.Button></RB.Col>
-    </RB.Row></RB.TabPane>
+    const {user} = props
+    const buttons = UserTypeIn(user, UserType.Guard) ?
+        ['flights', 'inventory'] : ['inventory']
+    return <Pane {...props} eventKey='profile' relation={user} buttons={buttons} />
 }
 
 export function UserFooter(props: FooterProps){
@@ -64,7 +71,7 @@ export function UserFooter(props: FooterProps){
       </RB.Nav>
     </RB.Row><RB.Row className='footer-tab'>
       <RB.Col><RB.TabContent>
-        {relation && <EntityPane {...props} />}
+        <EntityPane {...props} />
         <ProfilePane {...props} />
         {user.admin && <RB.Row>
           <Delimeter />

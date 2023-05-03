@@ -16,27 +16,25 @@ type InstitutionProps = {
 export function EntityInventory(props: InstitutionProps){
     const {entity, user} = props
     const param = {owner: entity, ...props}
-    return <RB.Container className='container-full'>
+    return <RB.Container className='container-fit'>
       <RB.Row>
         <RB.Col className='menu-list-title'>{entity.name}</RB.Col>
       </RB.Row>
       <RB.Row>
-        <RB.Col className='menu-box-col'>
-          <RB.Container>
-            <RB.Row>
-              <BudgetDetails {...param} />
-            </RB.Row>
-            <RB.Row><RB.Col className='menu-box menu-box-col'>
-              <PriceDetails {...param} />
-            </RB.Col></RB.Row>
-            {entity.type==InstitutionType.Corporation && <RB.Row>
-              <RB.Col className='menu-box menu-box-col'>
-                <RatingDetails />
-              </RB.Col>
-            </RB.Row>}
-          </RB.Container>
-        </RB.Col>
-        <RB.Col><RB.Container>
+        <RB.Col className='menu-box-col'><RB.Container>
+          <RB.Row>
+            <BudgetDetails {...param} />
+          </RB.Row>
+          <RB.Row><RB.Col className='menu-box menu-box-col'>
+            <PriceDetails {...param} />
+          </RB.Col></RB.Row>
+          {entity.type==InstitutionType.Corporation && <RB.Row>
+            <RB.Col className='menu-box menu-box-col'>
+              <RatingDetails />
+            </RB.Col>
+          </RB.Row>}
+        </RB.Container></RB.Col>
+        <RB.Col className='menu-box-view' ><RB.Container>
           {entity.type==InstitutionType.Corporation && <RB.Row>
             <RB.Col className='menu-box'>
               <OrderDetails {...param} fields={['plan']} />
@@ -85,7 +83,7 @@ export default class InventoryDetails extends F.Fetcher<InventoryDetailsProp, In
     }
     render(){
         const {entity} = this.state
-        return <RB.Container className="menu-container-full">
+        return <RB.Container className="menu-container-fit">
           <ControlBar title={L('interface', entity?.name||'')} onClose={this.props.onClose} />
           {this.view()}
         </RB.Container>

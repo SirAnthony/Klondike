@@ -18,6 +18,7 @@ load(mod, {
     'res_show': 'Настройки базовых ресурсы',
     'server_time': 'Текущее время',
     'server_cycle': 'Текущий цикл',
+    'server_cycle_length': 'Длина цикла в часах',
     'time_increase': tpl`Добавить ${0} ч.`,
     'time_decrease': tpl`Уменьшить на ${0} ч.`,
     // config
