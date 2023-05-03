@@ -41,7 +41,7 @@ function FlightActions(params: FlightRowParams){
     const sp = s=>s.split(' ')
     const actions = {
         [UserType.Captain]: sp('delist signup'),
-        [UserType.Guard]: sp('block help'),
+        [UserType.Guard]: sp('block help unblock'),
         [UserType.Master]: sp('block delist departure arrival unblock'),
     }
     const statuses = {
@@ -86,8 +86,7 @@ export class BaseList<P, S> extends UList<FlightListProps & P, FlightListState &
     body(){
         const {list, err} = this.state
         const rows = list.map(l=>this.getRow(l))
-        return [err && <RB.Row><ErrorMessage field={err} /></RB.Row>,
-        this.rowNew,
+        return [this.rowNew,
         <RB.Row key={'ship_list_title'} className="menu-list-title">
           <RB.Col>{LR('desc_time')}</RB.Col>
           <RB.Col>{LR('desc_ship')}</RB.Col>
@@ -112,6 +111,7 @@ type FlightListProps = {
 }
 export class List extends BaseList<FlightListProps, FlightListState> {
     L = L
+    get title(){ return 'flights_listing' }
     async onAction(name: string, flight: Flight){
         this.setState({err: null})
         const ret = await util.wget(`/api/ship/flight/${flight._id}/action/${name}`,

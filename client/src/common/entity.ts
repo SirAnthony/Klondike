@@ -281,7 +281,12 @@ export class Ship extends Institution {
 }
 
 export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked}
-export enum FlightType {Planetary, Drone}
+export enum FlightType {
+    Drone     = 1 << 0,
+    Planetary = 1 << 1,
+    // Emergency is planetary-only
+    Emergency = (1 << 2) | (1 << 1),
+}
 export enum FlightActions {}
 export class Flight extends ID {
     ts: number
@@ -294,6 +299,8 @@ export class Flight extends ID {
     get keys(){
         return `ts type status owner location`.split(' ') }
     get class(){ return Flight }
+    static Name(flight: Flight){
+        return `type_${flight.type} status_${flight.status}` }
 }
 
 export type PlanetShip = {

@@ -1,6 +1,6 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, ShipController, FlightController, ItemController, LogController} from '../../entity'
-import {ItemType, LogAction, Module, UserType, UserTypeIn} from '../../../client/src/common/entity'
+import {FlightStatus, ItemType, LogAction, Module, UserType, UserTypeIn} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch, asID} from '../../util/server'
 import * as Flights from '../../util/flights'
@@ -35,8 +35,10 @@ export class ShipApiRouer extends BaseRouter {
     @CheckRole([UserType.Guard, UserType.Captain])
     async get_flights(ctx: RenderContext){
         const d = new Date()
-        const flights = await FlightController.all({
-            ts: {$gte: +date.add(d, {'min': -30}), $lt: +date.add(d, {'hour': 2})}})
+        const flights = await FlightController.all({$or: [
+            {ts: {$gte: +date.add(d, {'min': -30}), $lt: +date.add(d, {'hour': 2})}},
+            {status: {$ne: FlightStatus.Docked}, 'owner._id': {$exists: true}}
+        ]})
         const ships = await ShipController.all({'flight._id': {$exists: true}})
         const ids = ships?.map(s=>(s._id as any) instanceof ObjectId ?
             s._id : new ObjectId(s._id))

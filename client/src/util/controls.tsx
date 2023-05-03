@@ -40,6 +40,7 @@ export class Menu<P, S> extends React.PureComponent<P, S & F.ErrorState> {
 type ListState = {list?: any[]}
 export class List<P, S> extends F.Fetcher<P, S & ListState> {
     L: (string)=>string
+    get title(){ return 'listing' }
     get closeLink() { return undefined }
     get containerClass() { return 'menu-container' }
     constructor(props){
@@ -60,7 +61,7 @@ export class List<P, S> extends F.Fetcher<P, S & ListState> {
         if (err)
             body.unshift(<ErrorMessage field={err} />)
         return <RB.Container className={this.containerClass}>
-          <ControlBar title={this.L('listing')} closeTo={this.closeLink} />
+          <ControlBar title={this.L(this.title)} closeTo={this.closeLink} />
           {body}
         </RB.Container>
     }

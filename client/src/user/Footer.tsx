@@ -32,7 +32,7 @@ function EntityPane(props: FooterProps){
     const relation = user.relation||user
     const sp = s=>s.split(' ')
     const buttons = {
-      [InstitutionType.User]: UserTypeIn(user, UserType.Guard) ?
+      [InstitutionType.User]: UserTypeIn(user, UserType.Guard | UserType.Master) ?
         sp('flights inventory') : sp('inventory'),
       [InstitutionType.Corporation]: sp('inventory maps'),
       [InstitutionType.Organization]: sp('inventory'),
@@ -45,7 +45,7 @@ function EntityPane(props: FooterProps){
 
 function ProfilePane(props: FooterProps){
     const {user} = props
-    const buttons = UserTypeIn(user, UserType.Guard) ?
+    const buttons = UserTypeIn(user, UserType.Guard | UserType.Master) ?
         ['flights', 'inventory'] : ['inventory']
     return <Pane {...props} eventKey='profile' relation={user} buttons={buttons} />
 }

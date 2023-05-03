@@ -4,6 +4,7 @@ load(mod, {
     'not_found': 'Корабль не найден',
     'interface': 'Интерфейс корабля',
     'listing': 'Список кораблей',
+    'flights_listing': 'Таблица вылетов',
     'install_module': 'Установить модуль',
     'repair': 'Починить корабль',
     'stats_title': 'Характеристики',

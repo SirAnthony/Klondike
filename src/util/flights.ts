@@ -1,5 +1,5 @@
 import {
-    Flight, FlightStatus, FlightType, InstitutionType,
+    Flight, FlightStatus, FlightType, ID, InstitutionType,
     ItemType, LogAction, Ship, UserType, UserTypeIn
 } from "../../client/src/common/entity";
 import {FlightController, LogController, ShipController, UserController} from "../entity";
@@ -7,8 +7,38 @@ import * as date from '../../client/src/common/date'
 import { IDMatch } from "./server";
 import * as uutil from './user'
 import { ApiError, Codes } from "../../client/src/common/errors";
+import { ObjectId } from "mongodb";
+
+export namespace Util {
+    export const isFlightType = (k: FlightType, t: FlightType)=>((+k) & t) == t
+    export async function cleanFlight(flight: FlightController){
+        // Delete unowned drone flights
+        if (isFlightType(flight.type, FlightType.Drone))
+            return await flight.delete()
+        if (+flight.type===FlightType.Emergency && !flight.departure)
+            return await flight.delete()
+        flight.status = FlightStatus.Docked
+        flight.arrival = flight.departure = null
+        flight.name = flight.location = null
+        flight.owner = null
+        await flight.save()
+    }
+
+    export async function checkShipAvailable(ship: ShipController, flight?: ID){
+        if (!ship.flight)
+            return true
+        if (IDMatch(ship.flight, flight))
+            return false
+        if (await FlightController.find({'_id': new ObjectId(ship.flight._id)}))
+            return false
+        ship.flight = null
+        await ship.save()
+        return true 
+    }
+}
 
 export namespace Actions {
+const isType = Util.isFlightType
 
 function CheckFlightStatus(statuses: FlightStatus[]){
     return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
@@ -28,19 +58,20 @@ export async function signup(user: UserController, flight: FlightController, dat
         throw 'error_no_ship'
     if (!FlightStatus[+data.type] || !FlightStatus[+data.status] || !+data.ts)
         throw 'Insufficient data'
-    if (data.type==FlightType.Drone && !data.ts)
+    if (isType(data.type, FlightType.Drone) && !data.ts)
         throw 'Flight time unspecified'
     const ship = await ShipController.get(rel._id)
-    if (+data.type==FlightType.Planetary && ship.credit<=0)
+    if (isType(data.type, FlightType.Planetary) && ship.credit<=0)
         throw 'error_no_funds'
-    if (ship.flight)
-        throw 'error_already_in_flight'
+    if (!(await Util.checkShipAvailable(ship, flight)))
+        throw 'error_ship_busy'
     flight.type = +data.type
     flight.status = FlightStatus.Waiting
-    if (data.type==FlightType.Drone)
+    if (isType(data.type, FlightType.Drone))
         flight.ts = +data.ts
     flight.location = data.location    
     flight.owner = ship
+    flight.name = Flight.Name(flight)
     flight.departure = null
     flight.arrival = null
     await flight.save();
@@ -55,7 +86,7 @@ export async function signup(user: UserController, flight: FlightController, dat
 uutil.CheckRole(UserType.Captain)
 CheckFlightStatus([FlightStatus.Waiting])
 export async function delist(user: UserController, flight: FlightController, data: Flight){
-    const rel = data.owner || user.relation
+    const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
     if (!IDMatch(rel._id, flight.owner?._id))
@@ -64,16 +95,7 @@ export async function delist(user: UserController, flight: FlightController, dat
         throw 'Cannot delist from started flight'
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
-    // Does not store drone flights which was never executed
-    if (+flight.type == FlightType.Drone)
-        await flight.delete()
-    else {
-        flight.status = FlightStatus.Docked
-        flight.arrival = flight.departure = null
-        flight.location = null
-        flight.owner = null
-        await flight.save()
-    }
+    await Util.cleanFlight(flight)
     ship.flight = null
     await ship.save()
     await LogController.log({
@@ -91,6 +113,7 @@ export async function block(user: UserController, flight: FlightController, data
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
     flight.status = FlightStatus.Blocked
+    flight.name = Flight.Name(flight)
     flight.arrival = flight.departure = null
     await flight.save()
     if (!ship.flight || !IDMatch(ship.flight, flight)){
@@ -113,6 +136,7 @@ export async function unblock(user: UserController, flight: FlightController, da
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
     flight.status = FlightStatus.Waiting
+    flight.name = Flight.Name(flight)
     flight.arrival = flight.departure = null
     await flight.save()
     if (!ship.flight || !IDMatch(ship.flight, flight)){
@@ -135,6 +159,7 @@ export async function departure(user: UserController, flight: FlightController, 
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
     flight.status = FlightStatus.InFlight
+    flight.name = Flight.Name(flight)
     flight.departure = +(new Date())
     flight.arrival = null
     await flight.save()
@@ -158,6 +183,7 @@ export async function arrival(user: UserController, flight: FlightController, da
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
     flight.status = FlightStatus.Docked
+    flight.name = null
     flight.arrival = +(new Date())
     await flight.save()
     if (ship.flight){
@@ -184,19 +210,22 @@ export async function help(user: UserController, flight: FlightController, data:
         ship.save()
     }
     const urel = user.relation
-    const new_ship = await ShipController.get(urel._id)
-    if (+urel.type!=InstitutionType.Ship || !new_ship)
+    const new_ship = await ShipController.get(urel?._id)
+    if (+urel?.type!=InstitutionType.Ship || !new_ship)
         throw 'error_no_ship'
-    if (new_ship.flight)
+    if (!(await Util.checkShipAvailable(new_ship)))
         throw 'error_ship_busy'
     const new_flight = await FlightController.get({
-        type: FlightType.Planetary,
+        type: FlightType.Emergency,
         status: FlightStatus.Waiting,
         owner: new_ship.asOwner,
         location: flight.location,
         ts: +date.add(date.get(), {min: 10})
     } as Flight)
+    new_flight.name = Flight.Name(new_flight)
     await new_flight.save()
+    new_ship.flight = new_flight
+    await new_ship.save()
     await LogController.log({
         name: 'flight_help', info: 'flight_help',
         action: LogAction.FlightHelp, flight: prev,
@@ -204,5 +233,11 @@ export async function help(user: UserController, flight: FlightController, data:
         data: {data, flight: new_flight, ship: new_ship.asOwner}
     })
 }
+
+}
+
+namespace Timer {
+const isType = Util.isFlightType
+
 
 }
