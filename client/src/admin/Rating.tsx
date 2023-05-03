@@ -56,7 +56,7 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
             </RB.Col>
             <RB.Col>
               <RB.Button onClick={()=>this.changeTime(4*date.ms.HOUR)}>
-                {L('time_decrease', time.hoursInCycle)}</RB.Button>
+                {L('time_decrease', 4)}</RB.Button>
               </RB.Col>
             <RB.Col>
               <RB.Button onClick={()=>this.changeTime(-date.ms.HOUR)}>
@@ -64,7 +64,7 @@ class TimeControl extends F.Fetcher<TimeControlProps, TimeContolState> {
             </RB.Col>
             <RB.Col>
               <RB.Button onClick={()=>this.changeTime(-4*date.ms.HOUR)}>
-                {L('time_increase', time.hoursInCycle)}</RB.Button>
+                {L('time_increase', 4)}</RB.Button>
             </RB.Col>
           </RB.Row>
           <RB.Row className='menu-list-row'>
