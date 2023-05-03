@@ -163,7 +163,7 @@ export default class List extends UList<UserListProps, UserListState> {
         const {list, filter_text, filter_kind} = this.state
         const fk = (u: User)=>isNaN(+filter_kind) || filter_kind===null || UserTypeIn(u, filter_kind)
         const ft = (u: User)=>util.isEmpty(filter_text) ||
-            [User.fullName(u), u.phone, u.relation?.name].some(v=>
+            [u.name, User.fullName(u), u.phone, u.relation?.name].some(v=>
             (new RegExp(filter_text, 'i')).test(v||''))
         return list?.filter(u=>fk(u) && ft(u))||[]
     }
@@ -171,7 +171,7 @@ export default class List extends UList<UserListProps, UserListState> {
         const {user} = this.props
         this.setState({err: null, newForm: null})
         const empty = user.keys.concat(['password'])
-            .filter(k=>!['_id', 'type', 'password', 'info', 'img', 'relation'].includes(k))
+            .filter(k=>!['_id', 'type', 'alias', 'password', 'info', 'img', 'relation'].includes(k))
             .filter(k=>util.isEmpty(u[k])).join(' ')
         const err = msg=>this.setState({err: new ClientError(msg), newForm: u})
         if (empty)
