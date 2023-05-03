@@ -161,7 +161,7 @@ export default class List extends UList<UserListProps, UserListState> {
     get fetchUrl() { return `/api/users/` }
     get list(){
         const {list, filter_text, filter_kind} = this.state
-        const fk = (u: User)=>filter_kind===null || UserTypeIn(u, filter_kind)
+        const fk = (u: User)=>isNaN(+filter_kind) || filter_kind===null || UserTypeIn(u, filter_kind)
         const ft = (u: User)=>util.isEmpty(filter_text) ||
             [User.fullName(u), u.phone, u.relation?.name].some(v=>
             (new RegExp(filter_text, 'i')).test(v||''))
