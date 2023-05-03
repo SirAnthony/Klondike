@@ -10,6 +10,7 @@ import * as curls from '../common/urls'
 import * as F from '../Fetcher'
 import {default as L, LR} from './locale'
 import EventEmitter from '../common/events'
+import { UserRoleCol } from './List';
 
 const ProfileEvents = new EventEmitter()
 
@@ -89,7 +90,7 @@ function ProfileInfo(props: UserViewProfileProps){
       </RB.Row>
       <RB.Row>
         <RB.Col>{L('desc_role')}</RB.Col>
-        <RB.Col>{LR(`user_kind_${user.kind}`)}</RB.Col>
+        <UserRoleCol user={user} />
       </RB.Row>
       {(viewer.admin || viewer._id===user._id) && <RB.Row>
         <RB.Col>{L('desc_credit')}</RB.Col>

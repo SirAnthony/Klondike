@@ -1,9 +1,9 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, institutionController} from '../../entity'
 import {ItemController, PlanetController} from '../../entity'
-import {ConfigController, LogController} from '../../entity'
-import {PlanetInfo, UserType, LogAction, InstitutionType} from '../../../client/src/common/entity'
-import {ItemType, Resource} from '../../../client/src/common/entity'
+import {ConfigController} from '../../entity'
+import {PlanetInfo, UserType, UserTypeIn} from '../../../client/src/common/entity'
+import {ItemType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {asID} from '../../util/server'
 import * as cutil from '../../util/config'
@@ -35,7 +35,7 @@ export class ApiRouter extends BaseRouter {
         const planet: PlanetInfo = await PlanetController.get(id)
         const ships = await ShipController.all({'location._id': asID(planet._id)})
         planet.ships = ships.map(s=>ShipController.PlanetShip(s))
-        const filter = user.kind==UserType.Master ? {} : {$or: [
+        const filter = UserTypeIn(user, UserType.Master) ? {} : {$or: [
             {'owner._id': asID(entity._id), 'owner.type': +entity.type},
             {'known._id': asID(entity._id), 'known.type': +entity.type}
         ]}

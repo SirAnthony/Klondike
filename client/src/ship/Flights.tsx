@@ -1,6 +1,6 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
-import {Item, Flight, User, UserType, FlightStatus} from '../common/entity'
+import {Item, Flight, User, UserType, FlightStatus, UserTypeIn} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {LocationCol} from '../inventory/Item/components';
 import {ErrorMessage} from '../util/errors';
@@ -31,7 +31,7 @@ function FlightLocationCol(params: FlightRowParams){
     const {flight, user} = params
     if (!flight.owner)
         return <RB.Col>-</RB.Col>
-    if (user.kind==UserType.Captain)
+    if (!UserTypeIn(user, UserType.Guard | UserType.Master))
         return <RB.Col>{L('desc_info_hidden')}</RB.Col>
     return <LocationCol item={(flight as unknown) as Item} layout={null} />
 }
@@ -51,9 +51,11 @@ function FlightActions(params: FlightRowParams){
        [FlightStatus.SOS]: sp('arrival help'),
        [FlightStatus.Blocked]: sp('unblock'),
     }
+    const user_actions = [...new Set(Object.keys(actions)
+        .filter(k=>UserTypeIn(user, +k)).map(a=>actions[a]).flat())]
     const btns = statuses[flight.status|0]
         .filter(s=>flight.owner || s==='signup')
-        .filter(s=>actions[user.kind].includes(s))
+        .filter(s=>user_actions.includes(s))
         .map(t=><RB.Button onClick={()=>onAction(t, flight)}>
             {L(`act_flight_${t}`)}</RB.Button>)
     return <RB.Col>

@@ -187,7 +187,20 @@ export const ProfileFields = {
     static: ['email'],
 }
 
-export enum UserType {None, Corporant, Captain, Mechanic, Navigator, Scientist, Guard, Master}
+export enum UserType {
+    None      = 0,
+    Corporant = 1 << 0,
+    Captain   = 1 << 1,
+    Mechanic  = 1 << 2,
+    Navigator = 1 << 3,
+    Scientist = 1 << 4,
+    Guard     = 1 << 5,
+    Master    = 1 << 6
+}
+
+export const UserTypeIn = (user: User, type: UserType, ...args: UserType[])=>
+    [type, ...args].some(t=>+user.kind & t)
+
 export class User extends Institution {
     type = InstitutionType.User
     kind: UserType
@@ -198,7 +211,7 @@ export class User extends Institution {
     phone: string
     relation: Owner
     info?: string
-    get admin(){ return this.kind == UserType.Master }
+    get admin(){ return UserTypeIn(this, UserType.Master) }
     get displayName(){
         return this.alias || [this.first_name,
             this.last_name].filter(Boolean).join(' ')

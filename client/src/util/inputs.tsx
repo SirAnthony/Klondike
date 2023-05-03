@@ -1,13 +1,13 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus} from '../common/entity'
+import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
 import {ResourceCost} from '../common/entity'
 import {PlanetType, Pos} from '../common/entity'
 import {Patent, InstitutionType} from '../common/entity'
 import {ID, Owner, Location, Item, Resource} from '../common/entity'
-import {TypedSelect} from '../util/select'
+import {TypedMultiSelect, TypedSelect} from '../util/select'
 import {Select as PSelect} from '../map/List'
 import {Images} from '../common/urls'
 import {Select as CSelect, PatentSelect as RPSelect} from '../corp/List'
@@ -146,10 +146,19 @@ export const InstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_t
 const FreeInstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type', 'institution_desc', true)
 export const ShipClassSelect = TypedSelect(ShipClass, '', 'ship_desc_kind')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
-export const UserTypeSelect = TypedSelect(UserType, 'user_kind', 'user_desc_kind', true)
 export const FlightTypeSelect = TypedSelect(FlightType, 'flight_type', 'flight_desc_type')
 export const FlightStatusSelect = TypedSelect(FlightStatus, 'flight_status', 'flight_desc_status')
 export const PlanetTypeSelect = TypedSelect(PlanetType, '', 'planet_desc_kind')
+
+const UserTypeSelectArr = TypedMultiSelect(UserType, 'user_kind', 'user_desc_kind', true)
+export function UserTypeSelect(props: {value?: UserType, disabled?: boolean, optName?: string,
+    filter?: (t: UserType)=>Boolean, onChange: (value: UserType)=>void}){
+    const value = Object.keys(UserType).filter(k=>UserTypeIn({kind: props.value} as any, +k))
+        .map(v=>''+v)
+    const onChange = (arr: UserType[])=>
+      props.onChange(!arr||!arr.length ? 0 : arr.reduce((p, c)=>p|=c, 0))
+    return <UserTypeSelectArr {...props} value={value} onChange={onChange} />
+}
 
 export function PatentSelect(props: {value?: Patent, owner: Owner,
     item: Item, onChange: (p: Patent)=>void}){

@@ -21,7 +21,7 @@ export async function signup(user: UserController, flight: FlightController, dat
     if (+data.type==FlightType.Planetary && ship.credit<=0)
         throw 'error_no_funds'
     if (ship.flight)
-        throw 'Cannot enlist on other flight'
+        throw 'error_already_in_flight'
     flight.type = +data.type
     flight.status = FlightStatus.Waiting
     if (data.type==FlightType.Drone)
@@ -67,8 +67,9 @@ export async function delist(user: UserController, flight: FlightController, dat
         owner: user.asOwner, institution: ship.asOwner})
 }
 
-export async function block(flight: FlightController, user: UserController){
-
+export async function block(user: UserController, flight: FlightController, data: Flight){
+    
+    
 }
 
 export async function unblock(flight: FlightController, user: UserController){

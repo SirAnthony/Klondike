@@ -1,8 +1,7 @@
-import {BaseRouter, CheckIDParam, CheckRole} from '../base'
+import {BaseRouter, CheckRole} from '../base'
 import {UserController, ShipController, FlightController, ItemController, LogController} from '../../entity'
-import {Flight, ItemType, LogAction, Module, UserType} from '../../../client/src/common/entity'
+import {ItemType, LogAction, Module, UserType, UserTypeIn} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import {Time} from '../../util/time'
 import {IDMatch, asID} from '../../util/server'
 import * as Flights from '../../util/flights'
 import * as date from '../../../client/src/common/date'
@@ -26,8 +25,8 @@ export class ShipApiRouer extends BaseRouter {
     @CheckRole([UserType.Corporant, UserType.Captain])
     async get_list(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
-        const filter = user.kind == UserType.Master ? {} :
-            user.kind == UserType.Captain ? {'captain._id': asID(user._id)} :
+        const filter = UserTypeIn(user, UserType.Master) ? {} :
+            UserTypeIn(user, UserType.Captain) ? {'captain._id': asID(user._id)} :
             {'owner._id': asID(user._id)}
         const list = await ShipController.all(filter)
         return {list}

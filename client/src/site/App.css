@@ -384,6 +384,10 @@ select.form-select:focus, textarea.form-control:focus {
     border: solid var(--color-ui-box-hover) 1px;
 }
 
+button.dropdown-toggle {
+    white-space: break-spaces;
+}
+
 input.form-control::placeholder, textarea.form-control::placeholder {
     color: var(--color-ui-text-shade);
 }

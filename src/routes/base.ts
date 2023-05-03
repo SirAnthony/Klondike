@@ -2,7 +2,7 @@
 import * as KoaRouter from 'koa-router'
 import  * as multer from '@koa/multer'
 import {RenderContext} from '../middlewares'
-import {UserType} from '../../client/src/common/entity'
+import {UserType, UserTypeIn} from '../../client/src/common/entity'
 import {UserController} from '../entity'
 import {ApiError, Codes} from '../../client/src/common/errors'
 import {IDMatch} from '../util/server'
@@ -37,11 +37,10 @@ export function CheckRole(roles: UserType[] | UserType){
         return {...descriptor, value: async function check(ctx: RenderContext){
             if (!ctx.isAuthenticated())
                throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
-            const types = Array.isArray(roles) ? roles : [roles]
-            if (!types.includes(UserType.Master))
-                types.push(UserType.Master)
+            const types = Array.isArray(roles) ?
+                roles.reduce((p, r)=>p|=r, UserType.Master) : (roles | UserType.Master)
             const {user}: {user: UserController} = ctx.state
-            if (types.length && !types.includes(+user.kind))
+            if (types && !UserTypeIn(user, types))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}
@@ -55,7 +54,7 @@ export function CheckIDParam(param: string = 'id'){
                throw new ApiError(Codes.NO_LOGIN, 'Should be authentificated')
             const id = ctx.aparams[param]
             const {user}: {user: UserController} = ctx.state
-            if (user.kind!=UserType.Master && !(id && IDMatch(id, user?.relation?._id)))
+            if (!UserTypeIn(user, UserType.Master) && !(id && IDMatch(id, user?.relation?._id)))
                 throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             return descriptor.value.apply(this, arguments)
         }}

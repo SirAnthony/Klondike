@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {InstitutionType, User, UserType} from '../common/entity'
+import {InstitutionType, User, UserType, UserTypeIn} from '../common/entity'
 import * as util from '../common/util'
 import {List as UList} from '../util/controls'
 import {ErrorMessage} from '../util/errors'
@@ -100,6 +100,14 @@ function UserRowEdit(props: UserRowProps){
     </RB.Row>
 }
 
+export function UserRoleCol(props: {user: User, layout?: number}){
+    const roles = Object.keys(UserType).filter(k=>UserTypeIn(props.user, +k))
+        .map(k=>LR(`user_kind_${k}`)).join(' | ')
+    return <RB.Col sm={props.layout}>
+      {roles||LR('user_kind_0')}
+    </RB.Col>
+}
+
 function UserRow(props: UserRowProps) {
     const {user, viewer} = props
     const [showData, setShowData] = React.useState(false)
@@ -119,7 +127,7 @@ function UserRow(props: UserRowProps) {
         <RB.Row>
           <RB.Col><RB.NavLink href={`/profile/${user._id}`}>{user.name}</RB.NavLink></RB.Col>
           <RB.Col>{User.fullName(user)}</RB.Col>
-          <RB.Col>{LR(`user_kind_${user.kind}`)}</RB.Col>
+          <UserRoleCol user={user} />
           <RB.Col>{rel}</RB.Col>
           <RB.Col>{user.credit}</RB.Col>
           <RB.Col>{user.phone}</RB.Col>
@@ -153,7 +161,7 @@ export default class List extends UList<UserListProps, UserListState> {
     get fetchUrl() { return `/api/users/` }
     get list(){
         const {list, filter_text, filter_kind} = this.state
-        const fk = (u: User)=>isNaN(+filter_kind) || +u.kind===+filter_kind
+        const fk = (u: User)=>isNaN(+filter_kind) || UserTypeIn(u, filter_kind)
         const ft = (u: User)=>util.isEmpty(filter_text) ||
             [User.fullName(u), u.phone, u.relation?.name].some(v=>
             (new RegExp(filter_text, 'i')).test(v||''))
