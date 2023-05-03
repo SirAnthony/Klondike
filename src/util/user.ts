@@ -1,5 +1,7 @@
+import { UserType, UserTypeIn } from "../../client/src/common/entity";
 import {UserController} from '../entity'
 import {asID} from './server'
+import { ApiError, Codes } from "../../client/src/common/errors";
 
 const id_matches = {}
 async function user_by_match(match: string){
@@ -27,3 +29,15 @@ export async function process_data(data = ''){
         data = data.replace(new RegExp(`{${m}}`, 'g'), `{${m}:${matches[m]}}`)
     return data
 }
+
+export function CheckRole(roles: UserType){
+    return (target: Object, key: string, descriptor: TypedPropertyDescriptor<any>)=>{
+        return {...descriptor, value: async function check(user: UserController, ...args: any[]){
+            const types = (roles | UserType.Master)
+            if (types && !UserTypeIn(user, types))
+                throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
+            return descriptor.value.apply(this, arguments)
+        }}
+    }
+}
+
