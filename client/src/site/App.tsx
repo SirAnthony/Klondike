@@ -36,6 +36,7 @@ function App() {
       <RR.Route path='/ship/*' element={<ShipNavigator user={user} />} />
       <RR.Route path='/inventory/*' element={<InventoryNavigator user={user} />} />
       <RR.Route path='/map/*' element={<MapNavigator user={user} />} />
+      <RR.Route path='/maps/*' element={<PlanetListNavigator user={user} />} />
       <RR.Route path='/planet/*' element={<MapNavigator user={user} />} />
       <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
       <RR.Route path='/flights/*' element={<FlightNavigator user={user} />} />

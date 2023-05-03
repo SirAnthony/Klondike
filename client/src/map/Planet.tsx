@@ -1,8 +1,8 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
-import * as RR from 'react-router-dom'
 import * as F from '../Fetcher'
-import {PlanetInfo, PlanetZone, User, Item, Ship} from '../common/entity';
+import {PlanetInfo, PlanetZone, User, Item, Location,
+    Pos as EPos} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
@@ -35,7 +35,7 @@ function Planet(props: {planet: PlanetInfo}){
     </Layer>
 }
 
-function CanvasView(props: {planet: PlanetInfo} & UIButtonCallbacks){
+function CanvasView(props: {planet: PlanetInfo} & UIButtonCallbacks & PlanetProps){
     const {planet} = props
     const {width, height} = defines.map.size
     return <Stage width={width} height={height} className="map">
@@ -45,8 +45,14 @@ function CanvasView(props: {planet: PlanetInfo} & UIButtonCallbacks){
     </Stage>
 }
 
+function reduce_by_location(p, c: {location: Location}){
+    const {pos} = c.location||{}, key = `${pos?.col|0}:${pos?.row|0}`;
+    (p[key] = p[key]||[]).push(c)
+    return p
+}
+
+
 type PlanetState = {
-    id: string
     planet?: PlanetInfo
     ui_ship: Boolean
     ui_inventory: Boolean
@@ -54,17 +60,18 @@ type PlanetState = {
 }
 type PlanetProps = {
     user: User
-    params: RR.Params
+    id: string
+    markedPoints?: EPos[]
+    onPointClick?: (pos: EPos)=>void
 }
 
 export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
     constructor(props){
         super(props)
-        this.state = {id: props.params.id,
-            ui_ship: false, ui_inventory: false, ui_journal: false}
+        this.state = {ui_ship: false, ui_inventory: false, ui_journal: false}
     }
     get fetchUrl() {
-        const {id} = this.state
+        const {id} = this.props
         return `/api/planet/${id}`
     }
     fetchState(data: any = {}){
@@ -75,6 +82,10 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
                 obj[k] = item[k]
             return obj
         })
+        item.pos = {
+            items: item.items.reduce(reduce_by_location, {})||{},
+            ships: item.ships?.reduce(reduce_by_location, {})||{},
+        }
         return {item: data, planet: item, ship}
     }
     menus(){
@@ -95,10 +106,7 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         if (!planet)
             return <div>{L('not_found')}</div>
         return <RB.Container className="map-container">
-          <CanvasView planet={planet} 
-            onShipClick={()=>this.setState({ui_ship: true})}
-            onJournalClick={()=>this.setState({ui_journal: true})}
-            onInventoryClick={()=>this.setState({ui_inventory: true})} />
+          <CanvasView planet={planet} {...this.props} />
           {this.menus()}
         </RB.Container>
     }

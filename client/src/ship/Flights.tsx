@@ -1,12 +1,18 @@
 import React from 'react';
 import * as RB from 'react-bootstrap'
-import {Item, Flight, User, UserType, FlightStatus, UserTypeIn, OwnerMatch} from '../common/entity'
+import {
+    Item, Flight, User, UserType, FlightStatus, Location,
+    UserTypeIn, OwnerMatch, FlightType, Planet, InstitutionType,
+    Pos,
+} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {LocationCol} from '../inventory/Item/components';
-import {ErrorMessage} from '../util/errors';
+import {default as L, LR} from './locale'
+import { TimeInput } from 'src/util/inputs';
+import {Select as PSelect} from '../map/List'
+import { PlanetView } from '../map/Planet';
 import * as util from '../common/util'
 import * as date from '../common/date'
-import {default as L, LR} from './locale'
 
 export type FlightRowProps = {
     flight: Flight
@@ -106,12 +112,14 @@ export function FlightRow(props: FlightRowProps) {
 export class BaseList<P, S> extends UList<FlightListProps & P, FlightListState & S> {
     L = L
     get fetchUrl() { return `/api/ship/flights` }
-    get rowNew(){ return <></> }
+    get rowNew(){ return null }
+    get mapView(){ return null }
     getRow(flight: Flight){ return <></> }
     body(){
         const {list, err} = this.state
         const rows = list.map(l=>this.getRow(l))
-        return [this.rowNew,
+        const map = this.mapView
+        return [!map && this.rowNew,
         <RB.Row key={'ship_list_title'} className="menu-list-title">
           <RB.Col>{LR('desc_time')}</RB.Col>
           <RB.Col>{LR('desc_ship')}</RB.Col>
@@ -119,8 +127,47 @@ export class BaseList<P, S> extends UList<FlightListProps & P, FlightListState &
           <RB.Col>{LR('item_desc_target')}</RB.Col>
           <RB.Col>{LR('flight_desc_status')}</RB.Col>
           <RB.Col></RB.Col>
-        </RB.Row>, ...rows]
+        </RB.Row>, ...rows, map && this.rowNew, map]
     }
+}
+
+type FlightSend = Omit<Flight, 'name' | 'keys' | 'class' | 'status'>
+type FlightRowNewParams = {
+    flight: FlightSend
+    onSubmit: (f: FlightSend)=>Promise<boolean>
+    onLocChanged: (f: Location)=>void
+} & Omit<FlightRowProps, 'actionsClass' | 'flight'>
+function FlightRowNew(props: FlightRowNewParams){
+    const {flight, user} = props
+    const owner = user.relation
+    const [ts, setTime] = React.useState(flight?.ts || date.add(undefined, {min: 10}))
+    const [location, setLocation] = React.useState(flight?.location)
+    const check = ()=>ts && (location?._id && !isNaN(+location.pos.col) &&
+        !isNaN(location?.pos?.row)) && flight?.points?.length
+    const onSubmit = async ()=>check() && (await props.onSubmit({
+        type: FlightType.Drone, ts: +date.get(ts), owner, location,
+        points: flight?.points})) && props.onCancel()
+    const onMapUpdate = (planet: Planet)=>{
+        let pos = location?.pos || {col: 0, row: 0}
+        const loc = {_id: planet._id, system: planet.system,
+            name: planet.name, pos}
+        setLocation(loc)
+        props.onLocChanged(loc)        
+    }
+    return <RB.Row className='menu-input-row'>
+      <RB.Col>
+        {LR('flight_type_1')}
+      </RB.Col>
+      <RB.Col>
+        <TimeInput value={ts} onChange={setTime} />
+      </RB.Col>
+      <RB.Col>
+        <PSelect value={location?._id} onChange={val=>onMapUpdate(val)} />
+      </RB.Col>
+      <RB.Col>
+        <RB.Button disabled={!check()} onClick={onSubmit}>{LR('act_flight_departure')}</RB.Button>
+      </RB.Col>
+    </RB.Row>
 }
 
 export function ListNavigator(props: {user: User}){
@@ -130,6 +177,7 @@ export function ListNavigator(props: {user: User}){
 
 type FlightListState = {
     list?: Flight[]
+    newForm: FlightSend
 }
 type FlightListProps = {
     user: User
@@ -140,14 +188,49 @@ export class List extends BaseList<FlightListProps, FlightListState> {
     async onAction(name: string, flight: Flight){
         this.setState({err: null})
         const ret = await util.wget(`/api/ship/flight/${flight._id}/action/${name}`,
-            {method: 'PUT'})
+            {method: 'PUT', data: {data: flight}})
         if (ret.err)
-            this.setState({err: ret.err})
+            return void this.setState({err: ret.err})
         this.fetch()
+        return true
     }
     getRow(flight: Flight){
         return <FlightRow key={`flight_list_${flight._id}`} flight={flight}
           onAction={(s, f)=>this.onAction(s, f)} user={this.props.user}
           actionsClass={FlightActions} />
+    }
+    updateForm(val: any){
+        this.setState({newForm: {...this.state.newForm, ...val}}) }
+    get rowNew(){ 
+        const {user} = this.props
+        if (+user.relation?.type != InstitutionType.Ship)
+            return <></>
+        const {newForm} = this.state
+        return <FlightRowNew user={user} flight={this.state.newForm}
+            onSubmit={f=>this.onAction('signup', f)}
+            onCancel={()=>this.setState({newForm: null})}
+            onLocChanged={location=>this.updateForm({location})}
+             />
+    }
+    onPointClick(pos: Pos){
+        let points = this.state.newForm?.points||[]
+        let pmatch = p=>p.col==pos.col && p.row == pos.row
+        if (points.some(pmatch))
+            points = points.filter(p=>!pmatch(p))
+        else {
+            if (points.length < 5)
+                points = [...points, pos]
+        }
+        if (points!=this.state.newForm?.points)
+            this.updateForm({points})
+    }
+    get mapView(){
+        const {user} = this.props
+        const id = this.state.newForm?.location?._id
+        if (!id)
+            return <></>
+        const points = this.state.newForm.points||[]
+        return <PlanetView user={user} id={id} markedPoints={points}
+            onPointClick={pos=>this.onPointClick(pos)} />
     }
 }

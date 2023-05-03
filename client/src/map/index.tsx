@@ -1,12 +1,13 @@
 import React from 'react';
 import * as RR from 'react-router-dom'
-import List from './List'
+import {default as List, EditList} from './List'
 import {User} from '../common/entity'
 import {PlanetView} from './Planet';
 
 function PlanetNavigator(props: {user: User}) {
     const params = RR.useParams()
-    return <PlanetView user={props.user} params={params} />
+    const {id} = params
+    return <PlanetView user={props.user} id={id} />
 }
 
 export function Navigator(props){
@@ -21,4 +22,9 @@ export function Navigator(props){
 export function ListNavigator(props: {user: User}){
     const {user} = props
     return <List user={user} />
+}
+
+export function EditListNavigator(props: {user: User}){
+    const {user} = props
+    return <EditList user={user} />
 }

@@ -4,8 +4,8 @@ import {Ship, User} from '../common/entity'
 import * as util from '../common/util'
 import {List as UList} from '../util/controls'
 import {ShipRowEdit, ShipSend} from './RowEdit'
-import {ErrorMessage} from '../util/errors'
 import {default as L, LR} from './locale'
+import * as urls from '../common/urls'
 
 function ShipRow(props: {entity: Ship, onChange: (ship: Ship)=>Promise<boolean>}) {
     const {entity} = props
@@ -15,12 +15,14 @@ function ShipRow(props: {entity: Ship, onChange: (ship: Ship)=>Promise<boolean>}
     if (showEdit)
         return <ShipRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
     return <RB.Row className="menu-list-row">
-      <RB.Col><img src={`/static/img/ships/${entity.img}.png`} /></RB.Col>
-      <RB.Col><RB.NavLink href={`/ship/${entity._id}`}>{entity.name}</RB.NavLink></RB.Col>
-      <RB.Col>{LR(`institution_type_${entity.owner?.type}`)+' '+util.get_name(entity.owner)}</RB.Col>
-      <RB.Col><RB.NavLink href={`/profile/${entity.captain._id}`}>{util.get_name(entity.captain)}</RB.NavLink></RB.Col>
+      <RB.Col><img src={urls.Images.get(entity)} /></RB.Col>
+      <RB.Col><RB.NavLink href={urls.Links.ship(entity)}>{entity.name}</RB.NavLink></RB.Col>
+      <RB.Col><RB.NavLink href={urls.Links.profile(entity.owner)} >
+        {LR(`institution_type_${entity.owner?.type}`)+' '+util.get_name(entity.owner)}
+      </RB.NavLink></RB.Col>
+      <RB.Col><RB.NavLink href={urls.Links.profile(entity.captain)}>{util.get_name(entity.captain)}</RB.NavLink></RB.Col>
       <RB.Col>{entity.credit}</RB.Col>
-      <RB.Col><RB.NavLink href={`/inventory/${entity.type}/${entity._id}`}>{LR('inventory')}</RB.NavLink></RB.Col>
+      <RB.Col><RB.NavLink href={urls.Links.inventory(entity)}>{LR('inventory')}</RB.NavLink></RB.Col>
       <RB.Col>
         <RB.Button onClick={()=>setShowData(!showData)}>{LR('act_show_data')}</RB.Button>
         <RB.Button onClick={()=>setShowEdit(true)}>{LR('act_edit')}</RB.Button>

@@ -15,6 +15,7 @@ const defaults = {
             ui_error: '#f00',
             hex_border: '#005f9f',
             hex_fill: '#488',
+            hex_mark: '#f00',
             planet_border: '#f00',
             planet_fill: '#eee',
         },

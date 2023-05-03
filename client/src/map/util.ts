@@ -32,6 +32,7 @@ export class Pos implements CPos {
         const y = radius * (1 + 3/2 * this.row)
         return {x, y}
     }
+    get 
 }
 
 type FontStyle = {

@@ -296,6 +296,7 @@ export class Flight extends ID {
     arrival?: number
     owner?: Owner
     location?: Location
+    points?: Pos[]
     get keys(){
         return `ts type status owner location`.split(' ') }
     get class(){ return Flight }
@@ -341,6 +342,10 @@ export class Planet extends ID {
 export class PlanetInfo extends Planet {
     items?: Item[]
     ships?: PlanetShip[]
+    pos?: {
+        items: {[k: string]: Item[]},
+        ships: {[k: string]: PlanetShip[]}
+    }
     // fog: PlanetFog[]
 }
 

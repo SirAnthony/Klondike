@@ -1,5 +1,5 @@
 import React from 'react';
-import {Planet as CPlanet, PlanetZone, User} from '../common/entity';
+import {Planet as CPlanet, PlanetZone, Pos, User} from '../common/entity';
 import {Layer, Rect, Text, Group} from 'react-konva'
 import {Button} from './Components'
 import defines from '../common/defines'
@@ -30,6 +30,7 @@ function DateUI(props: UIProps){
 */
 
 function ActionUI(props: UIProps){
+    return null
     const [hidden, setHidden] = React.useState(false)
     const {width, height} = props
     const rwidth = 800, rheight = 100

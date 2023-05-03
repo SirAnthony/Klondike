@@ -1,6 +1,13 @@
-import {Institution, InstitutionType, Item, ItemType} from '../common/entity'
+import {Institution, InstitutionType, Item, ItemType, Owner} from '../common/entity'
 import {PlanetShip, Resource, ResourceType} from '../common/entity'
 import {Ship, User} from '../common/entity'
+
+export const Links = {
+    ship: (entity: Owner)=>`/ship/${entity._id}`,
+    profile: (entity: Owner)=>`/profile/${entity.type}/${entity._id}`,
+    inventory: (entity: Owner)=>`/inventory/${entity.type}/${entity._id}`
+}
+
 
 export const Images = {
     prefix: '/static/img',

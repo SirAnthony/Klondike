@@ -8,12 +8,12 @@ import {DataViewerButtons} from '../util/buttons'
 import * as util from '../common/util'
 import {default as L, LR} from './locale'
 
-function PlanetRow(props: {planet: PlanetInfo, onChange: (entity: PlanetInfo)=>Promise<boolean>}) {
+function PlanetRow(props: {planet: PlanetInfo, onChange?: (entity: PlanetInfo)=>Promise<boolean>}) {
     const {planet} = props
     const [showData, setShowData] = React.useState(false)
     const [showEdit, setShowEdit] = React.useState(false)
     const onChange = async planet=>(await props.onChange(planet)) && setShowEdit(false)
-    if (showEdit)
+    if (props.onChange && showEdit)
         return <PlanetRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
     const zones = showData ? planet.zones?.map(z=>
         <RB.Col>{`<${z.center.col}:${z.center.row}>(${z.radius})`}</RB.Col>) : null
@@ -23,7 +23,7 @@ function PlanetRow(props: {planet: PlanetInfo, onChange: (entity: PlanetInfo)=>P
           <RB.Col><RB.NavLink href={`/map/${planet._id}`}>{planet.name}</RB.NavLink></RB.Col>
           <RB.Col>{planet.type+' '+L('desc_zones')+`: ${planet.zones?.length|0}`}</RB.Col>
           <RB.Col>{planet.system}</RB.Col>
-          <DataViewerButtons onEdit={setShowEdit} onShow={setShowData} show={showData} />
+          <DataViewerButtons onEdit={props.onChange && setShowEdit} onShow={setShowData} show={showData} />
         </RB.Row>
         <RB.Row>{zones}</RB.Row>
         {showData && <RB.Row>
@@ -42,7 +42,28 @@ type PlanetListState = {
 type PlanetListProps = {
     user: User
 }
-export default class List extends UList<PlanetListProps, PlanetListState> {
+export default class List extends UList<PlanetListProps, PlanetListState>{
+    L = L
+    constructor(props){
+        super(props)
+    }
+    get fetchUrl() { return `/api/planet/list` }
+    body(){
+        const {list} = this.state
+        const rows = list.map(l=><PlanetRow key={`planet_list_${l._id}`} planet={l} />)
+        return [<RB.Row key={'planet_list_title'} className="menu-list-title">
+          <RB.Col>{L('desc_name')}</RB.Col>
+          <RB.Col>{L('desc_info')}</RB.Col>
+          <RB.Col>{L('desc_system')}</RB.Col>
+          <RB.Col></RB.Col>
+        </RB.Row>, ...rows] 
+    }
+}
+
+type PlanetListEditState = {
+    newForm?: Planet
+} & PlanetListState
+export class EditList extends UList<PlanetListProps, PlanetListEditState> {
     L = L
     constructor(props){
         super(props)
@@ -74,7 +95,7 @@ export default class List extends UList<PlanetListProps, PlanetListState> {
 export class Select extends USelect<{}, {}> {
     L = LR
     top_enabled = true
-    get fetchUrl(){ return '/api/planet/list' }
+    get fetchUrl(){ return '/api/planet/list/short' }
     get optName(){ return 'item_desc_location' }
     getValue(v){
         return v==this.defaultValue ? null : this.state.list.find(f=>f._id==v) }

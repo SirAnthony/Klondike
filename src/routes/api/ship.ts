@@ -2,7 +2,7 @@ import {BaseRouter, CheckRole} from '../base'
 import {UserController, ShipController, FlightController, ItemController, LogController} from '../../entity'
 import {FlightStatus, ItemType, LogAction, Module, UserType, UserTypeIn} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import {IDMatch, asID} from '../../util/server'
+import {IDMatch, asID, isID} from '../../util/server'
 import * as Flights from '../../util/flights'
 import * as date from '../../../client/src/common/date'
 import { ObjectId } from 'mongodb'
@@ -50,8 +50,8 @@ export class ShipApiRouer extends BaseRouter {
     @CheckRole([UserType.Guard, UserType.Captain])
     async put_flight_action(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
-        const {id, action} = ctx.aparams
-        const flight = await FlightController.get(id)
+        const {id, action, data} = ctx.aparams
+        const flight = await FlightController.get(isID(id) ? id : data)
         if (!flight)
             throw 'Incorrect flight'
         let fn = Flights.Actions[action] 

@@ -27,7 +27,7 @@ export class ApiRouter extends BaseRouter {
         return await ItemController.get(id)
     }
 
-    @CheckRole(UserType.Navigator)
+    @CheckAuthenticated()
     async get_planet(ctx: RenderContext){
         const {id} = ctx.params;
         const {user}: {user: UserController} = ctx.state
@@ -47,10 +47,15 @@ export class ApiRouter extends BaseRouter {
         return {item: planet}
     }
 
-    @CheckRole(UserType.Navigator)
+    @CheckAuthenticated()
+    async get_planet_list(ctx: RenderContext){
+        return {list: await PlanetController.all()}
+    }
+
+    @CheckAuthenticated()
     async get_planet_list_short(ctx: RenderContext){
         const planets = await PlanetController.all()
-        const list = planets.map(p=>({_id: asID(p._id), name: p.name}))
+        const list = planets.map(p=>({_id: asID(p._id), name: p.name, system: p.system}))
         return {list}
     }
 
