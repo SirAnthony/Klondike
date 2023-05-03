@@ -1,6 +1,6 @@
 import * as mongodb from '../util/mongodb'
 import {ObjectId} from 'mongodb';
-import {Identifier, Owner, Institution} from '../../client/src/common/entity'
+import {Identifier, Owner, Institution, InstitutionType, User} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
 import {asID} from '../util/server';
 
@@ -92,7 +92,11 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             util.obj_copyto(data, this, fields)
             return this
         }
-        get identifier(): Identifier { return {_id: asID(this._id), name: this.name} }
+        get identifier(): Identifier { 
+            const name = this instanceof Institution && +this.type===InstitutionType.User ?
+                User.fullName(this as any) : this.name
+            return {_id: asID(this._id), name}
+        }
         get asObject(): any { return {...this} }
         get asOwner(): Owner {
             if (!(this instanceof Institution))
