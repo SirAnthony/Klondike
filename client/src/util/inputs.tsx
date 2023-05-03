@@ -156,7 +156,7 @@ export function UserTypeSelect(props: {value?: UserType, disabled?: boolean, opt
     const value = Object.keys(UserType).filter(k=>UserTypeIn({kind: props.value} as any, +k))
         .map(v=>''+v)
     const onChange = (arr: UserType[])=>
-      props.onChange(!arr||!arr.length ? 0 : arr.reduce((p, c)=>p|=c, 0))
+      props.onChange(!arr?.length ? null : arr.reduce((p, c)=>p|=c, 0))
     return <UserTypeSelectArr {...props} value={value} onChange={onChange} />
 }
 
