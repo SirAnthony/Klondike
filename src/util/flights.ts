@@ -52,24 +52,22 @@ function CheckFlightStatus(statuses: FlightStatus[]){
 
 uutil.CheckRole(UserType.Captain)
 CheckFlightStatus([FlightStatus.Docked])
-export async function signup(user: UserController, flight: FlightController, data: Flight){
+export async function signup(user: UserController, flight: FlightController){
     const rel = user.relation
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
-    if (!FlightStatus[+data.type] || !FlightStatus[+data.status] || !+data.ts)
+    if (!FlightStatus[+flight.type] || !+flight.ts)
         throw 'Insufficient data'
-    if (isType(data.type, FlightType.Drone) && !data.ts)
+    if (FlightStatus[+flight.status] && +flight.status!=FlightStatus.Docked)
+        throw 'error_slot_busy'
+    if (isType(flight.type, FlightType.Drone) && !flight.ts)
         throw 'Flight time unspecified'
     const ship = await ShipController.get(rel._id)
-    if (isType(data.type, FlightType.Planetary) && ship.credit<=0)
+    if (isType(flight.type, FlightType.Planetary) && ship.credit<=0)
         throw 'error_no_funds'
     if (!(await Util.checkShipAvailable(ship, flight)))
         throw 'error_ship_busy'
-    flight.type = +data.type
     flight.status = FlightStatus.Waiting
-    if (isType(data.type, FlightType.Drone))
-        flight.ts = +data.ts
-    flight.location = data.location    
     flight.owner = ship
     flight.name = Flight.Name(flight)
     flight.departure = null
@@ -79,13 +77,13 @@ export async function signup(user: UserController, flight: FlightController, dat
     await ship.save()
     await LogController.log({
         name: 'flight_signup', info: 'flight_signup',
-        action: LogAction.FlightSignup, flight, data,
+        action: LogAction.FlightSignup, flight,
         owner: user.asOwner, institution: ship.asOwner})
 }
 
 uutil.CheckRole(UserType.Captain)
 CheckFlightStatus([FlightStatus.Waiting])
-export async function delist(user: UserController, flight: FlightController, data: Flight){
+export async function delist(user: UserController, flight: FlightController){
     const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -100,13 +98,13 @@ export async function delist(user: UserController, flight: FlightController, dat
     await ship.save()
     await LogController.log({
         name: 'flight_delist', info: 'flight_delist',
-        action: LogAction.FlightDelist, flight: prev, data,
+        action: LogAction.FlightDelist, flight: prev,
         owner: user.asOwner, institution: ship.asOwner})
 }
 
 uutil.CheckRole(UserType.Guard)
 CheckFlightStatus([FlightStatus.Docked, FlightStatus.Waiting])
-export async function block(user: UserController, flight: FlightController, data: Flight){
+export async function block(user: UserController, flight: FlightController){
     const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -122,14 +120,14 @@ export async function block(user: UserController, flight: FlightController, data
     }
     await LogController.log({
         name: 'flight_block', info: 'flight_block',
-        action: LogAction.FlightBlock, flight: prev, data,
+        action: LogAction.FlightBlock, flight: prev,
         owner: user.asOwner, institution: ship.asOwner
     })
 }
 
 uutil.CheckRole(UserType.Guard)
 CheckFlightStatus([FlightStatus.Blocked])
-export async function unblock(user: UserController, flight: FlightController, data: Flight){
+export async function unblock(user: UserController, flight: FlightController){
     const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -145,14 +143,14 @@ export async function unblock(user: UserController, flight: FlightController, da
     }
     await LogController.log({
         name: 'flight_unblock', info: 'flight_unblock',
-        action: LogAction.FlightUnblock, flight: prev, data,
+        action: LogAction.FlightUnblock, flight: prev,
         owner: user.asOwner, institution: ship.asOwner
     })
 }
 
 uutil.CheckRole(UserType.Master)
 CheckFlightStatus([FlightStatus.Waiting])
-export async function departure(user: UserController, flight: FlightController, data: Flight){
+export async function departure(user: UserController, flight: FlightController){
     const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -169,14 +167,14 @@ export async function departure(user: UserController, flight: FlightController, 
     }
     await LogController.log({
         name: 'flight_departure', info: 'flight_departure',
-        action: LogAction.FlightDeparture, flight: prev, data,
+        action: LogAction.FlightDeparture, flight: prev,
         owner: user.asOwner, institution: ship.asOwner
     })
 }
 
 uutil.CheckRole(UserType.Master)
 CheckFlightStatus([FlightStatus.InFlight])
-export async function arrival(user: UserController, flight: FlightController, data: Flight){
+export async function arrival(user: UserController, flight: FlightController){
     const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -192,14 +190,14 @@ export async function arrival(user: UserController, flight: FlightController, da
     }
     await LogController.log({
         name: 'flight_arrival', info: 'flight_arrival',
-        action: LogAction.FlightArrival, flight: prev, data,
+        action: LogAction.FlightArrival, flight: prev,
         owner: user.asOwner, institution: ship.asOwner
     })
 }
 
 uutil.CheckRole(UserType.Master)
 CheckFlightStatus([FlightStatus.SOS])
-export async function help(user: UserController, flight: FlightController, data: Flight){
+export async function help(user: UserController, flight: FlightController){
     const rel = flight.owner
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -230,7 +228,7 @@ export async function help(user: UserController, flight: FlightController, data:
         name: 'flight_help', info: 'flight_help',
         action: LogAction.FlightHelp, flight: prev,
         owner: user.asOwner, institution: ship.asOwner,
-        data: {data, flight: new_flight, ship: new_ship.asOwner}
+        data: {flight: new_flight, ship: new_ship.asOwner}
     })
 }
 

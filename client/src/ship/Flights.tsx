@@ -38,6 +38,8 @@ function FlightLocationCol(params: FlightRowProps){
 
 function FlightActions(params: FlightRowProps){
     const {flight, user, onAction} = params
+    if (flight.owner && flight.arrival)
+        return <RB.Col></RB.Col>
     const sp = s=>s.split(' ')
     const actions = {
         [UserType.Captain]: sp('delist signup'),
@@ -63,6 +65,16 @@ function FlightActions(params: FlightRowProps){
     </RB.Col>
 }
 
+function FlightTypeCol(props: FlightRowProps){
+    const {flight, user} = props
+    const master = UserTypeIn(user, UserType.Master)
+    const allowed = master || flight.owner && 
+        (UserTypeIn(user, UserType.Guard) || OwnerMatch(flight.owner, user.relation))
+    const type = allowed ? LR(`flight_type_${flight.type}`) :
+        flight.owner ? L('desc_info_hidden') : ' '
+    return <RB.Col>{type}</RB.Col>
+}
+
 function FlightStatusCol(props: FlightRowProps){
     const {flight, user} = props
     const allowed = OwnerMatch(flight.owner, user.relation) ||
@@ -71,8 +83,8 @@ function FlightStatusCol(props: FlightRowProps){
         !allowed ? L('desc_info_hidden') : [
         !flight.arrival && LR(`flight_status_${flight.status}`),
         flight.arrival ? L('desc_arrived') + ' ' + date.timeday(flight.arrival) : null,
-        !flight.arrival && date.timeday(flight.departure)
-    ].filter(Boolean).join()
+        !flight.arrival && flight.departure && date.timeday(flight.departure)
+    ].filter(Boolean).join(' ')
     return <RB.Col>{status}</RB.Col>
 }
 
@@ -84,7 +96,7 @@ export function FlightRow(props: FlightRowProps) {
     return <RB.Row className="menu-list-row">
       <RB.Col>{date.timeday(flight.ts, {month: 'numeric'})}</RB.Col>
       <RB.Col><FlightRowShip {...props} /></RB.Col>
-      <RB.Col>{flight.owner ? LR(`flight_type_${flight.type}`) : ' '}</RB.Col>
+      <FlightTypeCol {...props} />
       <FlightLocationCol {...props} />
       <FlightStatusCol {...props} />
       <props.actionsClass {...props} onEdit={()=>setEdit(true)} />

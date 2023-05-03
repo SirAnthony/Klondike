@@ -32,6 +32,7 @@ const aliases = {
     'error_already_in_flight': 'Невозможно записаться на второй вылет',
     'error_forbidden_action': 'Это действие сейчас невозможно',
     'error_no_ship': 'Отсутствует приписанный корабль',
+    'error_slot_busy': 'Слот занят',
     'error_ship_busy': 'Корабль уже вылетел',
     'institution_desc': 'Принадлежность',
     'institution_type_0': 'Физ. Лицо',

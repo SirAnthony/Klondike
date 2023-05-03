@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Flight, InstitutionType, Owner, User} from '../common/entity'
+import {Flight, FlightType, InstitutionType, Owner, User} from '../common/entity'
 import {BaseList as FList, FlightRowProps, FlightRow} from '../ship/Flights'
 import {FlightStatusSelect, FlightTypeSelect, LocationSelect, OwnerSelect, TimeInput} from 'src/util/inputs'
 import {DataViewerButtons, EditButtons} from '../util/buttons'
@@ -23,7 +23,7 @@ function FlightRowNew(props: FlightRowNewParams){
     const [owner, setOwner] = React.useState(flight?.owner)
     const [status, setfStatus] = React.useState(flight?.status)
     const [location, setLocation] = React.useState(flight?.location)
-    const [type, setType] = React.useState(flight?.type)
+    const [type, setType] = React.useState(flight?.type || FlightType.Planetary)
     const add = !props.onCancel
     const ownerChange = (owner: Owner)=>{
         setOwner(owner)
@@ -32,7 +32,7 @@ function FlightRowNew(props: FlightRowNewParams){
             setType(null)
         }
     }
-    const check = ()=>ts && (!owner || (owner._id && !isNaN(+owner.type) && (
+    const check = ()=>ts && (!owner  && !isNaN(+type) || (owner._id && !isNaN(+owner.type) && (
         !location || (location._id && !isNaN(+location.pos.col) &&
         !isNaN(location.pos.row))) && !isNaN(+status) && !isNaN(+type)))
     const onSubmit = async ()=>check() && (await props.onSubmit({_id: flight?._id,
@@ -47,7 +47,7 @@ function FlightRowNew(props: FlightRowNewParams){
           InstitutionType.Research, InstitutionType.User]} />
       </RB.Col>
       <RB.Col>
-        <FlightTypeSelect disabled={!owner?._id} value={type} onChange={setType} />
+        <FlightTypeSelect value={type} onChange={setType} />
       </RB.Col>
       <RB.Col>
         <LocationSelect disabled={!owner?._id} value={location} onChange={setLocation} />

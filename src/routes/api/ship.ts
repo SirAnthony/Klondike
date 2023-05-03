@@ -50,14 +50,14 @@ export class ShipApiRouer extends BaseRouter {
     @CheckRole([UserType.Guard, UserType.Captain])
     async put_flight_action(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
-        const {id, action, data} = ctx.aparams
+        const {id, action} = ctx.aparams
         const flight = await FlightController.get(id)
         if (!flight)
             throw 'Incorrect flight'
         let fn = Flights.Actions[action] 
         if (!fn)
             throw `Incorrect request ${action}`
-        await fn(user, flight, data)
+        await fn(user, flight)
         await LogController.log({
             name: 'flight_action', info: action,
             action: LogAction.FlightAction,
