@@ -11,6 +11,7 @@ export default Object.assign({
 }, secrets)
 
 export type Config = {
+    time: {market: number},
     points: {
         patent: {
             [k in entity.PatentOwnership | 'pay' | 'close']: {
