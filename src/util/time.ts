@@ -4,7 +4,7 @@ import {TimeController} from '../entity/config'
 export const Time = new date.Time({
     serverTime: 0,
     basicTime: 0,
-    cycleLength: 4*date.ms.HOUR,
+    cycleLength: 12*date.ms.HOUR,
 })
 
 async function load(){

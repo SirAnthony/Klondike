@@ -7,7 +7,7 @@ export class Time {
     cycleLength: number
     constructor(data?: {serverTime: number, basicTime: number, cycleLength?: number}){
         this.serverTime = this.basicTime = 0
-        this.cycleLength = 4*ms.HOUR
+        this.cycleLength = 12*ms.HOUR
         for (let k in data)
             this[k] = data[k]
     }
