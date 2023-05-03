@@ -3,6 +3,7 @@ import * as RB from 'react-bootstrap'
 import {Ship, ShipValues} from '../common/entity'
 import {ModuleDetails} from './Module'
 import * as util from '../common/util'
+import * as urls from '../common/urls'
 import {default as L, LR} from './locale'
 
 type ShipProps = {
@@ -57,10 +58,10 @@ function ShipInfo(props: ShipProps){
 
 function ShipControls(props: ShipProps){
     const {ship} = props
-    const flight_name = ship?.flight.name.split(' ').map(k=>LR(k)).join(' ')
+    const flight_name = ship.flight?.name.split(' ').map(k=>LR(k)).join(' ')
     return <RB.Container>
       <RB.Row><RB.Col>
-        <img src={`/static/img/ships/${props.ship.img}.png`} alt="ship" />
+        <img src={urls.Images.get(ship)} alt="ship" />
       </RB.Col></RB.Row>
       {flight_name && <RB.Row>
         <RB.Col>{flight_name}</RB.Col>
