@@ -120,7 +120,7 @@ function UserRow(props: UserRowProps) {
     }
     if (showEdit)
         return <UserRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
-    const rel = !user.relation ? '-' :
+    const rel = !user.relation?._id ? '-' :
         LR(`institution_type_${user.relation.type}`)+' '+user.relation.name
     return <RB.Row key={`user_${user._id}`} className="menu-list-row">
       <RB.Container>
