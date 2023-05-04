@@ -37,7 +37,9 @@ function FlightLocationCol(params: FlightRowProps){
     const {flight, user} = params
     if (!flight.owner)
         return <RB.Col>-</RB.Col>
-    if (!UserTypeIn(user, UserType.Guard | UserType.Master))
+    const allowed = OwnerMatch(flight.owner, user.relation) ||
+        UserTypeIn(user, UserType.Guard | UserType.Master)
+    if (!allowed)
         return <RB.Col>{L('desc_info_hidden')}</RB.Col>
     return <LocationCol item={(flight as unknown) as Item} layout={null} />
 }
@@ -47,6 +49,8 @@ function FlightActions(params: FlightRowProps){
     if (flight.owner && flight.arrival)
         return <RB.Col></RB.Col>
     const sp = s=>s.split(' ')
+    const owner = UserTypeIn(user, UserType.Master | UserType.Guard) ||
+        OwnerMatch(user.relation, flight.owner)
     const actions = {
         [UserType.Captain]: sp('delist signup'),
         [UserType.Guard]: sp('block help unblock'),
@@ -62,7 +66,7 @@ function FlightActions(params: FlightRowProps){
     const user_actions = [...new Set(Object.keys(actions)
         .filter(k=>UserTypeIn(user, +k)).map(a=>actions[a]).flat())]
     const btns = statuses[flight.status|0]
-        .filter(s=>flight.owner || s==='signup')
+        .filter(s=>flight.owner ? owner : s==='signup')
         .filter(s=>user_actions.includes(s))
         .map(t=><RB.Button onClick={()=>onAction(t, flight)}>
             {L(`act_flight_${t}`)}</RB.Button>)

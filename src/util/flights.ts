@@ -1,6 +1,6 @@
 import {
     Flight, FlightKind, FlightStatus, FlightType, ID, InstitutionType,
-    ItemType, LogAction, Ship, UserType, UserTypeIn
+    ItemType, LogAction, OwnerMatch, Ship, UserType, UserTypeIn
 } from "../../client/src/common/entity";
 import {FlightController, LogController, ShipController, UserController} from "../entity";
 import * as date from '../../client/src/common/date'
@@ -88,9 +88,11 @@ uutil.CheckRole(UserType.Captain)
 CheckFlightStatus([FlightStatus.Waiting])
 export async function delist(user: UserController, flight: FlightController){
     const rel = flight.owner
+    const allowed = UserTypeIn(user, UserType.Master) ||
+        OwnerMatch(user.relation, rel)
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
-    if (!IDMatch(rel._id, flight.owner?._id))
+    if (!IDMatch(rel._id, flight.owner?._id) || !allowed)
         throw 'Cannot control foreign flight'
     if (+flight.status!=FlightStatus.Waiting)
         throw 'Cannot delist from started flight'
