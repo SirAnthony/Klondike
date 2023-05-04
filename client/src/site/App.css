@@ -319,7 +319,11 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
 
 .map-container.container {
     position: relative;
-    padding: 5px 0;
+    padding: 5px 15px;
+}
+
+.menu-container > .map-container.container {
+    padding: 5px 0px;
     padding-bottom: 10px;
 }
 
