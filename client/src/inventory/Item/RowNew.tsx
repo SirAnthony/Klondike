@@ -1,9 +1,9 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, ItemType} from '../../common/entity'
+import {Item, ItemType, ModuleBoosts} from '../../common/entity'
 import {Owner, Location} from '../../common/entity'
 import {ResourceType} from '../../common/entity'
-import {ResourceSelect, TypeSelect, PatentTypeSelect, TextInput} from '../../util/inputs'
+import {ResourceSelect, TypeSelect, PatentTypeSelect, TextInput, ModuleBoostsSelect} from '../../util/inputs'
 import {PatentWeightSelect, ArtifactTypeSelect} from '../../util/inputs'
 import {NumberInput, LocationSelect, OwnerSelect} from '../../util/inputs'
 import {MultiOwnerSelect, MultiResourceSelect} from '../../util/inputs'
@@ -24,7 +24,7 @@ export type ItemSend = {
     mass?: number
     energy?: number
     installed?: boolean
-    boosts?: {kind: string, value: number}[]
+    boosts?: ModuleBoosts
     // Patent
     weight?: number
     owners?: Owner[]
@@ -75,7 +75,8 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     get errors(){
         const item = new (Item.class(this.state.type))()
         return item.keys.filter(k=>!['_id', 'market', 'owner', 'owners', 'served',
-            'ready', 'location'].includes(k) && !this.state[k] && isNaN(this.state[k]))
+            'ready', 'location', 'installed'].includes(k) &&
+            !this.state[k] && isNaN(this.state[k]))
     }
     get ownerExclude(){ return iutil.owners_exclude(this.state.type) }
     // resource
@@ -112,13 +113,20 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
     fields_module(){
         const row_size = this.row_size
         const {mass, energy} = this.state
-        const massChange = mas=>this.stateChange({mass})
+        const massChange = mass=>this.stateChange({mass})
         const energyChange = energy=>this.stateChange({energy})
         return [<RB.Col sm={row_size} key='module_mass_input'>
           <NumberInput placeholder={LR('item_desc_mass')} value={mass} onChange={massChange} />
         </RB.Col>, <RB.Col sm={row_size} key='module_energy_input'>
           <NumberInput placeholder={LR('item_desc_energy')} value={energy} onChange={energyChange} />
         </RB.Col>]
+    }
+    rows_module(){
+        const {boosts} = this.state
+        const boostsChange = boosts=>this.stateChange({boosts})
+        return [
+          <ModuleBoostsSelect value={boosts} onChange={boostsChange} />
+        ]
     }
     // patent
     fields_patent(){

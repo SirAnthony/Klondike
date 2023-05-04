@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn} from '../common/entity'
+import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn, ModuleBoosts, ModStat} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
 import {ResourceCost} from '../common/entity'
@@ -149,6 +149,7 @@ export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res
 export const FlightTypeSelect = TypedSelect(FlightType, 'flight_type', 'flight_desc_type')
 export const FlightStatusSelect = TypedSelect(FlightStatus, 'flight_status', 'flight_desc_status')
 export const PlanetTypeSelect = TypedSelect(PlanetType, '', 'planet_desc_kind')
+export const ModStatSelect = TypedSelect(ModStat, 'ship_stat', 'ship_stats_title')
 
 const UserTypeSelectArr = TypedMultiSelect(UserType, 'user_kind', 'user_desc_kind', true)
 export function UserTypeSelect(props: {value?: UserType, disabled?: boolean, optName?: string,
@@ -339,6 +340,38 @@ export function ResourceValueSelect(props: {value?: ResourceValueInfo, onChange:
       <ResourceSpecialitySelect value={(props.value||{})[+k]} onChange={v=>onChange(+k, v)} />
     </RB.Col>]).flat()
     return <RB.Row className='menu-list-row'>
+      {cols}
+    </RB.Row>
+}
+
+export function ModuleBoostsSelect(props: {value?: ModuleBoosts, onChange: (boosts: ModuleBoosts)=>void}){
+    const [boosts, setBoosts] = React.useState(Object.assign({}, props.value))
+    const [stat, setStat] = React.useState(null)
+    const onChange = boosts=>{ setBoosts(boosts); props.onChange(boosts) }
+    const setBoost = (k, v)=>onChange({...boosts, ...{[k]: v}})
+    const addBoosts = ()=>onChange({[stat]: 0, ...props.value})
+    const removeBoost = k=>{
+        const obj = {...boosts}
+        delete obj[k]
+        onChange(obj)
+    }
+    const cols = Object.keys(boosts).map(k=><RB.Col><RB.Row>
+      <RB.Col sm={1}>
+        <RB.CloseButton onClick={()=>removeBoost(k)} />
+      </RB.Col>
+      <RB.Col>
+        <NumberInput value={boosts[k]} onChange={v=>setBoost(k, v)}
+          placeholder={L(`ship_stat_${ModStat[k].toLowerCase()}`)} />
+      </RB.Col>
+    </RB.Row></RB.Col>)
+    return <RB.Row className='menu-list-row'>
+      <RB.Col sm={2}>
+        <ModStatSelect exclude={[ModStat.None].concat(Object.keys(props.value||{}).map(k=>+k))}
+          value={stat} onChange={setStat} optonValue={(k=>ModStat[k].toLowerCase()) as any} />
+      </RB.Col>
+      <RB.Col sm={1}>
+        <RB.Button disabled={stat===null} onClick={addBoosts}>{L('act_add')}</RB.Button>
+      </RB.Col>
       {cols}
     </RB.Row>
 }

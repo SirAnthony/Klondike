@@ -1,10 +1,13 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Ship, ShipValues} from '../common/entity'
+import {Module, Ship, ShipValues} from '../common/entity'
 import {ModuleDetails} from './Module'
 import * as util from '../common/util'
 import * as urls from '../common/urls'
 import {default as L, LR} from './locale'
+import { ModuleSelectTrigger } from 'src/util/popovers'
+import { ErrorMessage } from 'src/util/errors'
+import { InventoryEvents } from 'src/inventory'
 
 type ShipProps = {
     ship: Ship
@@ -58,7 +61,18 @@ function ShipInfo(props: ShipProps){
 
 function ShipControls(props: ShipProps){
     const {ship} = props
+    const [err, setErr] = React.useState(null)
     const flight_name = ship.flight?.name.split(' ').map(k=>LR(`flight_${k}`)).join('. ')
+    const installModule = async (mod)=>{
+        const {ship} = props
+        setErr(null)
+        const ret = await util.wget(`/api/ship/${ship._id}/module/${mod._id}/install`,
+            {method: 'PUT'})
+        if (ret.err)
+            return void setErr(ret.err)
+        InventoryEvents.reloadModules()
+        return true
+    }
     return <RB.Container>
       <RB.Row><RB.Col>
         <img src={urls.Images.get(ship)} alt="ship" />
@@ -66,8 +80,10 @@ function ShipControls(props: ShipProps){
       {flight_name && <RB.Row>
         <RB.Col>{flight_name}</RB.Col>
       </RB.Row>}
+      {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
       <RB.Row><RB.Col>
-        <RB.Button>{L('install_module')}</RB.Button>
+        <ModuleSelectTrigger owner={ship} desc={L('install_module')}
+          onClick={installModule} />
       </RB.Col></RB.Row>
       {/*<RB.Row><RB.Col>
         <RB.Button>{L('repair')}</RB.Button>

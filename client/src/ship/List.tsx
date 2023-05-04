@@ -1,9 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Ship, User} from '../common/entity'
+import {Module, Owner, Ship, User} from '../common/entity'
 import * as util from '../common/util'
 import {List as UList} from '../util/controls'
 import {ShipRowEdit, ShipSend} from './RowEdit'
+import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
 import * as urls from '../common/urls'
 
@@ -63,5 +64,23 @@ export default class List extends UList<ShipListProps, ShipListState> {
             <RB.Col>{LR('item_desc_data')}</RB.Col>
             <RB.Col>{LR('item_desc_actions')}</RB.Col>
         </RB.Row>, ...rows]
+    }
+}
+
+type ModuleSelectProps = {
+    owner: Owner
+}
+export class ModuleSelect extends USelect<ModuleSelectProps, {}> {
+    L = LR
+    get optName(){ return 'item_desc_name' }
+    get fetchUrl(){
+        const {owner} = this.props
+        return `/api/ship/${owner?._id}/modules`
+    }
+    get canFetch(){ return !!this.props.owner?._id }
+    getValue(v){ return this.state.list.find(f=>f._id==v) }
+    getOptions(list: Module[]){
+        return list?.filter(this.props.filter||Boolean)
+            .reduce((p, v)=>Object.assign(p, {[v._id]: v}), {}) || []
     }
 }

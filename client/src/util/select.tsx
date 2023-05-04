@@ -126,7 +126,8 @@ export class MultiSelect<P, S> extends Select<P & MultiSelectProps, S & MultiSel
 }
 
 export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: boolean){
-    return class TypedSelect extends Select<{exclude?: (number | string)[], title?: string}, {}> {
+    return class TypedSelect extends Select<{exclude?: (number | string)[], title?: string,
+        optonValue?: (v: T)=>T}, {}> {
         L = L
         top_enabled = top_enabled
         numeric = true
@@ -140,8 +141,9 @@ export function TypedSelect<T>(TO: T, key: string, opt: string, top_enabled?: bo
             this.setState(this.fetchState({list}))
         }
         getOptions(list: T[]){
+            let val = this.props.optonValue || (l=>l)
             return list.reduce((p, v)=>
-                Object.assign(p, {[v as string]: key ? L(`${key}_${v}`) : v }), {}) || []
+                Object.assign(p, {[v as string]: key ? L(`${key}_${val(v)}`) : val(v) }), {}) || []
         }
         componentDidUpdate(prevProps){
             if (prevProps.exclude!==this.props.exclude)

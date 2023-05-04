@@ -1,9 +1,10 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Item, Patent, Order, OwnerMatch} from '../common/entity'
+import {Item, Patent, Order, OwnerMatch, Module} from '../common/entity'
 import {Owner, Loan, InstitutionType} from '../common/entity'
 import {NumberInput, OwnerSelect} from './inputs'
 import {OrderSelect, PatentSelect} from './inputs'
+import {ModuleSelect} from '../ship/List'
 import L from '../common/locale'
 import {LoanSelect} from '../corp/List'
 
@@ -42,6 +43,26 @@ export function OrderSelectTrigger(props: OrderSelectProps){
       <RB.PopoverBody>
         <OrderSelect value={order} owner={owner} item={item} onChange={setPatent} />
         <RB.Button disabled={!order} onClick={onClick}>{desc}</RB.Button>
+      </RB.PopoverBody>
+    </RB.Popover>
+    return <RB.OverlayTrigger placement='top' trigger={'click'} overlay={btn} rootClose={true}>
+      <RB.Button>{desc}</RB.Button>
+    </RB.OverlayTrigger>
+}
+
+type ModuleSelectProps = {
+    owner: Owner
+    desc: string
+    onClick: (module: Module)=>void
+}
+export function ModuleSelectTrigger(props: ModuleSelectProps){
+    const {owner, desc} = props
+    const [module, setModule] = React.useState(null)
+    const onClick = ()=>module && props.onClick(module)
+    const btn = <RB.Popover>
+      <RB.PopoverBody>
+        <ModuleSelect value={module} owner={owner} onChange={setModule} />
+        <RB.Button disabled={!module} onClick={onClick}>{desc}</RB.Button>
       </RB.PopoverBody>
     </RB.Popover>
     return <RB.OverlayTrigger placement='top' trigger={'click'} overlay={btn} rootClose={true}>

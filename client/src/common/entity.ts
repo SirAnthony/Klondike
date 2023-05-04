@@ -112,12 +112,13 @@ export class Coordinates extends MultiOwnedItem {
 export enum ModStat {None, Integrity, Mass, Engine, Slots,
     Speed, Movement, Size, Attack, Defence, Crew, Energy,
     Research, ResearchZone}
+export type ModuleBoosts = {[key in ModStat]: number}
 export class Module extends Item {
     type = ItemType.Module
     mass: number
     energy: number
     installed: boolean
-    boosts: {[key in ModStat]: number}
+    boosts: ModuleBoosts
     get keys(){
         return super.keys.concat('mass energy installed boosts'.split(' ')) }
 }

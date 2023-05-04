@@ -16,7 +16,7 @@ export {ProposalRow} from './Proposal'
 export const InventoryEvents = new EventEmitter()
 export enum InventoryEventType {reloadTime, reloadBalance, timeChanged,
     reloadPatents, reloadItems, reloadOrders, reloadPrices, reloadLoans,
-    reloadProposals, reloadRating, reloadConfig}
+    reloadProposals, reloadRating, reloadModules, reloadConfig}
 Object.keys(InventoryEventType).filter(t=>isNaN(+t)).forEach(c=>{
     InventoryEvents[c] = ()=>InventoryEvents.emit(c)
     InventoryEvents[`on${c}`] = (...args)=>InventoryEvents.on(c, ...args)

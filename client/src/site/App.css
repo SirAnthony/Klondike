@@ -3,6 +3,14 @@ body, #root, .App {
     background: #000;
 }
 
+body {
+    display: contents;
+}
+
+#root {
+    display: flow-root;
+}
+
 .App {
   text-align: center;
 }
@@ -18,11 +26,12 @@ body, #root, .App {
   }
 }
 
+/*
 @media (min-width: 1400px) {
 .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
     max-width: 1394px !important;
 }
-}
+}*/
 
 .App-header {
   background-color: #282c34;
