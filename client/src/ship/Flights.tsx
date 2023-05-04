@@ -156,8 +156,11 @@ function FlightRowNew(props: FlightRowNewParams){
     const onMapUpdate = (planet: Planet)=>{
         let pos = location?.pos
         if (!pos) {
+            const size = mutil.Map.tileDimensions()
             const zone = planet.zones[0]
-            const coords = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2, zone.radius)
+            const coords = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2,
+                zone.radius).filter(p=>p.col>=0 && p.row>=0 &&
+                p.col<=size.width && p.row<=size.height)
             pos = coords[Math.floor(Math.random()*coords.length)]
         }
         const loc = {_id: planet._id, system: planet.system,

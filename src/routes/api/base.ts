@@ -27,6 +27,7 @@ export class ApiRouter extends BaseRouter {
         return await ItemController.get(id)
     }
 
+    // TODO: might be used by non-related users
     @CheckAuthenticated()
     async get_planet(ctx: RenderContext){
         const {id} = ctx.params;
@@ -34,12 +35,13 @@ export class ApiRouter extends BaseRouter {
         const entity = await institutionController(user.relation?.type)?.get(user.relation?._id)
         const planet: PlanetInfo = await PlanetController.get(id)
         const opt_owner = UserTypeIn(user, UserType.Master) ? {} :
-             {'owner._id': asID(entity._id), 'owner.type': entity.type}
+            {'owner._id': asID(entity._id), 'owner.type': entity.type}
+        const opt_owners = UserTypeIn(user, UserType.Master) ? {} :
+            {'owners._id': asID(entity._id), 'owners.type': entity?.type}
         const opt = {'location._id': asID(planet._id),
             'type': {$in: [ItemType.Resource, ItemType.Coordinates]}}
         const items = await ItemController.all({$or: [{...opt_owner, ...opt},
-            {'owners._id': asID(entity._id), 'owners.type': entity.type},
-            {'known': true, ...opt}]})
+            {...opt_owners, ...opt}, {'known': true, ...opt}]})
         const ships = UserTypeIn(user, UserType.Master) ?
             await ShipController.all({'location._id': asID(planet._id)}) :
             user.relation.type == InstitutionType.Ship ? [entity] : []

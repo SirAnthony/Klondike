@@ -32,7 +32,15 @@ export class Pos implements CPos {
         const y = radius * (1 + 3/2 * this.row)
         return {x, y}
     }
-    get 
+}
+
+export namespace Map {
+    export function tileDimensions(){
+        const {radius, size} = defines.map
+        const width = Math.floor(size.width / radius / Math.sqrt(3))-1
+        const height =  Math.floor(size.height / radius * 2/3)-1
+        return {width, height}
+    }
 }
 
 export namespace Coordinates {

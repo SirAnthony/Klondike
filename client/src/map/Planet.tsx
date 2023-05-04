@@ -12,6 +12,7 @@ import defines from '../common/defines'
 import L from './locale'
 import useImage from 'use-image';
 import * as mutil from '../common/map'
+import { ErrorMessage } from 'src/util/errors';
 
 function Celestial(props: {zone: PlanetZone}){
     const {zone} = props
@@ -81,14 +82,16 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
     }
     fetchState(data: any = {}){
         const {item, entity} : {item: PlanetInfo, entity: Ship} = data
-        item.items = item.items.map(item=>{
+        if (!item)
+            return {item: null}
+        item.items = item.items?.map(item=>{
             const obj = new (Item.class(item.type))()
             for (let k in item)
                 obj[k] = item[k]
             return obj
         })
         item.pos = {
-            items: item.items.reduce(reduce_by_location, {})||{},
+            items: item.items?.reduce(reduce_by_location, {})||{},
             ships: item.ships?.reduce(reduce_by_location, {})||{},
         }
         const poses = new Set([...Object.keys(item.pos.items),
@@ -128,7 +131,7 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
     render() {
         const {planet} = this.state
         if (!planet)
-            return <div>{L('not_found')}</div>
+            return <ErrorMessage message={L('not_found')} />
         return <RB.Container className="map-container">
           <CanvasView planet={planet} {...this.props} />
           {this.menus()}
