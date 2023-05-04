@@ -59,7 +59,7 @@ export function CheckOwn(roles: UserType = 0, param_fn?: (ctx: RenderContext)=>I
             const {user}: {user: UserController} = ctx.state
             if (!UserTypeIn(user, (roles | UserType.Master))){
                 const test = param_fn(ctx)
-                if (!IDMatch(user, test) && !IDMatch(user.relation, test))
+                if (!IDMatch(user._id, test._id) && !IDMatch(user.relation._id, test._id))
                     throw new ApiError(Codes.INCORRECT_LOGIN, 'Access denied')
             }
             return descriptor.value.apply(this, arguments)
