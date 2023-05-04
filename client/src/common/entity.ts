@@ -347,7 +347,8 @@ export class PlanetInfo extends Planet {
         items: {[k: string]: Item[]},
         ships: {[k: string]: PlanetShip[]}
     }
-    // fog: PlanetFog[]
+    fog?: string[]
+    drop?: string[]
 }
 
 export enum ExpenseType {Loan, Fine}

@@ -55,7 +55,7 @@ export class ApiRouter extends BaseRouter {
     @CheckAuthenticated()
     async get_planet_list_short(ctx: RenderContext){
         const planets = await PlanetController.all()
-        const list = planets.map(p=>({_id: asID(p._id), name: p.name, system: p.system}))
+        const list = planets.map(p=>({_id: asID(p._id), name: p.name, system: p.system, zones: p.zones}))
         return {list}
     }
 

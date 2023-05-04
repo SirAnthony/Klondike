@@ -2,7 +2,9 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {PlanetInfo, PlanetZone, User, Item, Location,
-    Pos as EPos} from '../common/entity';
+    Pos as EPos,
+    Owner,
+    PlanetShip} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
@@ -12,6 +14,7 @@ import defines from '../common/defines'
 import L from './locale'
 import useImage from 'use-image';
 import * as util from '../common/util'
+import * as mutil from './util'
 
 function Celestial(props: {zone: PlanetZone}){
     const {zone} = props
@@ -61,6 +64,7 @@ type PlanetState = {
 type PlanetProps = {
     user: User
     id: string
+    ship?: PlanetShip
     markedPoints?: EPos[]
     onPointClick?: (pos: EPos)=>void
 }
@@ -69,6 +73,10 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
     constructor(props){
         super(props)
         this.state = {ui_ship: false, ui_inventory: false, ui_journal: false}
+    }
+    componentDidUpdate(prevProps){
+        if (prevProps.id != this.props.id)
+            this.fetch()
     }
     get fetchUrl() {
         const {id} = this.props
@@ -86,8 +94,26 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
             items: item.items.reduce(reduce_by_location, {})||{},
             ships: item.ships?.reduce(reduce_by_location, {})||{},
         }
+        const poses = new Set([...Object.keys(item.pos.items), ...Object.keys(item.pos.ships)])
+        item.fog = []
+        item.drop = []
+        for (let zone of item.zones){
+            item.fog = mutil.Coordinates.Figures.circle(zone.center, zone.radius)
+                .map(c=>`${c.col}:${c.row}`).filter(f=>!poses.has(f))
+            if (true) // DEBUG
+            item.drop = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2,
+                zone.radius).map(c=>`${c.col}:${c.row}`)
+        }
+        const pship = this.props.ship
+        if (pship){
+            const {pos} = pship.location
+            const arr = item.pos.ships[`${pos.col}:${pos.row}`] =
+                item.pos.ships[`${pos.col}:${pos.row}`]||[] as any
+            arr.push(pship as PlanetShip)
+        }
         return {item: data, planet: item, ship}
     }
+    
     menus(){
         const {state} = this
         const {user} = this.props

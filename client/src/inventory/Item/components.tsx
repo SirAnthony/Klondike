@@ -15,14 +15,14 @@ type ItemComponentProps = {
     layout: number
 }
 
-export function LocationCol(props: ItemComponentProps) {
+export function LocationCol(props: ItemComponentProps & {hide_pos?: boolean}) {
     const {location} = props.item
     if (!location)
         return <RB.Col sm={props.layout}>-</RB.Col>
     return <RB.Col sm={props.layout}>
       <span>{location.system}</span>
       <span>{location.name}</span>
-      <span>{location.pos?.col}:{location.pos?.row}</span>
+      {!props.hide_pos && <span>{location.pos?.col}:{location.pos?.row}</span>}
     </RB.Col>
 }
 

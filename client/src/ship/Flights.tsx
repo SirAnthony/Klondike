@@ -3,7 +3,7 @@ import * as RB from 'react-bootstrap'
 import {
     Item, Flight, User, UserType, FlightStatus, Location,
     UserTypeIn, OwnerMatch, FlightType, Planet, InstitutionType,
-    Pos,
+    Pos, PlanetShip, ShipClass,
 } from '../common/entity'
 import {List as UList} from '../util/controls'
 import {LocationCol} from '../inventory/Item/components';
@@ -13,6 +13,7 @@ import {Select as PSelect} from '../map/List'
 import { PlanetView } from '../map/Planet';
 import * as util from '../common/util'
 import * as date from '../common/date'
+import * as mutil from '../map/util'
 
 export type FlightRowProps = {
     flight: Flight
@@ -41,7 +42,8 @@ function FlightLocationCol(params: FlightRowProps){
         UserTypeIn(user, UserType.Guard | UserType.Master)
     if (!allowed)
         return <RB.Col>{L('desc_info_hidden')}</RB.Col>
-    return <LocationCol item={(flight as unknown) as Item} layout={null} />
+    return <LocationCol item={(flight as unknown) as Item}
+        hide_pos={true} layout={null} />
 }
 
 function FlightActions(params: FlightRowProps){
@@ -152,7 +154,12 @@ function FlightRowNew(props: FlightRowNewParams){
         type: FlightType.Drone, ts: +date.get(ts), owner, location,
         points: flight?.points})) && props.onCancel()
     const onMapUpdate = (planet: Planet)=>{
-        let pos = location?.pos || {col: 0, row: 0}
+        let pos = location?.pos
+        if (!pos) {
+            const zone = planet.zones[0]
+            const coords = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2, zone.radius)
+            pos = coords[Math.floor(Math.random()*coords.length)]
+        }
         const loc = {_id: planet._id, system: planet.system,
             name: planet.name, pos}
         setLocation(loc)
@@ -230,11 +237,15 @@ export class List extends BaseList<FlightListProps, FlightListState> {
     }
     get mapView(){
         const {user} = this.props
-        const id = this.state.newForm?.location?._id
+        const {newForm} = this.state
+        const id = newForm?.location?._id
         if (!id)
             return <></>
-        const points = this.state.newForm.points||[]
+        // XXX need img
+        const ship = {...user.relation, location: newForm.location,
+            _id: null, kind: ShipClass.D, img: '1'}
+        const points = newForm.points||[]
         return <PlanetView user={user} id={id} markedPoints={points}
-            onPointClick={pos=>this.onPointClick(pos)} />
+            ship={ship} onPointClick={pos=>this.onPointClick(pos)} />
     }
 }
