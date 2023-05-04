@@ -35,25 +35,6 @@ export class Pos implements CPos {
     get 
 }
 
-type FontStyle = {
-    fontStyle?: string,
-    fontSize?: number,
-    fontFamily?: string
-}
-
-function canvasFont(font: FontStyle){
-    const {fontStyle = 'normal', fontSize = 10, fontFamily = 'Arial'} = font
-    return `${fontStyle} ${fontSize}px ${fontFamily}`
-}
-export function textWidth(text, font: FontStyle) {
-    const canvas = textWidth.canvas;
-    const context = canvas.getContext("2d");
-    context.font = canvasFont(font);
-    return context.measureText(text).width;
-}
-// re-use canvas object for better performance
-textWidth.canvas = document.createElement("canvas")
-
 export namespace Coordinates {
     type cHex = {q: number, r: number}
     type cPos = {col: number, row: number}
@@ -156,6 +137,12 @@ export namespace Coordinates {
                 results.push(Round.cube(cube_lerp(a, b, 1.0 / N * i)))
             return results
         }
+
+        export function offset(a: cPos, b: cPos){
+            const ca = axial_to_cube(oddr_to_axial(a))
+            const cb = axial_to_cube(oddr_to_axial(b))
+            return cube(ca, cb).map(p=>axial_to_oddr(cube_to_axial(p)))
+        }
     }
 
     export namespace Range {
@@ -167,6 +154,9 @@ export namespace Coordinates {
             }
             return results
         }
+
+        export function offset(center: cPos, distance: number) : cPos[]{
+            return axial(oddr_to_axial(center), distance).map(c=>axial_to_oddr(c)) }
 
         function intersect(a: cHex, aDist: number, b: cHex, bDist: number){
             const results = []

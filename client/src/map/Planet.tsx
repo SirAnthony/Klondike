@@ -2,9 +2,7 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {PlanetInfo, PlanetZone, User, Item, Location,
-    Pos as EPos,
-    Owner,
-    PlanetShip} from '../common/entity';
+    Pos as EPos, Ship, PlanetShip} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
@@ -13,7 +11,6 @@ import ShipDetails from '../ship/Details';
 import defines from '../common/defines'
 import L from './locale'
 import useImage from 'use-image';
-import * as util from '../common/util'
 import * as mutil from '../common/map'
 
 function Celestial(props: {zone: PlanetZone}){
@@ -83,7 +80,7 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         return `/api/planet/${id}`
     }
     fetchState(data: any = {}){
-        const {item, ship} : {item: PlanetInfo, ship: any} = data
+        const {item, entity} : {item: PlanetInfo, entity: Ship} = data
         item.items = item.items.map(item=>{
             const obj = new (Item.class(item.type))()
             for (let k in item)
@@ -94,7 +91,8 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
             items: item.items.reduce(reduce_by_location, {})||{},
             ships: item.ships?.reduce(reduce_by_location, {})||{},
         }
-        const poses = new Set([...Object.keys(item.pos.items), ...Object.keys(item.pos.ships)])
+        const poses = new Set([...Object.keys(item.pos.items),
+            ...((entity?.known||{})[item._id]||[])])
         item.fog = []
         item.drop = []
         for (let zone of item.zones){
@@ -111,7 +109,7 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
                 item.pos.ships[`${pos.col}:${pos.row}`]||[] as any
             arr.push(pship as PlanetShip)
         }
-        return {item: data, planet: item, ship}
+        return {item: data, planet: item, entity}
     }
     
     menus(){

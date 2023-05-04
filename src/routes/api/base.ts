@@ -2,7 +2,7 @@ import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
 import {UserController, ShipController, institutionController} from '../../entity'
 import {ItemController, PlanetController} from '../../entity'
 import {ConfigController} from '../../entity'
-import {PlanetInfo, UserType, UserTypeIn} from '../../../client/src/common/entity'
+import {InstitutionType, PlanetInfo, UserType, UserTypeIn} from '../../../client/src/common/entity'
 import {ItemType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {asID} from '../../util/server'
@@ -33,18 +33,18 @@ export class ApiRouter extends BaseRouter {
         const {user}: {user: UserController} = ctx.state
         const entity = await institutionController(user.relation?.type)?.get(user.relation?._id)
         const planet: PlanetInfo = await PlanetController.get(id)
-        const ships = await ShipController.all({'location._id': asID(planet._id)})
-        planet.ships = ships.map(s=>ShipController.PlanetShip(s))
-        const filter = UserTypeIn(user, UserType.Master) ? {} : {$or: [
-            {'owner._id': asID(entity._id), 'owner.type': +entity.type},
-            {'known._id': asID(entity._id), 'known.type': +entity.type}
-        ]}
-        const items = await ItemController.all(Object.assign({
-            'location._id': asID(planet._id),
-            'type': {$in: [ItemType.Resource, ItemType.Coordinates]}
-        }, filter))
+        const opt_owner = UserTypeIn(user, UserType.Master) ? {} :
+             {'owner._id': asID(entity._id), 'owner.type': entity.type}
+        const opt = {'location._id': asID(planet._id),
+            'type': {$in: [ItemType.Resource, ItemType.Coordinates]}}
+        const items = await ItemController.all({$or: [{...opt_owner, ...opt},
+            {'known': true, ...opt}]})
+        const ships = UserTypeIn(user, UserType.Master) ?
+            await ShipController.all({'location._id': asID(planet._id)}) :
+            user.relation.type == InstitutionType.Ship ? [entity] : []
         planet.items = items
-        return {item: planet}
+        planet.ships = ships.map(s=>ShipController.PlanetShip(s))
+        return {item: planet, entity}
     }
 
     @CheckAuthenticated()

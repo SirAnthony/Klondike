@@ -12,10 +12,10 @@ function Mod(num: number, mod: Module, onRemove: (mod: Module)=>void){
       <td>{L('mod_stat', k)}</td>
       <td>{L('mod_stat_c', k)}</td>
       <td>{mod[k]}</td>
-    </tr>).concat(mod.boosts.map(k=><tr>
-      <td>{L('mod_stat', k.kind)}</td>
-      <td>{L('mod_stat_c', k.kind)}</td>
-      <td>{k.value}</td>
+    </tr>).concat(Object.keys(mod.boosts).map(k=><tr>
+      <td>{L('mod_stat', k)}</td>
+      <td>{L('mod_stat_c', k)}</td>
+      <td>{mod.boosts[k]}</td>
     </tr>))
     return [<tr>
       <td>{L('mod_slot')+' '+num}</td>

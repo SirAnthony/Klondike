@@ -1,7 +1,7 @@
 import React from 'react';
 import {Rect, Text, Group} from 'react-konva'
 import defines from '../common/defines'
-import {textWidth} from '../common/map'
+import { textWidth } from "src/map/util";
 import {LR} from './locale'
 import * as _ from 'lodash'
 import Konva from 'konva';

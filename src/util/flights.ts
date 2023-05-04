@@ -1,12 +1,15 @@
 import {
     Flight, FlightKind, FlightStatus, FlightType, ID, InstitutionType,
-    ItemType, LogAction, OwnerMatch, Ship, UserType, UserTypeIn
+    ItemType, Module,
+    LogAction, OwnerMatch, UserType, UserTypeIn, ModStat, Resource, Coordinates
 } from "../../client/src/common/entity";
-import {FlightController, LogController, ShipController, UserController} from "../entity";
+import {ConfigController, FlightController, ItemController, LogController, ShipController, UserController} from "../entity";
 import * as date from '../../client/src/common/date'
 import { IDMatch } from "./server";
 import * as uutil from './user'
 import { ApiError, Codes } from "../../client/src/common/errors";
+import * as utime from './time'
+import * as mutil from '../../client/src/common/map'
 import { ObjectId } from "mongodb";
 
 export namespace Util {
@@ -37,7 +40,7 @@ export namespace Util {
     }
 }
 
-export namespace Actions {
+export namespace Api {
 const isType = Util.isFlightType
 
 function CheckFlightStatus(statuses: FlightStatus[]){
@@ -71,7 +74,7 @@ export async function signup(user: UserController, flight: FlightController){
         throw 'error_ship_busy'
     flight.status = FlightStatus.Waiting
     flight.kind = UserTypeIn(user, UserType.Scientist) ? FlightKind.Scietific : FlightKind.Normal
-    flight.owner = ship
+    flight.owner = ship.asOwner
     flight.name = Flight.Name(flight)
     flight.departure = null
     flight.arrival = null
@@ -185,14 +188,7 @@ export async function arrival(user: UserController, flight: FlightController){
         throw 'error_no_ship'
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
-    flight.status = FlightStatus.Docked
-    flight.name = null
-    flight.arrival = +(new Date())
-    await flight.save()
-    if (ship.flight){
-        ship.flight = null
-        ship.save()
-    }
+    await Actions.dockFlight(flight)
     await LogController.log({
         name: 'flight_arrival', info: 'flight_arrival',
         action: LogAction.FlightArrival, flight: prev,
@@ -239,8 +235,168 @@ export async function help(user: UserController, flight: FlightController){
 
 }
 
-namespace Timer {
-const isType = Util.isFlightType
+namespace Actions {
+export async function dockFlight(flight: FlightController){
+    flight.status = FlightStatus.Docked
+    flight.name = null
+    flight.arrival = +(new Date())
+    await flight.save()
+    const ship = await ShipController.get(flight.owner._id)
+    if (ship.flight){
+        ship.flight = null
+        ship.save()
+    }
+}
 
+export async function researchItem(item: ItemController, ship: ShipController, kind: FlightKind){
+    if (item.type == ItemType.Resource){
+        const res = item as unknown as Resource
+        res.known = true
+        if (!item.owner){
+            item.owner = ship.asOwner
+            if (kind===FlightKind.Scietific)
+                res.value *= 1.05
+        }
+        await item.save()
+    } else if (item.type == ItemType.Coordinates) {
+        const pt = item as unknown as Coordinates
+        pt.owners = pt.owners.filter(o=>!OwnerMatch(o, ship)).concat(ship.asOwner)
+        await item.save()
+    }
+}
+
+export async function research(flight: FlightController){
+    const ship = await ShipController.get(flight.owner._id)
+    const modules = await ItemController.all({'type': ItemType.Module,
+        'owner._id': ship._id, 'owner.type': ship.type, installed: true})
+    const speed = (modules||[]).reduce((p, c)=>(p|0)+
+        ((c as unknown as Module).boosts[ModStat.Research]|0), 10)
+    const conf = await ConfigController.get()
+    // Default value is 1 hex per 180 sec
+    const ts = +new Date()
+    const mov = ((conf.time?.ship?.research|0) || 360) * 10/speed
+    const next_ts = mov * date.ms.SEC + flight.visit
+
+    if (next_ts > ts)
+        return
+    
+    const mod = Math.min(modules.reduce((p, c)=>
+        Math.max(p, (c as unknown as Module).boosts[ModStat.ResearchZone]|0), 0), 2)
+    const points = mutil.Coordinates.Range.offset(flight.location.pos, mod)
+
+    const loc_id = ship.location._id
+    // Mark points as known
+    ship.known = ship.known||{};
+    (ship.known[loc_id] = ship.known[loc_id]||[]).push(
+        ...points.map(p=>`${p.col}:${p.row}`))
+    await ship.save()
+
+    const filter = points.map(p=>({'location._id': ship.location._id,
+        'location.pos.col': p.col, 'location.pos.row': p.row}))
+    const items = await ItemController.all({$or: filter})
+    for (let item of items)
+        await researchItem(item, ship, flight.kind)
+
+    // Continue flight, even if last point
+    flight.visit = ts
+    flight.status = FlightStatus.InFlight
+    await flight.save()
+}
+
+export async function move(flight: FlightController){
+    const ship = await ShipController.get(flight.owner._id)
+    const modules = await ItemController.all({'type': ItemType.Module,
+        'owner._id': ship._id, 'owner.type': ship.type, installed: true})
+    const speed = (modules||[]).reduce((p, c)=>p+
+        (c as unknown as Module).boosts[ModStat.Speed]|0, ship.speed)
+    const conf = await ConfigController.get()
+    // Default value is 1 hex per 180 sec
+    const ts = +new Date()
+    const mov = ((conf.time?.ship?.speed|0) || 180) * 10/speed
+    const next_ts = mov * date.ms.SEC + flight.visit
+
+    // In move
+    if (next_ts>ts)
+        return
+
+    // No route
+    const point = flight.points.shift()
+    if (!point)
+        return await dockFlight(flight)
+
+    flight.visit = ts
+
+    const pos = flight.location
+    const line = mutil.Coordinates.Line.offset(point, pos.pos)
+    const next_point = line.pop()
+    if (next_point){
+        flight.location.pos = next_point
+        ship.location = flight.location
+    }
+
+    if (line.length)
+        flight.points.unshift(point)
+    else
+        flight.status = FlightStatus.Research
+    
+    await ship.save()
+    await flight.save()
+}
+
+}
+
+
+namespace Timer {
+
+
+async function emitFlights(){
+    const flights = await FlightController.all({$or: [
+        {'type': FlightType.Drone, 'status': FlightStatus.Waiting, 'departure': null},
+        {'type': FlightType.Drone, 'status': FlightStatus.Waiting, 'departure': {$exists: false}},
+    ]})
+    const now = +new Date()
+    for (let flight of flights){
+        let ship: ShipController
+        try { ship = await ShipController.get(flight.owner._id) }
+        catch(e){ continue }
+        if (flight.ts<now){
+            flight.status = FlightStatus.InFlight
+            flight.name = Flight.Name(flight)
+            flight.departure = now
+            flight.visit = now
+            await flight.save()
+            ship.flight = flight.identifier
+            ship.location = flight.location
+            await ship.save()
+            await LogController.log({
+                name: 'flight_departure', info: 'flight_departure',
+                action: LogAction.FlightDeparture, flight,
+                owner: null, institution: ship.asOwner
+            })
+        }
+    }
+}
+
+async function checkDronesMovement(){
+    const flights = await FlightController.all({'type': FlightType.Drone, 'status': FlightStatus.InFlight})
+    for (let flight of flights)
+        Actions.move(flight)
+}
+
+async function checkDronesResearch(){
+    const flights = await FlightController.all({'type': FlightType.Drone, 'status': FlightStatus.Research})
+    for (let flight of flights)
+        Actions.research(flight)
+}
+
+
+
+function load(){
+    utime.addIntervalEvent(60, emitFlights)
+    utime.addIntervalEvent(30, checkDronesMovement)
+    utime.addIntervalEvent(30, checkDronesResearch)
+}
+
+load()
 
 }

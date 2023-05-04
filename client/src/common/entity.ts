@@ -95,7 +95,7 @@ export class Resource extends Item {
     type = ItemType.Resource
     kind: ResourceType
     value: number
-    known: Owner[]
+    known?: boolean
     get keys(){
         return super.keys.concat('kind value'.split(' '))
             .filter(f=>f!='price')
@@ -109,12 +109,15 @@ export class Coordinates extends MultiOwnedItem {
         return super.keys.concat('target'.split(' ')) }
 }
 
+export enum ModStat {None, Integrity, Mass, Engine, Slots,
+    Speed, Movement, Size, Attack, Defence, Crew, Energy,
+    Research, ResearchZone}
 export class Module extends Item {
     type = ItemType.Module
     mass: number
     energy: number
     installed: boolean
-    boosts: [{kind: string, value: number}]
+    boosts: {[key in ModStat]: number}
     get keys(){
         return super.keys.concat('mass energy installed boosts'.split(' ')) }
 }
@@ -273,6 +276,7 @@ export class Ship extends Institution {
     crew: number
     slots: number
     flight?: ID
+    known?: {[k: string]: string[]}
     get keys(){
         return super.keys.concat(`kind location price port captain
             integrity mass engine speed movement size attack defence 
@@ -280,7 +284,7 @@ export class Ship extends Institution {
     }
 }
 
-export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked}
+export enum FlightStatus {Docked, Waiting, InFlight, SOS, Blocked, Research}
 export enum FlightType {
     Drone     = 1 << 0,
     Planetary = 1 << 1,

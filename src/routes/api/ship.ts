@@ -54,7 +54,7 @@ export class ShipApiRouer extends BaseRouter {
         const flight = await FlightController.get(isID(id) ? id : data)
         if (!flight)
             throw 'Incorrect flight'
-        let fn = Flights.Actions[action] 
+        let fn = Flights.Api[action] 
         if (!fn)
             throw `Incorrect request ${action}`
         await fn(user, flight)
