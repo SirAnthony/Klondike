@@ -48,7 +48,8 @@ export class ApiRouter extends BaseRouter {
         ]})
         const ships = UserTypeIn(user, UserType.Master) ?
             await ShipController.all({'location._id': asID(planet._id)}) :
-            user.relation.type == InstitutionType.Ship ? [entity] : []
+            user.relation.type == InstitutionType.Ship &&
+            entity.location?._id == planet._id ? [entity] : []
         planet.items = items
         planet.ships = ships.map(s=>ShipController.PlanetShip(s))
         return {item: planet, entity}

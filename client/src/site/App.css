@@ -209,6 +209,7 @@ div.menu-container-fit, div.container-fit {
 }
 
 .menu-box-clear {
+    color: var(--color-ui-text);
     max-width: 250px;
     min-width: 220px;
 }

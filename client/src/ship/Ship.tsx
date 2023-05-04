@@ -58,7 +58,7 @@ function ShipInfo(props: ShipProps){
 
 function ShipControls(props: ShipProps){
     const {ship} = props
-    const flight_name = ship.flight?.name.split(' ').map(k=>LR(k)).join(' ')
+    const flight_name = ship.flight?.name.split(' ').map(k=>LR(`flight_${k}`)).join('. ')
     return <RB.Container>
       <RB.Row><RB.Col>
         <img src={urls.Images.get(ship)} alt="ship" />
@@ -69,9 +69,9 @@ function ShipControls(props: ShipProps){
       <RB.Row><RB.Col>
         <RB.Button>{L('install_module')}</RB.Button>
       </RB.Col></RB.Row>
-      <RB.Row><RB.Col>
+      {/*<RB.Row><RB.Col>
         <RB.Button>{L('repair')}</RB.Button>
-      </RB.Col></RB.Row>
+      </RB.Col></RB.Row>*/}
     </RB.Container>
 }
 
