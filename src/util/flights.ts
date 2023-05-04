@@ -1,5 +1,5 @@
 import {
-    Flight, FlightStatus, FlightType, ID, InstitutionType,
+    Flight, FlightKind, FlightStatus, FlightType, ID, InstitutionType,
     ItemType, LogAction, Ship, UserType, UserTypeIn
 } from "../../client/src/common/entity";
 import {FlightController, LogController, ShipController, UserController} from "../entity";
@@ -65,9 +65,12 @@ export async function signup(user: UserController, flight: FlightController){
     const ship = await ShipController.get(rel._id)
     if (isType(flight.type, FlightType.Planetary) && ship.credit<=0)
         throw 'error_no_funds'
+    if (isType(flight.type, FlightType.Drone) && !flight.points?.length)
+        throw 'Points not specified'
     if (!(await Util.checkShipAvailable(ship, flight)))
         throw 'error_ship_busy'
     flight.status = FlightStatus.Waiting
+    flight.kind = UserTypeIn(user, UserType.Scientist) ? FlightKind.Scietific : FlightKind.Normal
     flight.owner = ship
     flight.name = Flight.Name(flight)
     flight.departure = null

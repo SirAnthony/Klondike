@@ -18,6 +18,12 @@ body, #root, .App {
   }
 }
 
+@media (min-width: 1400px) {
+.container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+    max-width: 1394px !important;
+}
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -313,8 +319,8 @@ div .menu-list-row, .menu-list-title, .menu-input-row {
 
 .map-container.container {
     position: relative;
-    padding-right: 0px;
-    padding-left: 0px;
+    padding: 5px 0;
+    padding-bottom: 10px;
 }
 
 .map {

@@ -25,8 +25,8 @@ function Hexagon(props: HexagonProps){
     const {radius} = defines.map
     const {color} = defines.styles
     const {x, y} = point
-    //const text = <Text text={`${props.marked} ${pos.col}:${pos.row}`} fontSize={12}
-    //    fill={'#0f0'} x={x-radius/2} y={y-radius/4} {...props.hover} />
+    const text = <Text text={`${pos.col}:${pos.row}`} fontSize={12}
+        fill={'#0f0'} x={x-radius/2} y={y-radius/4} {...props.hover} />
     const mark = <Text text={`${props.marked}`} fontSize={32}
         fill={'#0f0'} x={x-radius/3} y={y-radius/2} {...props.hover}
         {...props.click} />
@@ -36,7 +36,7 @@ function Hexagon(props: HexagonProps){
       <RegularPolygon sides={6} radius={radius} x={x} y={y} {...props.hover}
       stroke={color.hex_border} fill={fill}
       strokeWidth={1} {...props.click} />
-      {/* props.fill && text */}
+      {props.fill && text}
       {!!props.marked && mark}
     </Group>
 }
