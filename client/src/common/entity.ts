@@ -293,8 +293,9 @@ export class Flight extends ID {
     type: FlightType
     status: FlightStatus
     kind?: FlightKind
-    departure?: number 
+    departure?: number
     arrival?: number
+    visit?: number
     owner?: Owner
     location?: Location
     points?: Pos[]
