@@ -218,8 +218,8 @@ export class User extends Institution {
     }
     get fullName(){ return User.fullName(this) }
     static fullName(u: User){
-        return [u.first_name, u.alias ? `(${u.alias})` : '',
-            u.last_name].filter(Boolean).join(' ')
+        return u.type!=InstitutionType.User ? u.name : [u.first_name,
+            u.alias ? `(${u.alias})` : '', u.last_name].filter(Boolean).join(' ')
     }
     get keys(){
         return super.keys.concat(`kind alias first_name last_name email
@@ -287,11 +287,12 @@ export enum FlightType {
     // Emergency is planetary-only
     Emergency = (1 << 2) | (1 << 1),
 }
-export enum FlightActions {}
+export enum FlightKind {Normal, Scietific}
 export class Flight extends ID {
     ts: number
     type: FlightType
     status: FlightStatus
+    kind?: FlightKind
     departure?: number 
     arrival?: number
     owner?: Owner

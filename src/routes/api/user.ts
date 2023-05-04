@@ -1,5 +1,5 @@
 import {BaseRouter, CheckRole, CheckAuthenticated} from '../base'
-import {UserController} from '../../entity'
+import {UserController, institutionController} from '../../entity'
 import {ProfileFields, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as uutil from '../../util/user'
@@ -34,12 +34,12 @@ export class UserApiRouter extends BaseRouter {
     @CheckAuthenticated()
     async get_profile(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
-        const {id} = ctx.aparams
-        const target = !id ? user : await UserController.get(id)
+        const {id, type} = ctx.aparams
+        const target = !id ? user : await institutionController(+type).get(id)
         if (!target)
             throw 'Not found'
         const data = target.asObject
-        data.data = await uutil.process_data(data.data)
+        data.info = await uutil.process_data(data.data)
         return {user: data}
     }
 }

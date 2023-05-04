@@ -7,7 +7,7 @@ import {Select as USelect} from '../util/select'
 import {default as L, LR} from './locale'
 import {EntityRowEdit, InstitutionSave} from './RowEdit'
 import {DataViewerButtons} from '../util/buttons'
-import * as curls from '../common/urls'
+import * as urls from '../common/urls'
 import * as util from '../common/util'
 
 function CorpRow(props: {entity: Corporation, onChange: (entity: InstitutionSave)=>Promise<boolean>}) {
@@ -19,11 +19,11 @@ function CorpRow(props: {entity: Corporation, onChange: (entity: InstitutionSave
         return <EntityRowEdit {...props} onChange={onChange} onCancel={()=>setShowEdit(false)} />
     return <RB.Row className="menu-list-row">
       <RB.Container><RB.Row>
-        <RB.Col><img src={curls.Images.get(entity)} /></RB.Col>
-        <RB.Col>{entity.name}</RB.Col>
+        <RB.Col><img src={urls.Images.get(entity)} /></RB.Col>
+        <RB.Col><RB.NavLink href={urls.Links.profile(entity)}>{entity.name}</RB.NavLink></RB.Col>
         <RB.Col>{entity.credit}</RB.Col>
         <RB.Col>
-          <RB.NavLink href={`/inventory/${entity.type}/${entity._id}`}>{LR('inventory')}</RB.NavLink>
+          <RB.NavLink href={urls.Links.inventory(entity)}>{LR('inventory')}</RB.NavLink>
         </RB.Col>
         <DataViewerButtons onEdit={setShowEdit} onShow={setShowData} show={showData} />
       </RB.Row>

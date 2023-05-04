@@ -4,7 +4,7 @@ import * as RB from 'react-bootstrap'
 import * as util from '../common/util'
 import * as CError from '../common/errors'
 import {ErrorMessage} from '../util/errors'
-import {User, ProfileFields} from '../common/entity'
+import {User, ProfileFields, InstitutionType} from '../common/entity'
 import {ControlBar} from '../util/controls'
 import * as curls from '../common/urls'
 import * as F from '../Fetcher'
@@ -16,6 +16,7 @@ const ProfileEvents = new EventEmitter()
 
 type UserProfileProps = {
     id?: string
+    type?: number
     user: User
 }
 
@@ -80,6 +81,7 @@ type UserViewProfileProps = {
 
 function ProfileInfo(props: UserViewProfileProps){
     const {user, viewer} = props
+    const is_user = +user.type===InstitutionType.User
     return <RB.Container className='menu-box-desc'>
       <RB.Row><RB.Col>
         <img src={curls.Images.get(user)} alt='user' />
@@ -88,10 +90,10 @@ function ProfileInfo(props: UserViewProfileProps){
         <RB.Col>{L('desc_name')}</RB.Col>
         <RB.Col>{user.fullName}</RB.Col>
       </RB.Row>
-      <RB.Row>
+      {is_user && <RB.Row>
         <RB.Col>{L('desc_role')}</RB.Col>
         <UserRoleCol user={user} />
-      </RB.Row>
+      </RB.Row>}
       {(viewer.admin || viewer._id===user._id) && <RB.Row>
         <RB.Col>{L('desc_credit')}</RB.Col>
         <RB.Col>{user.credit|0}</RB.Col>
@@ -120,8 +122,8 @@ function ProfileData(props: UserViewProfileProps){
 
 export class UserProfile extends F.Fetcher<UserProfileProps, UserProfileState> {
     get fetchUrl(){
-        const {id = ''} = this.props
-        return `/api/user/profile/${id}`
+        const {id = '', type} = this.props
+        return `/api/user/profile/${type|0}/${id}`
     }
     fetchState(data: any = {}){
         const user = data?.user ? new User() : undefined
@@ -152,8 +154,8 @@ export class UserProfile extends F.Fetcher<UserProfileProps, UserProfileState> {
 
 function UserProfileNavigator(props: {user: User}) {
     const params = RR.useParams()
-    const {id} = params
-    return <UserProfile user={props.user} id={id} />
+    const {id, type} = params
+    return <UserProfile user={props.user} id={id} type={+type} />
 }
 
 export function Navigator(props){
@@ -162,6 +164,7 @@ export function Navigator(props){
       <RR.Routes>
         <RR.Route path='/' element={<UserProfileNavigator user={user} />} />
         <RR.Route path='/:id' element={<UserProfileNavigator user={user} />} />
+        <RR.Route path='/:type/:id' element={<UserProfileNavigator user={user} />} />
       </RR.Routes>
     </div>)
 }
