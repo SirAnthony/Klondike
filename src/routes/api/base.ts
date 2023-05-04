@@ -34,14 +34,18 @@ export class ApiRouter extends BaseRouter {
         const {user}: {user: UserController} = ctx.state
         const entity = await institutionController(user.relation?.type)?.get(user.relation?._id)
         const planet: PlanetInfo = await PlanetController.get(id)
-        const opt_owner = UserTypeIn(user, UserType.Master) ? {} :
-            {'owner._id': asID(entity._id), 'owner.type': entity.type}
-        const opt_owners = UserTypeIn(user, UserType.Master) ? {} :
-            {'owners._id': asID(entity._id), 'owners.type': entity?.type}
-        const opt = {'location._id': asID(planet._id),
-            'type': {$in: [ItemType.Resource, ItemType.Coordinates]}}
-        const items = await ItemController.all({$or: [{...opt_owner, ...opt},
-            {...opt_owners, ...opt}, {'known': true, ...opt}]})
+        const loc_opt = {'location._id': asID(planet._id)}
+        // Additional all-viewing filter
+        const view = UserTypeIn(user, UserType.Master) ? [{...loc_opt}] : [] as any
+        if (entity){
+            view.push({type: ItemType.Coordinates, ...loc_opt,
+                'owners._id': asID(entity?._id), 'owners.type': entity?.type})
+        }
+        const items = await ItemController.all({$or: [
+            {type: ItemType.Resource, 'owner._id': {$ne: null}, ...loc_opt},
+            {type: ItemType.Resource, 'owner._id': {exists: true}, ...loc_opt},
+            ...view
+        ]})
         const ships = UserTypeIn(user, UserType.Master) ?
             await ShipController.all({'location._id': asID(planet._id)}) :
             user.relation.type == InstitutionType.Ship ? [entity] : []
