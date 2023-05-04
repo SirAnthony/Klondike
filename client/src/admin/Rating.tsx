@@ -143,10 +143,45 @@ function OrderSpecialityChange(props: {conf: Config, onChange: (c: Config)=>void
     </RB.Row>
 }
 
+function GamePaceChange(props: {conf: Config, onChange: (c: Config)=>void}){
+    const {conf, onChange} = props
+    const propChange = (prop, name)=>val=>{
+        const parts = prop.split('.')
+        const obj = {...conf}
+        let cfg = obj
+        for (let part of parts)
+            cfg = cfg[part] = cfg[part]||{}
+        cfg[name] = val
+        onChange(obj)
+    }
+    return <RB.Row className='menu-list-row'>
+      <RB.Col>
+        <NumberInput value={conf.time?.market} placeholder={L('time.market')}
+          onChange={propChange('time', 'market')} />
+      </RB.Col>
+      <RB.Col>
+        <NumberInput value={conf.time?.ship?.speed}
+          placeholder={L('time.ship.speed')}
+          onChange={propChange('time.ship', 'speed')} />
+      </RB.Col>
+      <RB.Col>
+        <NumberInput value={conf.time?.ship?.research}
+          placeholder={L('time.ship.research')}
+          onChange={propChange('time.ship', 'research')} />
+      </RB.Col>
+    </RB.Row>
+}
+
 type ConfigControlState = {}
 type ConfigControlProps = {}
 class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState> {
     L = L
+    fetchState(data: any){ 
+      // Missing fields
+      data.time = data.time||{}
+      data.time.ship = data.time.ship||{}
+      return {item: data}
+    }
     render(){
         const {item, err} = this.state
         if (!item)
@@ -155,10 +190,17 @@ class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-input-row'>
-            <RB.Col>{L('config_setup_points')}</RB.Col>
+            <RB.Col>{L('config_setup')}</RB.Col>
             <RB.Col sm={3}><RB.Button onClick={()=>this.onSubmit()}>
               {LR('act_save')}
             </RB.Button></RB.Col>
+          </RB.Row>
+          <RB.Row className='menu-input-row'>
+            <RB.Col>{L('config_setup_pace')}</RB.Col>
+          </RB.Row>
+          <GamePaceChange conf={item} onChange={setConf} />
+          <RB.Row className='menu-input-row'>
+            <RB.Col>{L('config_setup_points')}</RB.Col>
           </RB.Row>
           {PatentConfigChange(item, setConf)}
           <RB.Row className='menu-input-row'>

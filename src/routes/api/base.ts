@@ -38,6 +38,7 @@ export class ApiRouter extends BaseRouter {
         const opt = {'location._id': asID(planet._id),
             'type': {$in: [ItemType.Resource, ItemType.Coordinates]}}
         const items = await ItemController.all({$or: [{...opt_owner, ...opt},
+            {'owners._id': asID(entity._id), 'owners.type': entity.type},
             {'known': true, ...opt}]})
         const ships = UserTypeIn(user, UserType.Master) ?
             await ShipController.all({'location._id': asID(planet._id)}) :

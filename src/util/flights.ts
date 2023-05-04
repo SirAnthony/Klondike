@@ -11,6 +11,7 @@ import { ApiError, Codes } from "../../client/src/common/errors";
 import * as utime from './time'
 import * as mutil from '../../client/src/common/map'
 import { ObjectId } from "mongodb";
+import * as _ from 'lodash'
 
 export namespace Util {
     export const isFlightType = (k: FlightType, t: FlightType)=>((+k) & t) == t
@@ -260,7 +261,7 @@ export async function researchItem(item: ItemController, ship: ShipController, k
         await item.save()
     } else if (item.type == ItemType.Coordinates) {
         const pt = item as unknown as Coordinates
-        pt.owners = pt.owners.filter(o=>!OwnerMatch(o, ship)).concat(ship.asOwner)
+        pt.owners = (pt.owners||[]).filter(o=>!OwnerMatch(o, ship)).concat(ship.asOwner)
         await item.save()
     }
 }
@@ -287,8 +288,10 @@ export async function research(flight: FlightController){
     const loc_id = ship.location._id
     // Mark points as known
     ship.known = ship.known||{};
-    (ship.known[loc_id] = ship.known[loc_id]||[]).push(
-        ...points.map(p=>`${p.col}:${p.row}`))
+    if (!ship.known[loc_id])
+        ship.known[loc_id] = [] as string[]
+    ship.known[loc_id] = [...new Set(ship.known[loc_id].concat(
+        points.map(p=>`${p.col}:${p.row}`)))]
     await ship.save()
 
     const filter = points.map(p=>({'location._id': ship.location._id,

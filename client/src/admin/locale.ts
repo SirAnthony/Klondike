@@ -22,7 +22,12 @@ load(mod, {
     'time_increase': tpl`Добавить ${0} ч.`,
     'time_decrease': tpl`Уменьшить на ${0} ч.`,
     // config
+    'config_setup': 'Настройки',
+    'config_setup_pace': 'Настройки скорости событий',
     'config_setup_points': 'Настройки очков рейтинга',
+    'time.market': 'Изменение рыночных цен, час',
+    'time.ship.speed': 'Время движения на 1 тайл, сек',
+    'time.ship.research': 'Время исследования тайла, сек',
     'points.patent.pay': 'Оплата патента лабораторией',
     'points.patent': tpl`Очки за закрытие патента. ${0} владение`,
     'points.order': 'Очки за закрытие заказа',

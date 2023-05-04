@@ -47,7 +47,7 @@ function Hexagon(props: HexagonProps){
     return <Group>
       <RegularPolygon sides={6} radius={radius} x={x} y={y} {...props.hover}
       stroke={color.hex_border} fill={fill} opacity={opacity}
-      strokeWidth={1} {...props.click} />
+      strokeWidth={1} {...props.click} key={`pg${posKey}`} />
       {props.fill && text} 
       {!!props.marked && mark}
     </Group>
