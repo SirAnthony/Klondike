@@ -31,9 +31,10 @@ export namespace Util {
     export async function checkShipAvailable(ship: ShipController, flight?: ID){
         if (!ship.flight)
             return true
-        if (IDMatch(ship.flight, flight))
+        if (IDMatch(ship.flight._id, flight?._id))
             return false
-        if (await FlightController.find({'_id': new ObjectId(ship.flight._id)}))
+        const fl = await FlightController.find({'_id': new ObjectId(ship.flight._id)})
+        if (fl && IDMatch(ship._id, fl.owner?._id))
             return false
         ship.flight = null
         await ship.save()
@@ -123,7 +124,7 @@ export async function block(user: UserController, flight: FlightController){
     flight.name = Flight.Name(flight)
     flight.arrival = flight.departure = null
     await flight.save()
-    if (!ship.flight || !IDMatch(ship.flight, flight)){
+    if (!ship.flight || !IDMatch(ship.flight._id, flight._id)){
         ship.flight = flight.identifier
         ship.save()
     }
@@ -146,7 +147,7 @@ export async function unblock(user: UserController, flight: FlightController){
     flight.name = Flight.Name(flight)
     flight.arrival = flight.departure = null
     await flight.save()
-    if (!ship.flight || !IDMatch(ship.flight, flight)){
+    if (!ship.flight || !IDMatch(ship.flight._id, flight._id)){
         ship.flight = flight.identifier
         ship.save()
     }
@@ -170,7 +171,7 @@ export async function departure(user: UserController, flight: FlightController){
     flight.departure = +(new Date())
     flight.arrival = null
     await flight.save()
-    if (!ship.flight || !IDMatch(ship.flight, flight)){
+    if (!ship.flight || !IDMatch(ship.flight._id, flight._id)){
         ship.flight = flight.identifier
         ship.save()
     }
@@ -205,7 +206,7 @@ export async function help(user: UserController, flight: FlightController){
         throw 'error_no_ship'
     const prev = {...flight} as undefined as Flight
     const ship = await ShipController.get(rel._id)
-    if (!ship.flight || !IDMatch(ship.flight, flight)){
+    if (!ship.flight || !IDMatch(ship.flight._id, flight._id)){
         ship.flight = flight.identifier
         ship.save()
     }
