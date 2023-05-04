@@ -1,10 +1,10 @@
 import React from 'react';
 import {Layer, RegularPolygon, Text, Group, Image as KImage} from 'react-konva'
-import {Pos} from './util'
+import {Pos} from '../common/map'
 import defines from '../common/defines'
 import {Item, PlanetInfo, PlanetShip, Pos as EPos} from '../common/entity';
 import useImage from 'use-image';
-import * as mutil from './util'
+import * as mutil from '../common/map'
 import * as urls from '../common/urls'
 
 

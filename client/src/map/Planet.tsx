@@ -8,13 +8,13 @@ import {PlanetInfo, PlanetZone, User, Item, Location,
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
-import {Pos} from './util'
+import {Pos} from '../common/map'
 import ShipDetails from '../ship/Details';
 import defines from '../common/defines'
 import L from './locale'
 import useImage from 'use-image';
 import * as util from '../common/util'
-import * as mutil from './util'
+import * as mutil from '../common/map'
 
 function Celestial(props: {zone: PlanetZone}){
     const {zone} = props

@@ -13,7 +13,7 @@ import {Select as PSelect} from '../map/List'
 import { PlanetView } from '../map/Planet';
 import * as util from '../common/util'
 import * as date from '../common/date'
-import * as mutil from '../map/util'
+import * as mutil from '../common/map'
 
 export type FlightRowProps = {
     flight: Flight

@@ -1,5 +1,5 @@
-import defines from '../common/defines'
-import {Pos as CPos} from '../common/entity';
+import defines from './defines'
+import {Pos as CPos} from './entity';
 
 export type Point = {
     x: number
