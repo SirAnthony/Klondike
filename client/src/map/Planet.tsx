@@ -125,7 +125,7 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         let left = point.x, top = point.y
         const lright = left-340, lleft = left+10
         left = left>width-400 ? lright : left < 400 ? lleft :  
-            left > width/2 ? lleft + 100 : lright, 100
+            left > width/2 ? lleft + 100 : lright - 100
         top = Math.max(Math.min(top - 100, height - 450), 40)
         return <RB.Container className='popover-map' style={{left, top}}>
           <ItemPopover item={item} onClose={()=>this.onPopupClose(item)} />
