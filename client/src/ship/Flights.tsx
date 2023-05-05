@@ -175,7 +175,7 @@ function FlightRowNew(props: FlightRowNewParams){
         setLocation(loc)
         props.onLocChanged(loc)        
     }
-    if (flight._id){
+    if (flight?._id){
         return <RB.Row className='menu-input-row'>
           <RB.Col>{L('desc_control_drone')}</RB.Col>
           <RB.Col>{location.name}</RB.Col>
@@ -193,9 +193,9 @@ function FlightRowNew(props: FlightRowNewParams){
       <RB.Col>
         { LR('flight_type_1')}
       </RB.Col>
-      {!flight._id && <RB.Col>
+      <RB.Col>
         <TimeInput value={ts} onChange={setTime} />
-      </RB.Col>}
+      </RB.Col>
       <RB.Col>
         <PSelect value={location?._id} onChange={val=>onMapUpdate(val)} />
       </RB.Col>

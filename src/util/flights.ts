@@ -125,7 +125,7 @@ export async function retrive(user: UserController, flight: FlightController){
         throw 'Cannot control foreign flight'
     if (+flight.type!=FlightType.Drone)
         throw 'Cannot retrive non-drone flight'
-    if ([FlightStatus.InFlight, FlightStatus.Research].includes(+flight.status))
+    if (![FlightStatus.InFlight, FlightStatus.Research].includes(+flight.status))
         throw 'error_forbidden_action'
     const prev = {...flight} as undefined as Flight
     await Actions.dockFlight(flight);
@@ -259,7 +259,6 @@ export async function help(user: UserController, flight: FlightController){
 }
 
 
-
 }
 
 namespace Actions {
@@ -350,7 +349,7 @@ export async function research(flight: FlightController){
         Math.max(p, (c as unknown as Module).boosts[ModStat.ResearchZone]|0), 0), 2)
     const points = mutil.Coordinates.Range.offset(flight.location.pos, mod)
 
-    const loc_id = ship.location._id
+    const loc_id = flight.location._id
     // Mark points as known
     ship.known = ship.known||{};
     if (!ship.known[loc_id])
@@ -359,7 +358,7 @@ export async function research(flight: FlightController){
         points.map(p=>`${p.col}:${p.row}`)))]
     await ship.save()
 
-    const filter = points.map(p=>({'location._id': ship.location._id,
+    const filter = points.map(p=>({'location._id': flight.location._id,
         'location.pos.col': p.col, 'location.pos.row': p.row}))
     const items = await ItemController.all({$or: filter})
     for (let item of items)
