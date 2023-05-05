@@ -133,6 +133,7 @@ const aliases = {
     'act_cancel': 'Отмена',
     'act_show': 'Показать',
     'act_hide': 'Скрыть',
+    'desc_system': 'Зонгиинг',
     'act_show_data': 'Показать данные',
 }
 
