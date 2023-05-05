@@ -1,11 +1,11 @@
-import * as fs from 'fs/promises'
+import * as fs from 'fs'
 import { ItemType, Owner, PlanetType, Resource, ResourceType } from '../client/src/common/entity'
 import { ItemController, PlanetController } from '../src/entity'
 
 type DataRow = [string, string, string]
 
 async function load_cvs(filename) : Promise<DataRow[]> {
-    const data = (await fs.readFile(filename)).toString()
+    const data = fs.readFileSync(filename).toString()
     const lines = data.split('\n')
     // Remove title
     lines.shift()
