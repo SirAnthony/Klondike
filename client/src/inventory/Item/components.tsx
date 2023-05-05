@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {InstitutionType, Item, ItemType, Owner, Resource} from '../../common/entity'
-import {Patent, Loan} from '../../common/entity'
+import {Patent, Loan, Module, ModStat} from '../../common/entity'
 import {LoanSelectTrigger, OwnerValueSelectTrigger} from '../../util/popovers'
 import {ResourceImg} from '../../util/components'
 import {PriceFetcher} from '../Prices'
@@ -46,6 +46,20 @@ export function ItemOwnerCol(props: ItemComponentProps){
         items.push(<div key='d_missing_owner'>-</div>)
     return <RB.Col sm={props.layout}>
       {items}
+    </RB.Col>
+}
+
+export function ItemModuleBoostsCol(props: ItemComponentProps){
+    const {item = {}} = props
+    const {boosts} = item as Module
+    if (!boosts)
+      return <span>-</span>
+    const rows = Object.keys(boosts).map(k=><RB.Row >
+        <RB.Col>{LR('ship_stat_'+ModStat[k].toLowerCase())}</RB.Col>
+        <RB.Col>{boosts[k]}</RB.Col>
+    </RB.Row>)
+    return <RB.Col sm={props.layout}>
+      {rows}
     </RB.Col>
 }
 

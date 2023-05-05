@@ -57,7 +57,7 @@ export class ShipApiRouer extends BaseRouter {
         let fn = Flights.Api[action] 
         if (!fn)
             throw `Incorrect request ${action}`
-        await fn(user, flight)
+        await fn(user, flight, data)
         await LogController.log({
             name: 'flight_action', info: action,
             action: LogAction.FlightAction,

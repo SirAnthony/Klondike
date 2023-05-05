@@ -7,6 +7,7 @@ load(mod, {
     'flights_listing': 'Таблица вылетов',
     'install_module': 'Установить модуль',
     'repair': 'Починить корабль',
+    'desc_control_drone': 'Управление дроном',
     'stats_title': 'Характеристики',
     'stats_values': 'Текущее значение',
     'stat_integrity': 'Состояние',
@@ -57,6 +58,7 @@ load(mod, {
     'act_flight_help': 'Выслать помощь',
     'act_flight_arrival': 'Прилет',
     'act_flight_departure': 'Вылет',
+    'act_flight_retrive': 'Вернуть',
 })
 
 export function LR(str: string, ...args): string {

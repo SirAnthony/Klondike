@@ -385,7 +385,8 @@ export enum LogAction {
     BonusRating,
     MoneyLeftovers, ResourceLeftovers,
     FlightAction, FlightSignup, FlightDelist, FlightBlock, FlightUnblock,
-    FlightDeparture, FlightArrival, FlightHelp,
+    FlightDeparture, FlightArrival, FlightHelp, FlightDock,
+    FlightMovement, FlightResearchDone,
     CycleRating, 
 }
 export class LogEntry extends ID {

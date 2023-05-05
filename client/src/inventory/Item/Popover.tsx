@@ -2,7 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Item, ItemType} from '../../common/entity'
 import {Location} from '../../common/entity'
-import {ItemOwnerCol, ItemPriceCol} from './components'
+import {ItemOwnerCol, ItemPriceCol, ItemModuleBoostsCol} from './components'
 import {IDField} from '../../util/components'
 import {default as L, LR} from '../locale'
 
@@ -67,10 +67,14 @@ class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
         const size = this.props.item?.location ? 12 : this.col_size
         return this.col(<ItemKeyLocation loc={this.props.item.location} />, size)
     }
+    field_installed(){
+        return this.col(LR((this.props.item as any).installed ? 'desc_yes' : 'desc_no' )) }
+    field_boosts(){
+        return <ItemModuleBoostsCol item={this.props.item} layout={this.col_size} /> }
     field_target(){
         const size = this.props.item?.location ? 12 : this.col_size
         return this.col(<ItemKeyLocation loc={(this.props.item as any).target} />, size)
-    } 
+    }
     field_generic(){
         return this.col(this.props.item[this.props.field]) }
     render(){
