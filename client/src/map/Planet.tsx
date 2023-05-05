@@ -55,6 +55,7 @@ function reduce_by_location(p, c: {location: Location}){
 
 type PlanetState = {
     planet?: PlanetInfo
+    points?: Pos[]
     ui_ship: Boolean
     ui_inventory: Boolean
     ui_journal: Boolean
@@ -101,9 +102,10 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         for (let zone of item.zones){
             item.fog = mutil.Coordinates.Figures.circle(zone.center, zone.radius)
                 .map(c=>`${c.col}:${c.row}`).filter(f=>!poses.has(f))
-            if (true) // DEBUG
-            item.drop = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2,
-                zone.radius).map(c=>`${c.col}:${c.row}`)
+            if (this.props.ship){
+                item.drop = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2,
+                    zone.radius).map(c=>`${c.col}:${c.row}`)
+            }
         }
         const pship = this.props.ship
         if (pship){
@@ -112,7 +114,8 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
                 item.pos.ships[`${pos.col}:${pos.row}`]||[] as any
             arr.push(pship as PlanetShip)
         }
-        return {item: data, planet: item, entity}
+        const points = item.ships?.reduce((p, s)=>[...p, ...(s.points||[])], [])
+        return {item: data, planet: item, entity, points}
     }
     
     menus(){
@@ -132,8 +135,9 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         const {planet} = this.state
         if (!planet)
             return <ErrorMessage message={L('not_found')} />
+        const points = this.props.markedPoints || this.state.points
         return <RB.Container className="map-container">
-          <CanvasView planet={planet} {...this.props} />
+          <CanvasView planet={planet} {...this.props} markedPoints={points} />
           {this.menus()}
         </RB.Container>
     }

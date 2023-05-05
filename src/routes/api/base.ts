@@ -1,13 +1,14 @@
 import {BaseRouter, CheckAuthenticated, CheckRole} from '../base'
-import {UserController, ShipController, institutionController} from '../../entity'
+import {UserController, ShipController, institutionController, FlightController} from '../../entity'
 import {ItemController, PlanetController} from '../../entity'
 import {ConfigController} from '../../entity'
-import {InstitutionType, PlanetInfo, UserType, UserTypeIn} from '../../../client/src/common/entity'
-import {ItemType} from '../../../client/src/common/entity'
+import {Flight, FlightStatus, FlightType, InstitutionType, OwnerMatch, PlanetInfo} from '../../../client/src/common/entity'
+import {ItemType, UserType, UserTypeIn} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
-import {asID} from '../../util/server'
-import * as cutil from '../../util/config'
+import {IDMatch, asID} from '../../util/server'
 import {Time} from '../../util/time'
+import * as util from '../../../client/src/common/util'
+import * as cutil from '../../util/config'
 
 export class ApiRouter extends BaseRouter {
     async get_index(ctx: RenderContext){
@@ -46,12 +47,34 @@ export class ApiRouter extends BaseRouter {
             {type: ItemType.Resource, 'owner._id': {exists: true}, ...loc_opt},
             ...view
         ]})
-        const ships = UserTypeIn(user, UserType.Master) ?
+        const full_view = UserTypeIn(user, UserType.Master)
+        const ships = full_view ?
             await ShipController.all({'location._id': asID(planet._id)}) :
             user.relation.type == InstitutionType.Ship &&
             (entity as unknown as ShipController).location?._id == planet._id ? [entity] : []
         planet.items = items
         planet.ships = ships.map(s=>ShipController.PlanetShip(s))
+        const flights = await FlightController.all({type: FlightType.Drone,
+            status: {$in: [FlightStatus.InFlight, FlightStatus.Research]},
+            ...loc_opt, ...(full_view ? {} :
+            {'owner._id': asID(entity._id), 'owner.type': entity.type})
+        })
+        for (let flight of flights as Flight[]){
+            if (!flight.owner)
+                continue
+            const prev = planet.ships.find(k=>OwnerMatch(k, flight.owner))
+            if (prev) {
+                prev.flightKind = flight.kind
+                prev.flightType = flight.type
+                prev.status = flight.status
+            } else {
+                const ship = await ShipController.get(flight.owner._id)
+                planet.ships.push({...ShipController.PlanetShip(ship),
+                    flightType: flight.type, flightKind: flight.kind,
+                    status: flight.status, location: flight.location,
+                    points: flight.points})
+            }
+        }
         return {item: planet, entity}
     }
 

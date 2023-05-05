@@ -96,7 +96,7 @@ export function CoordinatesInput(props: CoordinatesInputProps){
 
 type ImageInputProps = {
     placeholder?: string
-    source: Institution | Item
+    source: Omit<Institution, 'keys' | 'class'> | Item
     onChange: (data: FormData)=>void
 } & Omit<TextInputProps, 'value' | 'placeholder' | 'onChange'>
 export function ImageInput(props: ImageInputProps){

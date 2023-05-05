@@ -1,14 +1,16 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {InstitutionType, Ship} from '../common/entity'
-import {ShipClassSelect, OwnerSelect, LocationSelect} from '../util/inputs'
+import {Institution, InstitutionType, Ship} from '../common/entity'
+import {ShipClassSelect, OwnerSelect, LocationSelect, ImageInput} from '../util/inputs'
 import {TextInput, NumberInput} from '../util/inputs'
 import {EditButtons} from '../util/buttons'
 import {ErrorMessage} from '../util/errors'
 import {ApiStackError} from '../common/errors'
 import {default as L, LR} from './locale'
 
-export type ShipSend = Omit<Ship, 'keys'|'class'>
+export type ShipSend = {
+    imgFile?: File
+} & Omit<Ship, 'keys'|'class'>
 
 type RowNewProps = {
     add?: boolean
@@ -40,10 +42,11 @@ export function ShipRowEdit(props: RowNewProps){
     const [credit, setCredit] = React.useState(entity?.credit)
     const [cost, setCost] = React.useState(entity?.cost)
     const [data, setData] = React.useState(entity?.data)
+    const [imgFile, setImgFile] = React.useState(undefined)
     const onSubmit = ()=>onChange({_id: entity?._id, type: InstitutionType.Ship,
         name, kind, owner, location, price, port, captain, integrity, mass,
         engine, speed, movement, size, attack, defence, crew, slots, credit,
-        cost, data})
+        cost, data, imgFile})
     return <RB.InputGroup>
       <RB.Row className='menu-input-row'>
         {props.err && <ErrorMessage field={props.err} />}
@@ -122,11 +125,14 @@ export function ShipRowEdit(props: RowNewProps){
         </RB.Col>
       </RB.Row>
       <RB.Row className='menu-input-row'>
+        <RB.Col sm={2}>
+            <ImageInput source={entity} onChange={setImgFile} />
+        </RB.Col>
         <RB.Col sm={6}>
           <TextInput as='textarea' rows={4} placeholder={LR('item_desc_data')}
             value={data} onChange={setData} />
         </RB.Col>
-        <RB.Col sm={6}>
+        <RB.Col sm={4}>
           <RB.Container>
             <RB.Row className='menu-input-row'>
               <RB.Col>

@@ -8,6 +8,7 @@ export const Links = {
     inventory: (entity: Owner)=>`/inventory/${entity.type}/${entity._id}`
 }
 
+type InstObj = Omit<Institution, 'keys' | 'class'> 
 
 export const Images = {
     prefix: '/static/img',
@@ -18,14 +19,14 @@ export const Images = {
             item.type == ItemType.Coordinates ? 'point' : 'none'
         return `/res/${name}.png`
     },
-    entity: (entity: Institution | PlanetShip)=>
+    entity: (entity: InstObj | PlanetShip)=>
         (Images[InstitutionType[entity.type]?.toLowerCase()] || Images.corp)(entity),
     user: (user: User)=>
         `/users/${user.img||'user'}.png`,
-    corp: (entity: Institution)=>
+    corp: (entity: InstObj)=>
         `/corps/${entity.img||'corp'}.png`,
     ship: (ship: Ship | PlanetShip)=>
         `/ships/${ship.img}.png`,
-    get: (src?: Institution | PlanetShip | Item)=>!src ? '' :
+    get: (src?: InstObj | PlanetShip | Item)=>!src ? '' :
         Images.prefix+(src instanceof Item ? Images.item(src) : Images.entity(src)),
 }

@@ -41,10 +41,10 @@ type ShipListProps = {
 export default class List extends UList<ShipListProps, ShipListState> {
     L = L
     get fetchUrl() { return `/api/ship/list` }
-    async changeEntity(entity: Omit<Ship, "keys" | "class">) : Promise<boolean> {
+    async changeEntity(entity: ShipSend) : Promise<boolean> {
         this.setState({err: null, newForm: null})
         const ret = await util.wget(`/api/admin/entity/${entity.type}/${entity._id||0}/set`,
-            {method: 'POST', data: {data: entity}})
+            {method: 'POST', data: util.toFormData(entity, 'imgFile')})
         if (ret.err)
             return void this.setState({err: ret.err, newForm: entity})
         this.fetch()

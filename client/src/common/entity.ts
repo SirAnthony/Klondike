@@ -312,13 +312,14 @@ export class Flight extends ID {
 }
 
 export type PlanetShip = {
-    _id: string
-    name: string
-    type: InstitutionType
     kind: ShipClass
     img: string
+    flightKind?: FlightKind
+    flightType?: FlightType
+    status?: FlightStatus
     location: Location
-}
+    points?: Pos[]
+} & Owner
 
 export enum PlanetType { Frost = 'frost', FrostSat = 'frostsat',
     Jungle = 'jungle', Molten = 'molten', Rocky = 'rocky' }
@@ -349,6 +350,7 @@ export class Planet extends ID {
 export class PlanetInfo extends Planet {
     items?: Item[]
     ships?: PlanetShip[]
+    flights?: Flight[]
     pos?: {
         items: {[k: string]: Item[]},
         ships: {[k: string]: PlanetShip[]}
