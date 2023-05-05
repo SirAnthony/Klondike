@@ -330,12 +330,20 @@ export async function researchItem(item: ItemController, ship: ShipController, k
     }
 }
 
+function ModStatSum(modules: ItemController[], kind: ModStat){
+    return (modules||[]).reduce((p, c)=>(p|0)+
+        ((c as unknown as Module).boosts[kind]|0), 0)
+ }
+function ModStatMax(modules: ItemController[], kind: ModStat){
+    return (modules||[]).reduce((p, c)=>Math.max(p|0,
+        ((c as unknown as Module).boosts[kind]|0)), 0)
+}
+
 export async function research(flight: FlightController){
     const ship = await ShipController.get(flight.owner._id)
     const modules = await ItemController.all({'type': ItemType.Module,
         'owner._id': asID(ship._id), 'owner.type': ship.type, installed: true})
-    const speed = (modules||[]).reduce((p, c)=>(p|0)+
-        ((c as unknown as Module).boosts[ModStat.Research]|0), 10)
+    const speed = ModStatSum(modules, ModStat.Research)+10
     const conf = await ConfigController.get()
     // Default value is 1 hex per 180 sec
     const ts = +new Date()
@@ -345,8 +353,7 @@ export async function research(flight: FlightController){
     if (next_ts > ts)
         return
     
-    const mod = Math.min(modules.reduce((p, c)=>
-        Math.max(p, (c as unknown as Module).boosts[ModStat.ResearchZone]|0), 0), 2)
+    const mod = Math.min(ModStatMax(modules, ModStat.ResearchZone), 2)
     const points = mutil.Coordinates.Range.offset(flight.location.pos, mod)
 
     const loc_id = flight.location._id
@@ -380,8 +387,7 @@ export async function move(flight: FlightController){
     const ship = await ShipController.get(flight.owner._id)
     const modules = await ItemController.all({'type': ItemType.Module,
         'owner._id': asID(ship._id), 'owner.type': ship.type, installed: true})
-    const speed = (modules||[]).reduce((p, c)=>p+
-        (c as unknown as Module).boosts[ModStat.Speed]|0, ship.speed)
+    const speed =  ModStatSum(modules, ModStat.Speed)+ship.speed
     const conf = await ConfigController.get()
     // Default value is 1 hex per 180 sec
     const ts = +new Date()

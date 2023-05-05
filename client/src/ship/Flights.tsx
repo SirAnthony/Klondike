@@ -285,6 +285,6 @@ export class List extends BaseList<FlightListProps, FlightListState> {
             _id: null, kind: ShipClass.D, img: '1'}
         const points = newForm.points||[]
         return <PlanetView user={user} id={id} markedPoints={points}
-            ship={ship} onPointClick={pos=>this.onPointClick(pos)} />
+            ship={ship} onHexClick={pos=>this.onPointClick(pos)} />
     }
 }

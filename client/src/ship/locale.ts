@@ -31,7 +31,9 @@ load(mod, {
     'stat_crew': 'Размер экипажа',
     'stat_crew_c': 'CR',
     'stat_research': 'Скорость исследования',
+    'stat_research_c': 'RS',
     'stat_researchzone': 'Радиус исследования',
+    'stat_researchzone_c': 'RZ',
     // Cross with engine power
     'stat_energy': 'Энергопотребление',
     'stat_energy_c': 'p',

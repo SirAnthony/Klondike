@@ -32,6 +32,7 @@ export class Pos implements CPos {
         const y = radius * (1 + 3/2 * this.row)
         return {x, y}
     }
+    static getKey(pos: CPos){ return `${pos?.col|0}:${pos?.row|0}` }
 }
 
 export namespace Map {
@@ -40,6 +41,12 @@ export namespace Map {
         const width = Math.floor(size.width / radius / Math.sqrt(3))-1
         const height =  Math.floor(size.height / radius * 2/3)-1
         return {width, height}
+    }
+    export function toPoint(pos: CPos){
+        const {radius} = defines.map
+        const x = radius * Math.sqrt(3) * (pos.col + 0.5 * (pos.row&1))
+        const y = radius * 3/2 * pos.row
+        return {x, y}
     }
 }
 

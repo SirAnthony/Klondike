@@ -29,10 +29,12 @@ export function LocationCol(props: ItemComponentProps & {hide_pos?: boolean}) {
 export function ItemKindCol(props: {item: Item, layout: number}){
     const {item, layout} = props
     const res = item as Resource, pt = item as Patent
-    const el = ![ItemType.Patent, ItemType.Resource].includes(res.type) ? '-' :
-        item.type==ItemType.Patent ?
-        LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
-        [<ResourceImg res={res} />, LR(`res_kind_${res.kind}`)]
+    const el = item.type===ItemType.Patent ?
+          LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
+        item.type===ItemType.Module ?
+          <ItemModuleBoostsCol item={item} layout={null} /> :
+        item.type===ItemType.Resource ?
+          [<ResourceImg res={res} />, LR(`res_kind_${res.kind}`)] : '-'
     return <RB.Col sm={layout}>
       {el}
     </RB.Col>

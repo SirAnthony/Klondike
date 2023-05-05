@@ -24,33 +24,45 @@ type HexagonProps = {
     click: {onClick?: ()=>void}
 }
 
-function Hexagon(props: HexagonProps){
-    const {pos, posKey, planet} = props
-    const point = pos.canvas
-    const {radius} = defines.map
-    const {color} = defines.styles
-    const {x, y} = point
-    const text = <Text text={posKey} fontSize={12}
-        fill={'#0f0'} x={x-radius/2} y={y-radius/4} {...props.hover} />
-    const mark = <Text text={`${props.marked}`} fontSize={32}
-        fill={'#0f0'} x={x-radius/3} y={y-radius/2} {...props.hover}
-        {...props.click} />
-    const drop = planet.drop?.findIndex(k=>k===posKey)+1
-    const fog = planet.fog?.findIndex(k=>k===posKey)+1
-    const fill = 
-        props.marked ? color.hex_mark :
-        props.fill ? color.hex_fill :
-        drop ? color.hex_drop : fog ? color.hex_fog :
-        undefined
-    const opacity = props.marked ? 0.8 :
-        props.fill || drop ? 0.6 : 0.5
-    return <Group>
-      <RegularPolygon sides={6} radius={radius} x={x} y={y} {...props.hover}
-      stroke={color.hex_border} fill={fill} opacity={opacity}
-      strokeWidth={1} {...props.click} key={`pg${posKey}`} />
-      {props.fill && text} 
-      {!!props.marked && mark}
-    </Group>
+class Hexagon extends React.Component<HexagonProps, {}>{
+    componentDidUpdate(prevProps: Readonly<HexagonProps>, prevState: Readonly<{}>, snapshot?: any): void {
+        const polygon = this.refs.hex_polygon as any
+        polygon.cache()        
+    }
+    componentDidMount(): void {
+        const polygon = this.refs.hex_polygon as any
+        polygon.cache()  
+    }
+    render(){
+        const {props} = this
+        const {pos, posKey, planet} = props
+        const point = pos.canvas
+        const {radius} = defines.map
+        const {color} = defines.styles
+        const {x, y} = point
+        const text = <Text text={posKey} fontSize={12}
+            fill={'#0f0'} x={x-radius/2} y={y-radius/4} {...props.hover} />
+        const mark = <Text text={`${props.marked}`} fontSize={32}
+            fill={'#0f0'} x={x-radius/3} y={y-radius/2} {...props.hover}
+            {...props.click} />
+        const drop = planet.drop?.findIndex(k=>k===posKey)+1
+        const fog = planet.fog?.findIndex(k=>k===posKey)+1
+        const fill = 
+            props.marked ? color.hex_mark :
+            props.fill ? color.hex_fill :
+            drop ? color.hex_drop : fog ? color.hex_fog :
+            undefined
+        const opacity = props.marked ? 0.8 :
+            props.fill || drop ? 0.6 : 0.5
+        return <Group>
+          <RegularPolygon sides={6} radius={radius} x={x} y={y} {...props.hover}
+            stroke={color.hex_border} fill={fill} opacity={opacity}
+            strokeWidth={1} {...props.click} key={`pg${posKey}`} 
+            ref={`hex_polygon`} />
+          {props.fill && text} 
+          {!!props.marked && mark}
+        </Group>
+    }
 }
 
 function HexItem(props: HexagonProps & {entity: Item | PlanetShip}){
@@ -69,34 +81,47 @@ type HexProps = {
     row: number
     marked: string[]
 } & HexLayerProps
+type HexState = {
+    fill?: boolean
+}
 
-function Hex(props: HexProps){
-    const {col, row, planet} = props
-    const [fill, setFill] = React.useState(false)
-    const fillProps = {hover: {onMouseLeave: ()=>setFill(false),
-        onMouseOver: ()=>setFill(true)}, fill,
-        click: {} as any
+class Hex extends React.Component<HexProps, HexState> {
+    constructor(props){
+        super(props);
+        this.state = {};
+        ['fill', 'unfill'].forEach(k=>this[k].bind(this))
     }
-    if (props.onPointClick)
-        fillProps.click = {onClick: ()=>props.onPointClick({col, row})}
-    const key = `${col}:${row}`, pos = new Pos(col, row), hexes = []
-    const hprops = {planet, pos, posKey: key, ...fillProps}
-    hexes.push(<Hexagon key={key} {...hprops} marked={
-        props.marked?.findIndex(k=>k===key)+1} />)
-    const item_arr = planet.pos?.items[key]||[]
-    for (let k of item_arr)
-        hexes.push(<HexItem key={`${k._id}${key}`} entity={k} {...hprops} />)
-    const ship_arr = planet.pos?.ships[key]||[]
-    for (let k of ship_arr)
-        hexes.push(<HexItem key={`${k._id}${key}`} entity={k} {...hprops} />)
-    return <>{hexes}</>
+    fill(){ this.setState({fill: true}) }
+    unfill(){ this.setState({fill: false}) }
+    get fillProps(){
+        const {col, row} = this.props
+        const {fill} = this.state
+        const click = !this.props.onHexClick ? {} :
+            {onClick: ()=>this.props.onHexClick({col, row})}
+        return {hover: {onMouseLeave: ()=>this.unfill(),
+            onMouseOver: ()=>this.fill()}, fill, click}
+    }
+    render(){
+        const {col, row, planet} = this.props
+        const key = `${col}:${row}`, pos = new Pos(col, row), hexes = []
+        const hprops = {planet, pos, posKey: key, ...this.fillProps}
+        hexes.push(<Hexagon key={key} {...hprops} marked={
+            this.props.marked?.findIndex(k=>k===key)+1} />)
+        const item_arr = planet.pos?.items[key]||[]
+        for (let k of item_arr)
+            hexes.push(<HexItem key={`${k._id}${key}`} entity={k} {...hprops} />)
+        const ship_arr = planet.pos?.ships[key]||[]
+        for (let k of ship_arr)
+            hexes.push(<HexItem key={`${k._id}${key}`} entity={k} {...hprops} />)
+        return <>{hexes}</>
+    }
 }
 
 type HexLayerProps = {
     planet: PlanetInfo
     showDropzone?: boolean
     markedPoints?: EPos[]
-    onPointClick?: (pos: EPos)=>void
+    onHexClick?: (pos: EPos)=>void
 }
 
 export function HexLayer(props: HexLayerProps){

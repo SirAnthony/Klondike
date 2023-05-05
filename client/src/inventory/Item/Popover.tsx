@@ -8,6 +8,7 @@ import {default as L, LR} from '../locale'
 
 type ItemPopoverProps = {
     item: Item
+    onClose?: ()=>void
 }
 
 type ItemRowKeyProps = {
@@ -93,13 +94,16 @@ class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
 }
 
 export function ItemPopover(props: ItemPopoverProps){
-    const {item} = props
+    const {item, onClose} = props
     const obj = new (Item.class(item.type))()
     for (let k in item)
         obj[k] = item[k]
     const rows = obj.keys.map(k=>
         <ItemKeyRow item={item} field={k} key={`item_popover_${item._id}_${k}`} />)
     return <RB.Popover>
+      {onClose && <RB.PopoverHeader>
+        <RB.CloseButton onClick={onClose} />
+      </RB.PopoverHeader>}
       <RB.PopoverBody>
         {rows}
       </RB.PopoverBody>

@@ -480,3 +480,31 @@ div.form-floating>label {
     transform: rotate(180deg);
     white-space: nowrap;
 }
+
+.container.popover-map {
+    position: absolute;
+    z-index: 100;
+    width: fit-content;
+}
+
+.popover-map .popover {
+    background-color: var(--color-ui-border);
+}
+
+.container.popover-map .popover-arrow {
+    display: none
+}
+
+.container.popover-map .popover-header {
+    height: 23px;
+    background: var(--color-ui-border);
+    border-bottom: none;
+}
+
+.container.popover-map .btn-close {
+    position: absolute;
+    right: 17px;
+    top: 4px;
+    height: 11px;
+    width: 11px;
+}

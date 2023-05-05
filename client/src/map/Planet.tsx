@@ -7,12 +7,12 @@ import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
 import {Pos} from '../common/map'
-import ShipDetails from '../ship/Details';
 import defines from '../common/defines'
 import L from './locale'
 import useImage from 'use-image';
 import * as mutil from '../common/map'
 import { ErrorMessage } from 'src/util/errors';
+import { ItemPopover } from 'src/inventory/Item/Popover';
 
 function Celestial(props: {zone: PlanetZone}){
     const {zone} = props
@@ -27,7 +27,7 @@ function Celestial(props: {zone: PlanetZone}){
 function Planet(props: {planet: PlanetInfo}){
     const {planet} = props
     const zones = planet.zones.map(z=>
-        <Celestial key={`zone_${z.center.col}_${z.center.row}`} zone={z} />)
+        <Celestial key={`zone_${Pos.getKey(z.center)}`} zone={z} />)
     const bg = `/static/img/map/${planet.type.toString().toLowerCase()}.jpg`
     const [image] = useImage(bg) 
     return <Layer>
@@ -36,7 +36,11 @@ function Planet(props: {planet: PlanetInfo}){
     </Layer>
 }
 
-function CanvasView(props: {planet: PlanetInfo} & UIButtonCallbacks & PlanetProps){
+type PlanetCanvasProps = {
+    planet: PlanetInfo
+} & PlanetProps & UIButtonCallbacks
+
+function CanvasView(props: PlanetCanvasProps){
     const {planet} = props
     const {width, height} = defines.map.size
     return <Stage width={width} height={height} className="map">
@@ -47,7 +51,7 @@ function CanvasView(props: {planet: PlanetInfo} & UIButtonCallbacks & PlanetProp
 }
 
 function reduce_by_location(p, c: {location: Location}){
-    const {pos} = c.location||{}, key = `${pos?.col|0}:${pos?.row|0}`;
+    const {pos} = c.location||{}, key = Pos.getKey(pos);
     (p[key] = p[key]||[]).push(c)
     return p
 }
@@ -56,22 +60,20 @@ function reduce_by_location(p, c: {location: Location}){
 type PlanetState = {
     planet?: PlanetInfo
     points?: Pos[]
-    ui_ship: Boolean
-    ui_inventory: Boolean
-    ui_journal: Boolean
+    popups?: {[id: string]: React.ReactElement}
 }
 type PlanetProps = {
     user: User
     id: string
     ship?: PlanetShip
     markedPoints?: EPos[]
-    onPointClick?: (pos: EPos)=>void
+    onHexClick?: (pos: EPos)=>void
 }
 
 export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
     constructor(props){
         super(props)
-        this.state = {ui_ship: false, ui_inventory: false, ui_journal: false}
+        this.state = {}
     }
     componentDidUpdate(prevProps){
         if (prevProps.id != this.props.id)
@@ -117,28 +119,44 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         const points = item.ships?.reduce((p, s)=>[...p, ...(s.points||[])], [])
         return {item: data, planet: item, entity, points}
     }
-    
-    menus(){
-        const {state} = this
-        const {user} = this.props
-        const close_ship = ()=>this.setState({ui_ship: false})
-        const menus = []
-        if (state.ui_ship)
-            menus.push(<ShipDetails user={user} onClose={close_ship} />)
-        if (!menus.length)
-            return
-        return <RB.Container className="menu-absolute">
-          {menus}
+    popup(item: Item){
+        const point = mutil.Map.toPoint(item.location.pos)
+        const {width, height} = defines.map.size
+        let left = point.x, top = point.y
+        const lright = left-340, lleft = left+10
+        left = left>width-400 ? lright : left < 400 ? lleft :  
+            left > width/2 ? lleft + 100 : lright, 100
+        top = Math.max(Math.min(top - 100, height - 450), 40)
+        return <RB.Container className='popover-map' style={{left, top}}>
+          <ItemPopover item={item} onClose={()=>this.onPopupClose(item)} />
         </RB.Container>
     }
+    onPopupClose(item: Item){
+        const {popups = {}} = this.state
+        delete popups[item._id]
+        this.setState({popups: {...popups}})
+    }
+    onHexClick(pos: EPos){
+        if (this.props.onHexClick)
+            return this.props.onHexClick(pos)
+        const {planet} : {planet?: PlanetInfo} = this.state
+        const items = planet?.pos?.items[Pos.getKey(pos)]
+        if (!items?.length)
+            return
+        const {popups = {}} = this.state
+        for (let item of items)
+            popups[item._id] = this.popup(item)
+        this.setState({popups: {...popups}})
+    }
     render() {
-        const {planet} = this.state
+        const {planet, popups = {}} = this.state
         if (!planet)
             return <ErrorMessage message={L('not_found')} />
         const points = this.props.markedPoints || this.state.points
         return <RB.Container className="map-container">
-          <CanvasView planet={planet} {...this.props} markedPoints={points} />
-          {this.menus()}
+          {Object.values(popups)}
+          <CanvasView planet={planet} {...this.props} markedPoints={points}
+            onHexClick={pos=>this.onHexClick(pos)} />
         </RB.Container>
     }
 }
