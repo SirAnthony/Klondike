@@ -1,6 +1,6 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, ShipController, FlightController, ItemController, LogController} from '../../entity'
-import {FlightStatus, ItemType, LogAction, Module, UserType, UserTypeIn} from '../../../client/src/common/entity'
+import {FlightStatus, FlightType, ItemType, LogAction, Module, UserType, UserTypeIn} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {IDMatch, asID, isID} from '../../util/server'
 import * as Flights from '../../util/flights'
@@ -87,7 +87,12 @@ export class ShipApiRouer extends BaseRouter {
         const active = await ItemController.all({type: ItemType.Module,
             'owner._id': asID(ship._id), 'owner.type': +ship.type, installed: true})
         if (active.length >= ship.slots)
-            throw 'No space available';
+            throw 'No space available'
+        const flight = await FlightController.find({'owner._id': asID(ship._id),
+            'owner.type': +ship.type, type: FlightType.Drone,
+            status: {$ne: FlightStatus.Docked}});
+        if (flight)
+            throw 'error_drone_busy';
         ((item as unknown) as Module).installed = true
         await item.save()
     }
@@ -101,6 +106,11 @@ export class ShipApiRouer extends BaseRouter {
             throw 'not_found'
         if (item.owner.type!=ship.type || !IDMatch(item.owner._id, ship._id))
             throw 'Cannot act on foreigh item';
+        const flight = await FlightController.find({'owner._id': asID(ship._id),
+            'owner.type': +ship.type, type: FlightType.Drone,
+            status: {$ne: FlightStatus.Docked}});
+        if (flight)
+            throw 'error_drone_busy';
         ((item as unknown) as Module).installed = false
         await item.save()
     }
