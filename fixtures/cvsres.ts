@@ -35,7 +35,7 @@ async function getPlanet(p: string) : Promise<Omit<Location, 'pos'>> {
 
 type ImportRes = Omit<Resource, 'keys' | 'class'>
 async function loadRow(idx: number, row: DataRow) : Promise<ImportRes> {
-    const [t, p, r, c, v] : [string, string, string, string, string] = row
+    const [t, p, c, r, v] : [string, string, string, string, string] = row
     const kind: ResourceType = +t
     const value: number = +v
     const planet_info = await getPlanet(p)
