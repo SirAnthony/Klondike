@@ -84,6 +84,9 @@ export function ListNavigator(props: {user: User}){
 class List extends FList<ListProps, ListState> {
     get fetchUrl() { return `/api/admin/flight/list` }
     get containerClass() { return 'menu-container-full' }
+    sort(a: Flight, b: Flight){ 
+        return a.type != b.type ? a.type===FlightType.Planetary ? -1 :
+            b.type===FlightType.Planetary ? 1 : b.type-a.type : b.ts-a.ts }
     async onSubmit(item: Flight){
         this.setState({err: null})
         const data = util.obj_copyto(item, new Flight())

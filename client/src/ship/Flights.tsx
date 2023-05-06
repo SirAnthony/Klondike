@@ -129,10 +129,11 @@ export class BaseList<P, S> extends UList<FlightListProps & P, FlightListState &
     get fetchUrl() { return `/api/ship/flights` }
     get rowNew(){ return null }
     get mapView(){ return null }
+    sort(a: Flight, b: Flight){ return 0 }
     getRow(flight: Flight){ return <></> }
     body(){
         const {list, err} = this.state
-        const rows = list.map(l=>this.getRow(l))
+        const rows = list.sort(this.sort).map(l=>this.getRow(l))
         const map = this.mapView
         return [!map && this.rowNew,
         <RB.Row key={'ship_list_title'} className="menu-list-title">
@@ -244,6 +245,8 @@ export class List extends BaseList<FlightListProps, FlightListState> {
             this.setState({viewHidden: true, points: [...(drone.points||[])]})
         }
     }
+    sort(a: Flight, b: Flight){ 
+        return a.type != b.type ? b.type-a.type : a.ts-b.ts }
     async onAction(name: string, flight: Flight){
         this.setState({err: null})
         const ret = await util.wget(`/api/ship/flight/${flight._id}/action/${name}`,
