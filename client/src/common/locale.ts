@@ -133,6 +133,7 @@ const aliases = {
     'act_edit': 'Редактировать',
     'act_save': 'Сохранить',
     'act_update': 'Обновить',
+    'act_update_drone': 'Обновить маршрут дрона',
     'act_cancel': 'Отмена',
     'act_show': 'Показать',
     'act_hide': 'Скрыть',

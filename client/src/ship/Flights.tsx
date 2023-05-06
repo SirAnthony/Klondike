@@ -187,7 +187,7 @@ function FlightRowNew(props: FlightRowNewParams){
             <RB.Button onClick={()=>props.onViewToggle(false)}>{LR('act_show')}</RB.Button>
           </RB.Col>}
           {!props.viewHidden && <RB.Col>
-            <RB.Button disabled={!check()} onClick={onSubmit}>{LR('act_update')}</RB.Button>
+            <RB.Button disabled={!check()} onClick={onSubmit}>{LR('act_update_drone')}</RB.Button>
             <RB.Button onClick={()=>props.onViewToggle(true)}>{LR('act_hide')}</RB.Button>
           </RB.Col>}
         </RB.Row>
