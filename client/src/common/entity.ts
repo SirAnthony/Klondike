@@ -199,7 +199,8 @@ export enum UserType {
     Navigator = 1 << 3,
     Scientist = 1 << 4,
     Guard     = 1 << 5,
-    Master    = 1 << 6
+    Master    = 1 << 6,
+    GuardFine = 1 << 7
 }
 
 export const UserTypeIn = (user: User, type: UserType, ...args: UserType[])=>
@@ -375,6 +376,8 @@ export class Loan extends Expense {
 
 export class Fine extends Expense {
     type = ExpenseType.Fine
+    owner: Owner
+    data?: string
 }
 
 export enum LogAction {

@@ -1,7 +1,7 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Institution, Owner, User} from '../common/entity'
-import {InstitutionType, Loan, Item, Resource} from '../common/entity'
+import {InstitutionType, Loan} from '../common/entity'
 import {Delimeter} from '../util/components'
 import {OwnerValueSelectTrigger} from '../util/popovers'
 import {InventoryEvents} from '../inventory'
@@ -9,6 +9,7 @@ import * as F from '../Fetcher'
 import {default as L, LR} from './locale'
 import * as util from '../common/util'
 import * as date from '../common/date'
+
 
 type BalanceDetailsState = {
     item?: {

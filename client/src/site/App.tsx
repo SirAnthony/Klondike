@@ -11,6 +11,7 @@ import {Navigator as MapNavigator, ListNavigator as PlanetListNavigator} from '.
 import {ListNavigator as FlightNavigator} from '../ship/Flights'
 import {Navigator as AdminNavigator} from '../admin'
 import {Navigator as UserProfileNavigator} from '../user/Profile'
+import {ListNavigator as FinesNavigator } from '../user/Fines';
 import {Confirmator} from '../inventory';
 import L from './locale'
 import './App.css';
@@ -41,9 +42,10 @@ function App() {
       <RR.Route path='/planets/' element={<PlanetListNavigator user={user} />} />
       <RR.Route path='/flights/*' element={<FlightNavigator user={user} />} />
       <RR.Route path='/flights' element={<FlightNavigator user={user} />} />
+      <RR.Route path='/fines/*' element={<FinesNavigator user={user} />} />
+      <RR.Route path='/fines' element={<FinesNavigator user={user} />} />
       <RR.Route path='/profile' element={<UserProfileNavigator user={user} />} />
       <RR.Route path='/profile/*' element={<UserProfileNavigator user={user} />} />
-
       { is_admin && <RR.Route path='/admin/*' element={<AdminNavigator user={user} />} />}
       { is_admin && <RR.Route path='/admin/' element={<AdminNavigator user={user} />} />}
     </RR.Routes>

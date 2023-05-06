@@ -3,6 +3,7 @@ const mod = 'inventory'
 load(mod, {
     'not_found': 'Сущность не найдена',
     'interface': tpl`Интерфейс ${0}`,
+    'fines_listing': 'Список штрафов',
     'desc_name': 'Название',
     'balance': 'Текущий счет',
     'expenses': 'Расходы и займы',

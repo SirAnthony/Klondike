@@ -148,7 +148,6 @@ export class ProposalDetails extends ItemDetailsBase {
     }
 }
 
-
 export class ItemDetails extends ItemDetailsBase {
     target = 'items'
     constructor(props){

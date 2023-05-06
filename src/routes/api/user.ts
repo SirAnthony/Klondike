@@ -1,6 +1,6 @@
 import {BaseRouter, CheckRole, CheckAuthenticated} from '../base'
-import {UserController, institutionController} from '../../entity'
-import {ProfileFields, UserType} from '../../../client/src/common/entity'
+import {LoanController, UserController, institutionController} from '../../entity'
+import {ExpenseType, InstitutionType, ProfileFields, UserType} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import * as uutil from '../../util/user'
 import {ApiError, Codes} from '../../../client/src/common/errors'
@@ -42,4 +42,36 @@ export class UserApiRouter extends BaseRouter {
         data.info = await uutil.process_data(data.data)
         return {user: data}
     }
+
+    @CheckRole(UserType.Master | UserType.GuardFine)
+    async get_fines(ctx: RenderContext){
+        const list = await LoanController.all({type: ExpenseType.Fine})
+        return {list}
+    }
+
+    @CheckRole(UserType.Master | UserType.GuardFine)
+    async put_fine(ctx: RenderContext){
+        const {data} = ctx.aparams
+        if (+data?.owner?.type != InstitutionType.User)
+            throw 'Fines can be put only on users'
+        if ((+data.amount|0)<=0)
+            throw 'Incorrect amount'
+        const dst = await UserController.get(data.owner._id)
+        if (!dst)
+            throw 'not_found'
+        const rel = dst.relation || dst
+        const creditor = await institutionController(rel.type).get(rel._id)
+        const fine = await LoanController.createFine(creditor.asOwner, dst.asOwner,
+            data.amount, data.data)
+        await fine.save()
+    }
+
+    @CheckRole(UserType.Master | UserType.GuardFine)
+    async delete_fine(ctx: RenderContext){
+        const {id} = ctx.aparams
+        const fine = await LoanController.get(id)
+        await fine.delete()
+    }
+
+
 }

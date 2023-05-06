@@ -381,5 +381,4 @@ export class InventoryApiRouter extends BaseRouter {
         })
         return {list}
     }
-
 }

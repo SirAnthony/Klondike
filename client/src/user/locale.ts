@@ -43,6 +43,7 @@ load(mod, {
     'pane_maps': 'Планетарные карты',
     'pane_ship': 'Корабль и дрон',
     'pane_log': 'Журнал',
+    'pane_fines': 'Штрафы',
     'desc_form_data': 'Игровые данные',
     'desc_form_tooltip': 'Описание, как писать в текстарею',
 })

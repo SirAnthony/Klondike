@@ -47,6 +47,7 @@ const aliases = {
     'item_desc_owner': 'Владелец',
     'item_desc_owners': 'Владелец',
     'item_desc_price': 'Цена',
+    'item_desc_value': 'Значение',
     'item_desc_actions': 'Действия',
     'item_desc_location': 'Расположение',
     'item_desc_data': 'Данные',
@@ -100,6 +101,7 @@ const aliases = {
     'user_kind_16': 'Ученый',
     'user_kind_32': 'СБ',
     'user_kind_64': 'Мастер',
+    'user_kind_128': 'Руководитель СБ',
     'loc_desc_coord': 'Координаты (x:y)',
     'flight_desc_type': 'Тип вылета',
     'flight_type_1': 'Запуск дрона',
@@ -122,6 +124,7 @@ const aliases = {
     'inventory': 'Инвентарь',
     'desc_yes': 'Да',
     'desc_no': 'Нет',
+    'desc_fine_new': 'Новый штраф',
     'error_empty_select': 'Не выбрано',
     'error_value_high': 'Значение слишком велико',
     'error_value_low': 'Значение слишком мало',
@@ -133,7 +136,9 @@ const aliases = {
     'act_cancel': 'Отмена',
     'act_show': 'Показать',
     'act_hide': 'Скрыть',
+    'act_fine': 'Оштрафовать',
     'desc_system': 'Зонгиинг',
+    'desc_sector': 'Зонгиинг',
     'act_show_data': 'Показать данные',
 }
 

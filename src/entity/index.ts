@@ -29,9 +29,9 @@ export class LoanController extends MakeController(Loan, 'loans') {
         return new LoanController({creditor, lender, amount, ts: Time.time,
             type: ExpenseType.Loan})
     }
-    static createFine(creditor: Owner, amount = 0){
+    static createFine(creditor: Owner, owner: Owner, amount = 0, data: string){
         return new LoanController({creditor, amount, ts: Time.time,
-            type: ExpenseType.Fine})
+            owner, data, type: ExpenseType.Fine})
     }
 }
 

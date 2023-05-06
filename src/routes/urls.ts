@@ -49,7 +49,10 @@ inventory_api: {prefix: '/api/inventory', router: InventoryApiRouter, opt: {json
     '/:stype/:id/item/:itemid/reject': {func: 'item_reject', methods: ['put']},
 }},
 user_api: {prefix: '/api/user', router: UserApiRouter, opt: {json: true}, urls: {
-    '/profile/:type/:id': {func: 'profile', methods: ['get', 'post']}
+    '/profile/:type/:id': {func: 'profile', methods: ['get', 'post']},
+    '/fines': {func: 'fines', methods: ['get']},
+    '/fine/:id/put': {func: 'fine', methods: ['put']},
+    '/fine/:id/cancel': {func: 'fine', methods: ['delete']},
 }},
 admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, json: true}, urls: {
     '/item/list': {func: 'items_list', methods: ['get']},

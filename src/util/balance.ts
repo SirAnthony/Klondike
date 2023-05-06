@@ -5,7 +5,8 @@ import {
 import {
     CorpController, InstitutionController, LoanController,
     LogController,
-    OrderController
+    OrderController,
+    UserController
 } from '../entity'
 import {
     ItemController, ShipController, institutionController
@@ -175,10 +176,13 @@ async function cycleBalance(cycle: number){
     // All corporations, organizations, lags
     const corps = await CorpController.all();
     const ships = await ShipController.all();
+    const users = await UserController.all();
     for (let corp of corps)
         await calcExpenses(corp, expenses, cycle)
     for (let ship of ships)
         await calcExpenses(ship, expenses, cycle)
+    for (let user of users)
+        await calcExpenses(user, expenses, cycle)
 }
 
 Time.addCycleEvent(cycleBalance)

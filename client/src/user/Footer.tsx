@@ -27,26 +27,34 @@ function Pane(props: FooterProps & {relation: Owner, buttons: string[], eventKey
     </RB.Row></RB.TabPane>
 }
 
+function AddButtons(user: User){
+    const buttons = []
+    if (UserTypeIn(user, UserType.Master | UserType.GuardFine))
+        buttons.unshift('fines')
+    if (UserTypeIn(user, UserType.Master | UserType.GuardFine))
+        buttons.unshift('flights')
+    return buttons
+}
+
 function EntityPane(props: FooterProps){
     const {user} = props
     const relation = user.relation||user
     const sp = s=>s.split(' ')
     const buttons = {
-      [InstitutionType.User]: UserTypeIn(user, UserType.Guard | UserType.Master) ?
-        sp('flights inventory') : sp('inventory'),
+      [InstitutionType.User]: sp('inventory'),
       [InstitutionType.Corporation]: sp('inventory maps'),
       [InstitutionType.Organization]: sp('inventory'),
       [InstitutionType.Research]: sp('flights inventory maps'),
       [InstitutionType.Ship]: sp('flights inventory maps ship log'),
     }
+    const arr = [...new Set([...AddButtons(user), ...buttons[+relation.type]])]
     return <Pane {...props} eventKey='entity' relation={relation}
       buttons={buttons[+relation.type]} />
 }
 
 function ProfilePane(props: FooterProps){
     const {user} = props
-    const buttons = UserTypeIn(user, UserType.Guard | UserType.Master) ?
-        ['flights', 'inventory'] : ['inventory']
+    const buttons = [...AddButtons(user), 'inventory']
     return <Pane {...props} eventKey='profile' relation={user} buttons={buttons} />
 }
 
