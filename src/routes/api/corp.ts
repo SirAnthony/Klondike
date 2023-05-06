@@ -1,4 +1,4 @@
-import {BaseRouter, CheckRole, CheckIDParam} from '../base'
+import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated} from '../base'
 import {UserController, CorpController} from '../../entity'
 import {OrderController, ItemController} from '../../entity'
 import {institutionController} from '../../entity'
@@ -55,8 +55,7 @@ export class CorpApiRouter extends BaseRouter {
         await Rating.patent_points(item, owner, served);
     }
 
-    @CheckRole([UserType.Captain, UserType.Corporant,
-        UserType.Guard, UserType.Scientist])
+    @CheckAuthenticated()
     async get_list(ctx: RenderContext){
         const {stype} = ctx.aparams
         if (isNaN(+stype))
