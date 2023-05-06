@@ -51,7 +51,7 @@ export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsSt
         for (let k=0; k<cycle-1; k++){
             const row = (data[k]||[]) as [number]
             const cols = [<td>{`C${k+1}`}</td>].concat(
-                row.map(r=><td>{r}</td>))
+                row.map((r, i)=><td>{(total[i]|0)+r}</td>))
             rows.push(<tr>{cols}</tr>)
             for (let p=0; p<row.length; p++)
                 total[p] = (total[p]|0)+row[p]
@@ -60,12 +60,12 @@ export class RatingDetails extends F.Fetcher<RatingDetailsProps, RatingDetailsSt
             <td>{`C${cycle}`}</td>
             {total.map(t=><td></td>)}
         </tr>)
-        if (rows.length>2){
-            rows.push(<tr>
-                <td>{L('rating_total')}</td>
-                {total.map(t=><td>{t}</td>)}
-            </tr>)
-        }
+        // if (rows.length>2){
+        //     rows.push(<tr>
+        //         <td>{L('rating_total')}</td>
+        //         {total.map(t=><td>{t}</td>)}
+        //     </tr>)
+        // }
         return <tbody>{rows}</tbody>
     }
     title(){
