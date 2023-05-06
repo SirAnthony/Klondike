@@ -1,8 +1,8 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Owner, Order, ResourceCost, User, InstitutionType, LogEntry, LogAction, Flight} from '../common/entity'
-import {OwnerSelect, NumberInput, MultiResourceCostSelect, RandomID, ResourceCostID} from '../util/inputs'
-import {default as L} from './locale'
+import {OwnerSelect, NumberInput, MultiResourceCostSelect, RandomID, ResourceCostID, LogActionSelect, TextInput, OrderSelect} from '../util/inputs'
+import {default as L, LR} from './locale'
 import {ClientError} from '../common/errors'
 import {ErrorMessage} from '../util/errors'
 import * as _ from 'lodash'
@@ -14,18 +14,18 @@ type RowDescProps = {
 }
 export function LogRowDesc(props: RowDescProps){
     return <RB.Row className={props.className}>
-      <RB.Col>{L('log_ts')}</RB.Col>
+      <RB.Col>{LR('desc_time')}</RB.Col>
       <RB.Col sm={1}>{L('log_cycle')}</RB.Col>
       <RB.Col>{L('log_action')}</RB.Col>
       <RB.Col sm={1}>{L('log_points')}</RB.Col>
       <RB.Col>{L('log_owner')}</RB.Col>
-      <RB.Col>{L('log_info')}</RB.Col>
+      <RB.Col>{L('log_desc_info')}</RB.Col>
       <RB.Col>{L('log_item')}</RB.Col>
       <RB.Col>{L('log_insitution')}</RB.Col>
       <RB.Col>{L('log_order')}</RB.Col>
       <RB.Col>{L('log_flight')}</RB.Col>
       <RB.Col>{L('log_data')}</RB.Col>
-      <RB.Col>{L('actions')}</RB.Col>
+      <RB.Col>{LR('actions')}</RB.Col>
     </RB.Row>
 }
 
@@ -107,22 +107,42 @@ export class LogRowNew extends React.Component<RowNewProps, RowNewState> {
           <RB.Row className='menu-input-row'>
             {state.err && <RB.Row><ErrorMessage field={state.err} /></RB.Row>}
             <RB.Col>{L('act_log_create')}</RB.Col>
-            <RB.Col>{}</RB.Col>
+            <RB.Col>
+              <LogActionSelect value={state.action}
+                onChange={action=>this.stateChange({action})} />
+            </RB.Col>
             <RB.Col>
               <OwnerSelect value={state.owner} exclude={exclude}
                 onChange={owner=>this.stateChange({owner})} />
             </RB.Col>
-            <RB.Col sm={1}>{}</RB.Col>
+            <RB.Col>
+              <TextInput value={state.info} placeholder={LR('log_desc_info')}
+                onChange={info=>this.stateChange({info})} />
+            </RB.Col>
             <RB.Col>
               <NumberInput placeholder={''} value={state.cycle}
                 onChange={cycle=>this.stateChange({cycle})} />
             </RB.Col>
-            <RB.Col sm={1}>{''}</RB.Col>
+          </RB.Row>
+          <RB.Row>
             <RB.Col>
-              <NumberInput placeholder={''} value={1}
-                onChange={cost=>this.stateChange({cost})} />
+              <OwnerSelect value={state.institution} title={'institution'}
+                onChange={institution=>this.stateChange({institution})} />
+            </RB.Col>
+            <RB.Col>{'order select'}
+              {/*<OrderSelect value={state.order} owner
+                onChange={order=>this.stateChange({order})} />
+               */}
+            </RB.Col>
+            <RB.Col>{'flight select'}</RB.Col>
+          </RB.Row><RB.Row>
+            <RB.Col>
+              <NumberInput placeholder={'points'} value={state.points}
+                onChange={points=>this.stateChange({points})} />
             </RB.Col>
             <RB.Col>
+              <NumberInput placeholder={'desc_cycle'} value={state.cycle}
+                onChange={cycle=>this.stateChange({cycle})} />
             </RB.Col>
             <RB.Col>
               <EditButtons add={this.props.add} disabled={!!state.err}
