@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn, ModuleBoosts, ModStat} from '../common/entity'
+import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn, ModuleBoosts, ModStat, FlightKind, LogAction} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
 import {ResourceCost} from '../common/entity'
@@ -147,9 +147,11 @@ const FreeInstitutionTypeSelect = TypedSelect(InstitutionType, 'institution_type
 export const ShipClassSelect = TypedSelect(ShipClass, '', 'ship_desc_kind')
 export const ResourceSpecialitySelect = TypedSelect(ResourceSpecialityType, 'res_spec_value', 'res_desc_kind')
 export const FlightTypeSelect = TypedSelect(FlightType, 'flight_type', 'flight_desc_type')
+export const FlightKindSelect = TypedSelect(FlightKind, 'flight_kind', 'flight_desc_kind')
 export const FlightStatusSelect = TypedSelect(FlightStatus, 'flight_status', 'flight_desc_status')
 export const PlanetTypeSelect = TypedSelect(PlanetType, '', 'planet_desc_kind')
 export const ModStatSelect = TypedSelect(ModStat, 'ship_stat', 'ship_stats_title')
+export const LogActionSelect = TypedSelect(LogAction, 'log_action', 'log_desc_action')
 
 const UserTypeSelectArr = TypedMultiSelect(UserType, 'user_kind', 'user_desc_kind', true)
 export function UserTypeSelect(props: {value?: UserType, disabled?: boolean, optName?: string,
