@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {Module, Ship, ShipValues} from '../common/entity'
+import {Module, Ship, ShipValues, User, UserType, UserTypeIn} from '../common/entity'
 import {ModuleDetails} from './Module'
 import * as util from '../common/util'
 import * as urls from '../common/urls'
@@ -10,6 +10,7 @@ import { ErrorMessage } from 'src/util/errors'
 import { InventoryEvents } from 'src/inventory'
 
 type ShipProps = {
+    user: User
     ship: Ship
 }
 
@@ -60,9 +61,10 @@ function ShipInfo(props: ShipProps){
 }
 
 function ShipControls(props: ShipProps){
-    const {ship} = props
+    const {ship, user} = props
     const [err, setErr] = React.useState(null)
     const flight_name = ship.flight?.name.split(' ').map(k=>LR(`flight_${k}`)).join('. ')
+    const can_install = UserTypeIn(user, UserType.Mechanic)
     const installModule = async (mod)=>{
         const {ship} = props
         setErr(null)
@@ -82,8 +84,8 @@ function ShipControls(props: ShipProps){
       </RB.Row>}
       {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
       <RB.Row><RB.Col>
-        <ModuleSelectTrigger owner={ship} desc={L('install_module')}
-          onClick={installModule} />
+        {can_install && <ModuleSelectTrigger owner={ship} desc={L('install_module')}
+          onClick={installModule} /> }
       </RB.Col></RB.Row>
       {/*<RB.Row><RB.Col>
         <RB.Button>{L('repair')}</RB.Button>

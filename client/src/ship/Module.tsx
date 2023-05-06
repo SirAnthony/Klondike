@@ -1,15 +1,24 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
-import {Ship, Module, ShipValues, ModStat} from '../common/entity'
+import {Ship, Module, ShipValues, ModStat, User, UserTypeIn, UserType} from '../common/entity'
 import * as util from '../common/util'
 import {default as L, LR} from './locale'
 import { InventoryEvents } from 'src/inventory'
 import { Delimeter } from 'src/util/components'
 
-function Mod(num: number, mod: Module, onRemove: (mod: Module)=>void){
+type ModProps = {
+    user: User
+    num: number
+    mod: Module
+    onRemove: (mod: Module)=>void
+}
+
+function Mod(props: ModProps){
+    const {user, num, mod, onRemove} = props
     if (!mod)
-        return [<tr className='mod-menu-first'><td>{L('mod_empty')}</td><td></td><td></td></tr>]
+        return <tr className='mod-menu-first'><td>{L('mod_empty')}</td><td></td><td></td></tr>
+    const can_install = UserTypeIn(user, UserType.Mechanic)
     const values = ShipValues.mods.map(k=><tr>
       <td>{L('mod_stat', k)}</td>
       <td>{L('mod_stat_c', k)}</td>
@@ -19,24 +28,27 @@ function Mod(num: number, mod: Module, onRemove: (mod: Module)=>void){
       <td>{L('mod_stat_c', ModStat[k].toLowerCase())}</td>
       <td>{mod.boosts[k]}</td>
     </tr>))
-    return [<tr className='mod-menu-row-first'>
+    return <><tr className='mod-menu-row-first'>
       <td>{L('mod_slot')+' '+num}</td>
       <td></td>
       <td>
-        <RB.Button onClick={()=>onRemove(mod)}>{LR('act_remove')}</RB.Button>
+        {can_install && <RB.Button onClick={()=>onRemove(mod)}>{LR('act_remove')}</RB.Button>}
       </td>
-    </tr>,
+    </tr>
     <tr>
       <td>{LR('item_desc_name')}</td>
       <td></td>
       <td>{mod.name}</td>
-    </tr>, ...values]
+    </tr>
+    {values}
+    </>
 }
 
 type ModuleDetailsState = {
     list?: Module[]
 }
 type ModuleDetailsProps = {
+    user: User
     ship: Ship
 }
 
@@ -65,12 +77,13 @@ export class ModuleDetails extends F.Fetcher<ModuleDetailsProps, ModuleDetailsSt
         return true
     }
     render(){
-        const {ship} = this.props
+        const {ship, user} = this.props
         const {list} = this.state
         const modules = list?.filter(m=>m.installed).slice(0, ship.slots)||[]
         for (let i=0; i<ship.slots; i++)
             modules[i] = modules[i]||null
-        const rows = modules.map((m, i)=>Mod(i, m, this.removeModule)).flat()
+        const rows = modules.map((m, i)=>
+          <Mod user={user} num={i} mod={m} onRemove={this.removeModule} />)
         return <div className="menu-box"><table>
           <tr>
             <th colSpan={2}>{L('mod_title')}</th>

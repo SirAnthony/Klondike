@@ -30,9 +30,10 @@ export default class ShipDetails extends F.Fetcher<ShipDetailsProps, ShipDetails
     }
     render(){
         const {ship} = this.state
+        const {user} = this.props
         return <RB.Container className="menu-container">
           <ControlBar title={L('interface')} onClose={this.props.onClose} />
-          {ship ? <ShipDesc ship={ship} /> : <div>{L('not_found')}</div>}
+          {ship ? <ShipDesc ship={ship} user={user} /> : <div>{L('not_found')}</div>}
         </RB.Container>
     }
 }

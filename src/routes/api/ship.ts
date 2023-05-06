@@ -65,7 +65,7 @@ export class ShipApiRouer extends BaseRouter {
         })
     }
 
-    @CheckRole([UserType.Guard, UserType.Captain])
+    @CheckRole(UserType.Guard | UserType.Captain | UserType.Mechanic)
     async get_modules_list(ctx: RenderContext){
         const {id} = ctx.aparams
         // From ship api only ship modules is available
@@ -75,7 +75,7 @@ export class ShipApiRouer extends BaseRouter {
         return {list}
     }
 
-    @CheckRole([UserType.Guard, UserType.Captain])
+    @CheckRole(UserType.Mechanic)
     async put_module_install(ctx: RenderContext){
         const {id, mod} = ctx.aparams
         const ship = await ShipController.get(id)
@@ -92,7 +92,7 @@ export class ShipApiRouer extends BaseRouter {
         await item.save()
     }
 
-    @CheckRole([UserType.Guard, UserType.Captain])
+    @CheckRole(UserType.Mechanic)
     async put_module_remove(ctx: RenderContext){
         const {id, mod} = ctx.aparams
         const ship = await ShipController.get(id)
