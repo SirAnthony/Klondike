@@ -54,7 +54,9 @@ function FlightActions(params: FlightRowProps){
     const owner = UserTypeIn(user, UserType.Master | UserType.Guard) ||
         OwnerMatch(user.relation, flight.owner)
     const types = {
-        [FlightType.Drone]: sp('signup delist retrive')
+        [FlightType.Drone]: sp('signup delist retrive'),
+        [FlightType.Planetary]: sp('signup delist block unblock departure arrival help'),
+        [FlightType.Emergency]: sp('signup delist block unblock departure arrival help')
     }
     const actions = {
         [UserType.Captain]: sp('delist signup retrive'),

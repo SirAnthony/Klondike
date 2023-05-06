@@ -58,7 +58,7 @@ export async function signup(user: UserController, flight: FlightController){
     const ship = await ShipController.get(rel._id)
     if (isType(flight.type, FlightType.Planetary) && ship.credit<=0)
         throw 'error_no_funds'
-    await Actions.signupFlight(flight, user)
+    await Actions.signupFlight(flight, user, ship)
     await LogController.log({
         name: 'flight_signup', info: 'flight_signup',
         action: LogAction.FlightSignup, flight,
@@ -86,7 +86,7 @@ export async function drone_signup(user: UserController, flight: FlightControlle
         throw 'error_ship_busy'
 
     if (!prev)
-        await Actions.signupFlight(flight, user)
+        await Actions.signupFlight(flight, user, ship)
     else
         flight.points = data.points
     
@@ -263,8 +263,8 @@ export async function help(user: UserController, flight: FlightController){
 
 namespace Actions {
 
-export async function signupFlight(flight: FlightController, user: UserController){
-    const ship = await ShipController.get(flight.owner._id)
+export async function signupFlight(flight: FlightController, user: UserController,
+    ship: ShipController){
     if (!(await Util.checkShipAvailable(ship, flight)))
         throw 'error_ship_busy'
     flight.status = FlightStatus.Waiting
@@ -304,13 +304,13 @@ export async function cleanFlight(flight: FlightController){
     flight.status = FlightStatus.Docked
     flight.arrival = flight.departure = null
     flight.name = flight.location = null
-    flight.owner = null
-    await flight.save()
     const ship = await ShipController.get(flight.owner._id)
     if (ship.flight && IDMatch(ship.flight._id, flight._id)){
         ship.flight = null
         ship.save()
     }
+    flight.owner = null
+    await flight.save()
 }
 
 export async function researchItem(item: ItemController, ship: ShipController, kind: FlightKind){
