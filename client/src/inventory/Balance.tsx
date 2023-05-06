@@ -106,7 +106,7 @@ export class BudgetDetails extends F.Fetcher<BudgetDetailsProps, BudgetDetailsSt
         const {item} : BudgetDetailsState = this.state
         const {entity} = item||{}
         const inputRange: [number, number] = [1, entity?.credit|0]
-        const ownersExclude = [InstitutionType.User]
+        const ownersExclude = []
         const loan_debit = item?.loans?.filter(f=>
             f.lender._id==entity._id && f.amount).map(f=><RB.Row>
           <RB.Col>{f.creditor.name}</RB.Col>

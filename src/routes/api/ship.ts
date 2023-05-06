@@ -32,7 +32,7 @@ export class ShipApiRouer extends BaseRouter {
         return {list}
     }
 
-    @CheckRole([UserType.Guard, UserType.Captain])
+    @CheckRole([UserType.Guard, UserType.Captain, UserType.Scientist, UserType.Navigator])
     async get_flights(ctx: RenderContext){
         const d = new Date()
         const flights = await FlightController.all({$or: [
