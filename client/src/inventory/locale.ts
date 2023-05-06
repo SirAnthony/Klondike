@@ -60,6 +60,7 @@ load(mod, {
     'market_propose_for_1': 'общая цена',
     'market_propose_for_3': 'в счет оплаты займа, цена',
     'loan_proposes': 'Предложения заемшиков',
+    'sector_name': 'Зонгиинг',
 })
 
 export function LR(str: string, ...args): string {
