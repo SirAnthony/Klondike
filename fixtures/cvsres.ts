@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import { ItemType, Owner, PlanetType, Resource, ResourceType } from '../client/src/common/entity'
 import { ItemController, PlanetController } from '../src/entity'
 
-type DataRow = [string, string, string]
+type DataRow = [string, string, string, string, string]
 
 async function load_cvs(filename) : Promise<DataRow[]> {
     const data = fs.readFileSync(filename).toString()
@@ -32,11 +32,11 @@ async function getPlanet(type: PlanetType) : Promise<Owner> {
 
 type ImportRes = Omit<Resource, 'keys' | 'class'>
 async function loadRow(idx: number, row: DataRow) : Promise<ImportRes> {
-    const [t, p, v] : [string, string, string] = row
+    const [t, p, r, c, v] : [string, string, string, string, string] = row
     const kind: ResourceType = +t
     const planet = getPlanetType(p)
     const value: number = +v
-    const location = {system: '', pos: {col: 0, row: 0},
+    const location = {system: '', pos: {col: +c, row: +r},
         ...(await getPlanet(planet))}
     const name = `R-3${kind}586${idx}`
     return {type: ItemType.Resource, kind, value,
