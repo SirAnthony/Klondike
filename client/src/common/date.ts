@@ -76,7 +76,7 @@ export const nextTime = (input: string)=>{
     // If the given time is already passed today, add 1 day to the date
     if (hours < now.getHours() || (hours === now.getHours() && minutes < now.getMinutes()))
         now.setDate(now.getDate() + 1);
-    now.setTime(hours)
+    now.setHours(hours)
     now.setMinutes(minutes)
     now.setSeconds(0)
     return now
