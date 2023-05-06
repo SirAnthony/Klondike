@@ -41,7 +41,7 @@ export class MainRouter extends BaseRouter {
 
     async get_string_code(ctx: RenderContext){
         const {data} = ctx.aparams
-        const code = await QRCode.toDataURL(data, {width: 1200})
+        const code = await QRCode.toDataURL(data, {width: 800})
         return {code}        
     }
 }

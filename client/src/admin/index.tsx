@@ -11,6 +11,8 @@ import {ListNavigator as FlightListNavigator} from './Flights'
 import {EditListNavigator as MapListNavigator} from '../map'
 import {ListNavigator as UserListNavigator} from '../user/List'
 import {Navigator as RatingNavigator} from './Rating'
+import { TextInput } from '../util/inputs';
+import { PopupButton } from '../util/buttons';
 import L from './locale'
 
 const Navigators = {
@@ -22,6 +24,7 @@ const Navigators = {
     'flights': FlightListNavigator,
     'planets': MapListNavigator,
     'users': UserListNavigator,
+    'qrcode': QRCodeNavigator,
 }
 
 type ListState = {
@@ -64,4 +67,18 @@ export function Navigator(props) {
         {urls}
       </RR.Routes>
     </div>)
+}
+
+export function QRCodeNavigator(props: {user: User}){
+    const {user} = props
+    const [data, setData] = React.useState(null)
+    if (!user.admin)
+        return null
+    return <RB.Container className='menu-box'>
+      <RB.Row>
+          <TextInput as={'textarea'} value={data} onChange={setData}
+            placeholder='text' />
+          <PopupButton url={`/qrcode/${data}`} desc={'show'} />
+      </RB.Row>
+    </RB.Container>
 }

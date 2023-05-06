@@ -9,7 +9,7 @@ import {Navigator as ShipNavigator} from '../ship'
 import {Navigator as InventoryNavigator} from '../inventory'
 import {Navigator as MapNavigator, ListNavigator as PlanetListNavigator} from '../map'
 import {ListNavigator as FlightNavigator} from '../ship/Flights'
-import {Navigator as AdminNavigator} from '../admin'
+import {Navigator as AdminNavigator, QRCodeNavigator} from '../admin'
 import {Navigator as UserProfileNavigator} from '../user/Profile'
 import {ListNavigator as FinesNavigator } from '../user/Fines';
 import {Confirmator} from '../inventory';
@@ -48,6 +48,8 @@ function App() {
       <RR.Route path='/profile/*' element={<UserProfileNavigator user={user} />} />
       { is_admin && <RR.Route path='/admin/*' element={<AdminNavigator user={user} />} />}
       { is_admin && <RR.Route path='/admin/' element={<AdminNavigator user={user} />} />}
+      { is_admin && <RR.Route path='/qrcode/*' element={<QRCodeNavigator user={user} />} />}
+      { is_admin && <RR.Route path='/qrcode' element={<QRCodeNavigator user={user} />} />}
     </RR.Routes>
     {user && <UserFooter user={user}></UserFooter>}
   </RR.BrowserRouter>

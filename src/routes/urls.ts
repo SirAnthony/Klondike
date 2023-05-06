@@ -12,6 +12,7 @@ export const urls = {
 main: {prefix: '', router: MainRouter, urls: {
     '/': {func: 'base', template: 'base', methods: ['get']},
     '/item/:id/code': {func: 'item_code', template: 'item_code', methods: ['get']},
+    '/qrcode/:data': {func: 'string_code', template: 'item_code', methods: ['get']},
 }},
 corp_api: {prefix: '/api/corp', router: CorpApiRouter, opt: {json: true}, urls: {
     '/orders/:id': {func: 'orders', methods: ['get']},
