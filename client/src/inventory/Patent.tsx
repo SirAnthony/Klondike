@@ -81,10 +81,10 @@ function PatentActions(props: RowProps){
         {!is_served && <RB.Col>
           <PatentSellButton {...props} />
         </RB.Col>}
-        {patent.ready && <RB.Col>
+        {/* patent.ready && <RB.Col>
           <RB.Button onClick={onAction('product', patent)}>
             {L('act_product')}</RB.Button>
-        </RB.Col>}
+        </RB.Col> */}
       </RB.Row>
     </RB.Container>
 }
