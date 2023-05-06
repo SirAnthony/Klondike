@@ -100,13 +100,20 @@ function FlightStatusCol(props: FlightRowProps){
     const {flight, user} = props
     const allowed = OwnerMatch(flight.owner, user.relation) ||
         UserTypeIn(user, UserType.Guard | UserType.Master)
-    const status = !flight.owner ? ' ' :
-        !allowed ? L('desc_info_hidden') : [
-        !flight.arrival && LR(`flight_status_${flight.status}`),
-        flight.arrival ? L('desc_arrived') + ' ' + date.timeday(flight.arrival) : null,
-        !flight.arrival && flight.departure && date.timeday(flight.departure)
-    ].filter(Boolean).join(' ')
-    return <RB.Col>{status}</RB.Col>
+    const status = []
+    if (!flight.owner)
+        status.push(' ')
+    else if (!allowed)
+        status.push(L('desc_info_hidden'))
+    else if (!flight.arrival){
+        status.push(LR(`flight_status_${flight.status}`))
+        if (flight.visit)
+            status.push(date.timeday(flight.visit))
+        else if(flight.departure)
+            status.push(date.timeday(flight.departure))
+    } else
+        status.push(L('desc_arrived'), date.timeday(flight.arrival))
+    return <RB.Col>{status.join(' ')}</RB.Col>
 }
 
 export function FlightRow(props: FlightRowProps) {
