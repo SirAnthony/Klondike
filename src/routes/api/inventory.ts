@@ -2,7 +2,7 @@ import {BaseRouter, CheckRole, CheckIDParam, CheckAuthenticated, CheckOwn} from 
 import {CorpController, institutionController, LoanController, LogController} from '../../entity'
 import {ItemController, UserController, ConfigController} from '../../entity'
 import {OrderController} from '../../entity'
-import {UserType, Patent, InstitutionType} from '../../../client/src/common/entity'
+import {UserType, Patent, InstitutionType, User} from '../../../client/src/common/entity'
 import {MarketType, ItemType} from '../../../client/src/common/entity'
 import {LogAction, OwnerMatch} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
@@ -329,7 +329,9 @@ export class InventoryApiRouter extends BaseRouter {
         const value = amount|0
         if (OwnerMatch(src, dst) || value<=0 || value>src.credit)
             throw 'field_error_invalid'
-        await balance.provide_loan(src.asOwner, dst.asOwner, value)
+        // Do not provide loan between users
+        if (+stype!=InstitutionType.User || +dtype!==InstitutionType.User)
+            await balance.provide_loan(src.asOwner, dst.asOwner, value)
         src.credit = (src.credit|0) - value
         dst.credit = (dst.credit|0) + value
         await src.save()
