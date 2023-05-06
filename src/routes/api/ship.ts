@@ -47,7 +47,7 @@ export class ShipApiRouer extends BaseRouter {
         return {list}
     }
 
-    @CheckRole([UserType.Guard, UserType.Captain])
+    @CheckRole([UserType.Scientist, UserType.Guard, UserType.Captain])
     async put_flight_action(ctx: RenderContext){
         const {user}: {user: UserController} = ctx.state
         const {id, action, data} = ctx.aparams

@@ -59,6 +59,7 @@ function FlightActions(params: FlightRowProps){
         [FlightType.Emergency]: sp('signup delist block unblock departure arrival help')
     }
     const actions = {
+        [UserType.Scientist]: sp('signup'),
         [UserType.Captain]: sp('delist signup retrive'),
         [UserType.Guard]: sp('block help unblock'),
         [UserType.Master]: sp('block delist departure retrive arrival unblock'),

@@ -65,7 +65,7 @@ export async function signup(user: UserController, flight: FlightController){
         owner: user.asOwner, institution: ship.asOwner})
 }
 
-uutil.CheckRole(UserType.Captain)
+uutil.CheckRole(UserType.Captain | UserType.Scientist)
 CheckFlightStatus([FlightStatus.Docked, FlightStatus.InFlight, FlightStatus.InFlight])
 export async function drone_signup(user: UserController, flight: FlightController, data: Flight){
     const rel = user.relation
