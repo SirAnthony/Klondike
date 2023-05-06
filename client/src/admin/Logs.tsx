@@ -21,7 +21,7 @@ export function ListNavigator(props: {user: User}){
 
 class List extends UList<ListProps, ListState> {
     L = L
-    get fetchUrl() { return `/api/admin/orders/` }
+    get fetchUrl() { return `/api/admin/logs` }
     get containerClass() { return 'menu-container-full' }
     async onSubmit(item: LogEntry){
         this.setState({err: null})
@@ -34,7 +34,7 @@ class List extends UList<ListProps, ListState> {
         return true
     }
     async deleteItem(item: LogEntry){
-        const res = await util.wget(`/api/admin/order/${item._id}/delete`,
+        const res = await util.wget(`/api/admin/log/${item._id}/delete`,
             {method: 'DELETE'})
         if (res.err)
             return void this.setState({err: res.err})

@@ -73,6 +73,9 @@ admin_api: {prefix: '/api/admin', router: AdminApiRouter, opt: {admin: true, jso
     '/planet/:id/set': {func: 'planet_set', methods: ['post']},
     '/time': {func: 'time', methods: ['put']},
     '/config': {func: 'config', methods: ['post']},
+    '/logs': {func: 'log_list', methods: ['get']},
+    '/log/:id/set': {func: 'log', methods: ['post']},
+    '/log/:id/delete': {func: 'log', methods: ['delete']},
 }},
 api: {prefix: '/api', router: ApiRouter, opt: {json: true}, urls: {
     '/time': {func: 'time', methods: ['get']},

@@ -1,7 +1,7 @@
 import {BaseRouter, CheckRole} from '../base'
 import {UserController, CorpController, PlanetController,
     ConfigController, institutionController, FlightController,
-    InstitutionController, OrderController, ItemController} from '../../entity'
+    InstitutionController, OrderController, ItemController, LogController} from '../../entity'
 import {UserType, ItemType, InstitutionType,
     PlanetType, Planet, Owner, Location} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
@@ -243,5 +243,21 @@ export class AdminApiRouter extends BaseRouter {
         const {conf} = params
         await ConfigController.save(conf)
     }
+
+    @CheckRole(UserType.Master)
+    async get_log_list(ctx: RenderContext){
+        const list = await LogController.all()
+        return {list}
+    }
+
+    @CheckRole(UserType.Master)
+    async post_log(ctx: RenderContext){
+
+    }
+    
+    @CheckRole(UserType.Master)
+    async delete_log(ctx: RenderContext){
+        
+    }   
 
 }
