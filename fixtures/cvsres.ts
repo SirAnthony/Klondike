@@ -1,6 +1,7 @@
 import * as fs from 'fs'
-import { ItemType, Owner, PlanetType, Resource, ResourceType } from '../client/src/common/entity'
+import { ItemType, Location, PlanetType, Resource, ResourceType } from '../client/src/common/entity'
 import { ItemController, PlanetController } from '../src/entity'
+import { asID } from '../src/util/server'
 
 type DataRow = [string, string, string, string, string]
 
@@ -23,14 +24,13 @@ function getPlanetType(name: string) : PlanetType {
 }
 
 const Planets = {}
-async function getPlanet(p: string) : Promise<any> {
+async function getPlanet(p: string) : Promise<Omit<Location, 'pos'>> {
     const type = getPlanetType(p)
     if (type in Planets)
         return Planets[type]
-    console.error(type)
     const controller = await PlanetController.find({type})
-    return Planets[type] = {type: controller.type, system: controller.system,
-        _id: controller._id}
+    return Planets[type] = {system: controller.system, name: controller.name,
+        _id: asID(controller._id as any)}
 }
 
 type ImportRes = Omit<Resource, 'keys' | 'class'>
