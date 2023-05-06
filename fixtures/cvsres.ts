@@ -23,21 +23,24 @@ function getPlanetType(name: string) : PlanetType {
 }
 
 const Planets = {}
-async function getPlanet(type: PlanetType) : Promise<Owner> {
+async function getPlanet(p: string) : Promise<any> {
+    const type = getPlanetType(p)
     if (type in Planets)
         return Planets[type]
+    console.error(type)
     const controller = await PlanetController.find({type})
-    return Planets[type] = controller.asOwner
+    return Planets[type] = {type: controller.type, system: controller.system,
+        _id: controller._id}
 }
 
 type ImportRes = Omit<Resource, 'keys' | 'class'>
 async function loadRow(idx: number, row: DataRow) : Promise<ImportRes> {
     const [t, p, r, c, v] : [string, string, string, string, string] = row
     const kind: ResourceType = +t
-    const planet = getPlanetType(p)
     const value: number = +v
-    const location = {system: '', pos: {col: +c, row: +r},
-        ...(await getPlanet(planet))}
+    const planet_info = await getPlanet(p)
+    console.error(JSON.stringify(planet_info))
+    const location = {pos: {col: +c, row: +r}, ...planet_info}
     const name = `R-3${kind}586${idx}`
     return {type: ItemType.Resource, kind, value,
         location, owner: null, price: 0, data: '', name}
