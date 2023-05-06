@@ -34,6 +34,7 @@ const aliases = {
     'error_no_ship': 'Отсутствует приписанный корабль',
     'error_slot_busy': 'Слот занят',
     'error_ship_busy': 'Корабль уже вылетел',
+    'error_drone_busy': 'Дрон в полете',
     'institution_desc': 'Принадлежность',
     'institution_type_0': 'Физ. Лицо',
     'institution_type_1': 'Организация',

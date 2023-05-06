@@ -13,6 +13,8 @@ load(mod, {
     'link_planets': 'Планеты',
     'link_flights': 'Таблица вылетов',
     'link_users': 'Пользователи',
+    'link_logs': 'События',
+    'link_qrcode': 'QRCode',
     'act_save': 'Сохранить',
     'res_create': 'Создать ресурс',
     'res_show': 'Настройки базовых ресурсы',

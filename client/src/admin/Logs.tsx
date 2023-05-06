@@ -2,10 +2,9 @@ import React from 'react'
 import {LogEntry, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Delimeter} from '../util/components'
-import {OrderRowDesc, OrderRowNew} from '../inventory/Order'
 import {default as L} from './locale'
 import * as util from '../common/util'
-import {LogRow} from '../site/Log'
+import {LogRow, LogRowDesc, LogRowNew} from '../site/Log'
 
 
 type ListState = {
@@ -48,9 +47,9 @@ class List extends UList<ListProps, ListState> {
         const rows = list.map(l=><LogRow entry={l} className='menu-list-row'
             onSubmit={o=>this.onSubmit(o)} onDelete={o=>this.deleteItem(o)}
             onReload={()=>this.fetch()} key={`order_list_${l._id}`} {...this.props} />)
-        //return [<OrderRowNew onSubmit={o=>this.onSubmit(o)} add={true} />,
-        //  <Delimeter />, <OrderRowDesc className='menu-list-title' />, <Delimeter />, 
-        //  ...rows]
+        return [<LogRowNew onSubmit={o=>this.onSubmit(o)} add={true} />,
+          <Delimeter />, <LogRowDesc className='menu-list-title' />, <Delimeter />, 
+          ...rows]
         return []
     }
 }

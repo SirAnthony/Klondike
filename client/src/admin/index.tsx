@@ -10,6 +10,7 @@ import {ListNavigator as OrdersNavigator} from './Orders'
 import {ListNavigator as FlightListNavigator} from './Flights'
 import {EditListNavigator as MapListNavigator} from '../map'
 import {ListNavigator as UserListNavigator} from '../user/List'
+import {ListNavigator as LogsListNavigator} from './Logs'
 import {Navigator as RatingNavigator} from './Rating'
 import { TextInput } from '../util/inputs';
 import { PopupButton } from '../util/buttons';
@@ -24,6 +25,7 @@ const Navigators = {
     'flights': FlightListNavigator,
     'planets': MapListNavigator,
     'users': UserListNavigator,
+    'logs': LogsListNavigator,
     'qrcode': QRCodeNavigator,
 }
 
