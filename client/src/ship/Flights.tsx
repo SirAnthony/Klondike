@@ -11,6 +11,7 @@ import {default as L, LR} from './locale'
 import { TimeInput } from 'src/util/inputs';
 import {Select as PSelect} from '../map/List'
 import { PlanetView } from '../map/Planet';
+import {Pos as MPos} from '../common/map'
 import * as util from '../common/util'
 import * as date from '../common/date'
 import * as mutil from '../common/map'
@@ -148,18 +149,22 @@ export class BaseList<P, S> extends UList<FlightListProps & P, FlightListState &
 type FlightSend = Omit<Flight, 'name' | 'keys' | 'class' | 'status'>
 type FlightRowNewParams = {
     flight: FlightSend
+    prevPoints: Pos[]
     viewHidden?: boolean
     onSubmit: (f: FlightSend)=>Promise<boolean>
     onViewToggle: (state: boolean)=>void
     onLocChanged: (f: Location)=>void
 } & Omit<FlightRowProps, 'actionsClass' | 'flight'>
 function FlightRowNew(props: FlightRowNewParams){
-    const {flight, user} = props
+    const {flight, user, prevPoints} = props
     const owner = user.relation
     const [ts, setTime] = React.useState(flight?.ts || date.add(undefined, {min: 10}))
     const [location, setLocation] = React.useState(flight?.location)
+    const points_match = ()=> flight?.points?.length==prevPoints?.length &&
+        !flight?.points?.some((k, i)=>MPos.getKey(k)!=MPos.getKey(prevPoints[i]))
     const check = ()=>ts && (location?._id && !isNaN(+location.pos.col) &&
-        !isNaN(location?.pos?.row)) && flight?.points?.length && !props.viewHidden
+        !isNaN(location?.pos?.row)) && flight?.points?.length &&
+        !points_match() && !props.viewHidden
     const onSubmit = async ()=>check() && (await props.onSubmit({_id: flight._id,
         type: FlightType.Drone, ts: +date.get(ts), owner, location,
         points: flight?.points})) && props.onCancel()
@@ -217,6 +222,7 @@ type FlightListState = {
     list?: Flight[]
     newForm: FlightSend
     viewHidden: boolean
+    points: Pos[]
 }
 type FlightListProps = {
     user: User
@@ -233,10 +239,10 @@ export class List extends BaseList<FlightListProps, FlightListState> {
         const {user} = this.props
         const drone = list.find(f=>f.type===FlightType.Drone &&
             OwnerMatch(f.owner, user.relation))
-        if (drone)
+        if (drone){
             this.updateForm({...drone})
-        if (drone)
-            this.setState({viewHidden: true})
+            this.setState({viewHidden: true, points: [...(drone.points||[])]})
+        }
     }
     async onAction(name: string, flight: Flight){
         this.setState({err: null})
@@ -258,9 +264,9 @@ export class List extends BaseList<FlightListProps, FlightListState> {
         const {user} = this.props
         if (+user.relation?.type != InstitutionType.Ship)
             return <></>
-        const {newForm, viewHidden} = this.state
+        const {newForm, points, viewHidden} = this.state
         return <FlightRowNew user={user} flight={newForm} viewHidden={viewHidden}
-            onSubmit={f=>this.onAction('drone_signup', f)}
+            onSubmit={f=>this.onAction('drone_signup', f)} prevPoints={points}
             onViewToggle={v=>this.setState({viewHidden: v})} onCancel={()=>{}}
             onLocChanged={location=>this.updateForm({location})}
              />
