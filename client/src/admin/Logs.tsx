@@ -42,9 +42,10 @@ class List extends UList<ListProps, ListState> {
         this.fetch()
         return true
     }
+    sort(a: LogEntry, b: LogEntry){ return b.ts-a.ts }
     body(){
         const {list} = this.state
-        const rows = list.map(l=><LogRow entry={l} className='menu-list-row'
+        const rows = list.sort(this.sort).map(l=><LogRow entry={l} className='menu-list-row'
             onSubmit={o=>this.onSubmit(o)} onDelete={o=>this.deleteItem(o)}
             onReload={()=>this.fetch()} key={`order_list_${l._id}`} {...this.props} />)
         return [<LogRowNew onSubmit={o=>this.onSubmit(o)} add={true} />,

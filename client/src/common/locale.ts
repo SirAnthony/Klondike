@@ -118,6 +118,7 @@ const aliases = {
     'planet_desc_kind': 'Тип планеты',
     'entity_desc_credit': 'Счет',
     'entity_desc_cost': 'Стоимость',
+    'log_desc_info': 'Инфо',
     'desc_time': 'Время',
     'cycle': 'Цикл',
     'day_number': 'день',

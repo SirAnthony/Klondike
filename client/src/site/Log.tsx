@@ -47,7 +47,7 @@ export function LogRow(props: RowProps){
     }
     const onDelete = is_admin ? ()=>props.onDelete(entry) : null
     return <RB.Row key={`log_${entry._id}`} className={props.className}>
-        <RB.Col>{date.longdate(entry.ts)}</RB.Col>
+        <RB.Col>{date.interval(entry.ts)}</RB.Col>
         <RB.Col sm={1}>{entry.cycle}</RB.Col>
         <RB.Col>{LogAction[entry.action]}</RB.Col>
         <RB.Col sm={1}>{entry.points}</RB.Col>
