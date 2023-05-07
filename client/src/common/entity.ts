@@ -394,6 +394,8 @@ export enum LogAction {
     FlightDeparture, FlightArrival, FlightHelp, FlightDock,
     FlightMovement, FlightResearchDone,
     CycleRating, 
+    // Add new items
+    FundsTransfer
 }
 export class LogEntry extends ID {
     action: LogAction
