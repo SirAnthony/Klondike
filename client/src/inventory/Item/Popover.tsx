@@ -2,7 +2,7 @@ import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Item, ItemType} from '../../common/entity'
 import {Location} from '../../common/entity'
-import {ItemOwnerCol, ItemPriceCol, ItemModuleBoostsCol} from './components'
+import {ItemOwnerCol, ItemPriceCol, ItemModuleBoostsCol, ResourceCostCol} from './components'
 import {IDField} from '../../util/components'
 import {default as L, LR} from '../locale'
 
@@ -76,6 +76,10 @@ class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
         const size = this.props.item?.location ? 12 : this.col_size
         return this.col(<ItemKeyLocation loc={(this.props.item as any).target} />, size)
     }
+    field_resourceCost(){
+        return <ResourceCostCol item={this.props.item} layout={this.col_size} /> }
+    field_served(){
+        return <ItemOwnerCol item={this.props.item} layout={this.col_size} /> }
     field_generic(){
         return this.col(this.props.item[this.props.field]) }
     render(){
@@ -95,6 +99,8 @@ class ItemKeyRow extends React.Component<ItemRowKeyProps, {}> {
 
 export function ItemPopover(props: ItemPopoverProps){
     const {item, onClose} = props
+    if (!item)
+        return null
     const obj = new (Item.class(item.type))()
     for (let k in item)
         obj[k] = item[k]
@@ -118,6 +124,8 @@ type ItemPopoverOverlayProps = {
 
 export function ItemPopoverOverlay(props: ItemPopoverOverlayProps){
     const {item, children} = props
+    if (!item)
+        return children
     const obj = new (Item.class(item.type))()
     for (let k in item)
         obj[k] = item[k]
