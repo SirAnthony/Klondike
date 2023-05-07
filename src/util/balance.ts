@@ -81,8 +81,8 @@ export async function buy_item(src: InstitutionController, item: ItemController)
 
 export async function funds_transfer(src: InstitutionController, dst: InstitutionController, value: number){
         // Do not provide loan between users
-        if (+src.type!=InstitutionType.User && +dst.type!==InstitutionType.User)
-            await provide_loan(src.asOwner, dst.asOwner, value)
+        //if (+src.type!=InstitutionType.User && +dst.type!==InstitutionType.User)
+        //    await provide_loan(src.asOwner, dst.asOwner, value)
         src.credit = (src.credit|0) - value
         dst.credit = (dst.credit|0) + value
         await src.save()
@@ -154,7 +154,7 @@ async function calcExpenses(entity: InstitutionController, expenses: LoanControl
     const own = expenses.filter(f=>
         f.creditor.type==entity.type && IDMatch(f.creditor._id, entity._id))
     const fines = own.filter(f=>f.type==ExpenseType.Fine)
-    const loans = own.filter(f=>f.type==ExpenseType.Loan)
+    // const loans = own.filter(f=>f.type==ExpenseType.Loan)
     for (let fine of fines){
         const amount = fine.amount|0
         entity.credit = (entity.credit|0) - amount
@@ -165,8 +165,8 @@ async function calcExpenses(entity: InstitutionController, expenses: LoanControl
             name: 'fine_close', info: `calcExpenses ${cycle}`,
             owner: entity.asOwner, data: {fine, amount, cycle}})
     }
-    for (let loan of loans)
-        await close_loan(entity, loan, {info: `calcExpenses ${cycle}`, cycle})
+    // for (let loan of loans)
+    //    await close_loan(entity, loan, {info: `calcExpenses ${cycle}`, cycle})
     // Add finances from next cycle orders
     const orders = await OrderController.all({'owner._id': asID(entity._id),
         'owner.type': +entity.type, cycle: cycle+1})
