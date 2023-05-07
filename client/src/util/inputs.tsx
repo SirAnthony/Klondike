@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
-import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn, ModuleBoosts, ModStat, FlightKind, LogAction} from '../common/entity'
+import {ItemType, ResourceType, PatentType, Institution, FlightType, FlightStatus, UserTypeIn, ModuleBoosts, ModStat, FlightKind, LogAction, EventGroupType} from '../common/entity'
 import {PatentWeight, ResourceSpecialityType, ShipClass} from '../common/entity'
 import {ArtifactType, UserType, ResourceValueInfo, Order} from '../common/entity'
 import {ResourceCost} from '../common/entity'
@@ -162,6 +162,8 @@ export function UserTypeSelect(props: {value?: UserType, disabled?: boolean, opt
       props.onChange(!arr?.length ? null : arr.reduce((p, c)=>p|=c, 0))
     return <UserTypeSelectArr {...props} value={value} onChange={onChange} />
 }
+
+export const LogActionMultiSelect = TypedMultiSelect(EventGroupType, 'log_group', 'log_group_desc_kind', true)
 
 export function PatentSelect(props: {value?: Patent, owner: Owner,
     item: Item, onChange: (p: Patent)=>void}){
