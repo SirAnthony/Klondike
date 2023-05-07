@@ -237,10 +237,10 @@ export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolea
 export function MultiOwnerSelect(props: {value?: Owner[], className?: string,
     title?: string, exclude?: number[], onChange: (owners: Owner[])=>void}){
     const [owner, setOwner] = React.useState(null)
-    const addOwner = ()=>owner && props.onChange(_.uniqBy([].concat(
-        owner, props.value).filter(f=>f?._id&&f.type), f=>f._id))
-    const removeOwner = (_id: string)=>props.onChange(_.uniqBy([].concat(
-        props.value).filter(o=>o && o._id!==_id), f=>f._id))
+    const addOwner = ()=>owner && props.onChange([].concat(
+        owner, props.value).filter(f=>f?._id&&f.type))
+    const removeOwner = (_id: string)=>props.onChange([].concat(
+        props.value).filter(o=>o && o._id!==_id))
     const owners = props.value?.map(o=><RB.Container key={`sel_owner_${o._id}`}
       className='selected-item'>{o.name}<RB.CloseButton onClick={()=>removeOwner(o._id)} />
     </RB.Container>)
