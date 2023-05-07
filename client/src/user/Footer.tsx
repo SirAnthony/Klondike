@@ -30,9 +30,7 @@ function Pane(props: FooterProps & {relation: Owner, buttons: string[], eventKey
 function AddButtons(user: User){
     const buttons = []
     if (UserTypeIn(user, UserType.Master | UserType.GuardFine))
-        buttons.unshift('fines')
-    if (UserTypeIn(user, UserType.Master | UserType.GuardFine))
-        buttons.unshift('flights')
+        buttons.unshift('flights', 'maps', 'fines')
     return buttons
 }
 
