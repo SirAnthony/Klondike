@@ -238,7 +238,7 @@ export function MultiOwnerSelect(props: {value?: Owner[], className?: string,
     title?: string, exclude?: number[], onChange: (owners: Owner[])=>void}){
     const [owner, setOwner] = React.useState(null)
     const addOwner = ()=>owner && props.onChange([].concat(
-        owner, props.value).filter(f=>f?._id&&f.type))
+        owner, props.value).filter(f=>f?._id&&!isNaN(+f?.type)))
     const removeOwner = (_id: string)=>props.onChange([].concat(
         props.value).filter(o=>o && o._id!==_id))
     const owners = props.value?.map(o=><RB.Container key={`sel_owner_${o._id}`}
