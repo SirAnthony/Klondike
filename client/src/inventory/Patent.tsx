@@ -72,8 +72,9 @@ function PatentActions(props: RowProps){
     if (owner.type==InstitutionType.Research)
         return <RB.Button>{L('act_pay')}</RB.Button>
     const is_served = Patent.served(patent, owner)
+    const forwardable = +owner.type===InstitutionType.Corporation
     return <RB.Container>
-      {!is_served && patent.ready  && <RB.Row><RB.Col>
+      {!is_served && forwardable && patent.ready && <RB.Row><RB.Col>
         <RB.Button onClick={onAction('forward', patent)}>
           {L('act_forward_center')}</RB.Button>
       </RB.Col></RB.Row>}

@@ -28,23 +28,23 @@ export function EntityInventory(props: InstitutionProps){
           <RB.Row><RB.Col className='menu-box menu-box-col'>
             <PriceDetails {...param} />
           </RB.Col></RB.Row>
-          {entity.type==InstitutionType.Corporation && <RB.Row>
+          {+entity.type===InstitutionType.Corporation && <RB.Row>
             <RB.Col className='menu-box menu-box-col'>
               <RatingDetails />
             </RB.Col>
           </RB.Row>}
         </RB.Container></RB.Col>
         <RB.Col className='menu-box-view' ><RB.Container>
-          {entity.type==InstitutionType.Corporation && <RB.Row>
+          {+entity.type===InstitutionType.Corporation && <RB.Row>
             <RB.Col className='menu-box'>
               <OrderDetails {...param} fields={['plan']} />
             </RB.Col>
           </RB.Row>}
           <ProposalDetails asBox={true} {...param} />
-          {entity.type==InstitutionType.Research &&
+          {+entity.type===InstitutionType.Research &&
             <PatentDetails {...param} asBox={true} />}
           <ItemDetails {...param} asBox={true} />
-          {entity.type==InstitutionType.Corporation && 
+          {+entity.type!==InstitutionType.Research && 
             <PatentDetails {...param} asBox={true} />}
         </RB.Container></RB.Col>
       </RB.Row>
