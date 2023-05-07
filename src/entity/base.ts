@@ -123,8 +123,8 @@ export function MakeController<TBase extends Identifier>(Base: Constructor<TBase
             if (data instanceof Controller)
                 return data as Controller
             if (data instanceof ObjectId || typeof data == 'string') {
-                if (Cache.has(''+data))
-                    data = Cache.get(''+data)
+                if (Cache.has(asID(data)))
+                    data = Cache.get(asID(data))
                 else {
                     data = await Controller.DB.get(data)
                     Cache.set(asID(data._id), data)

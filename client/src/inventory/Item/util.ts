@@ -2,7 +2,7 @@ import {Item, ItemType, InstitutionType} from '../../common/entity'
 import {Resource, ResourceType} from '../../common/entity'
 
 export const owners_exclude = (type: ItemType)=>{
-    return [InstitutionType.User]
+    return []
     // switch(type){
     //     case ItemType.Resource: return [InstitutionType.User]
     //     case ItemType.Coordinates: return [InstitutionType.User]
