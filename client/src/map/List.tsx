@@ -21,11 +21,10 @@ function PlanetRow(props: {planet: PlanetInfo, onChange?: (entity: PlanetInfo)=>
       <RB.Container>
         <RB.Row>
           <RB.Col><RB.NavLink href={`/map/${planet._id}`}>{planet.name}</RB.NavLink></RB.Col>
-          <RB.Col>{planet.type+' '+L('desc_zones')+`: ${planet.zones?.length|0}`}</RB.Col>
+          <RB.Col>{planet.type}</RB.Col>
           <RB.Col>{planet.system}</RB.Col>
           <DataViewerButtons onEdit={props.onChange && setShowEdit} onShow={setShowData} show={showData} />
         </RB.Row>
-        <RB.Row>{zones}</RB.Row>
         {showData && <RB.Row>
           <RB.Col>
             {planet.data}
