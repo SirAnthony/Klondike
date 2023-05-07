@@ -45,7 +45,7 @@ function CheckFlightStatus(statuses: FlightStatus[]){
 
 uutil.CheckRole(UserType.Captain)
 CheckFlightStatus([FlightStatus.Docked])
-export async function signup(user: UserController, flight: FlightController){
+export async function signup(user: UserController, flight: FlightController, data: Flight){
     const rel = user.relation
     if (!rel?._id || +rel?.type != InstitutionType.Ship)
         throw 'error_no_ship'
@@ -58,6 +58,8 @@ export async function signup(user: UserController, flight: FlightController){
     const ship = await ShipController.get(rel._id)
     if (isType(flight.type, FlightType.Planetary) && ship.credit<=0)
         throw 'error_no_funds'
+    if (data.location)
+        flight.location = data.location
     await Actions.signupFlight(flight, user, ship)
     await LogController.log({
         name: 'flight_signup', info: 'flight_signup',

@@ -15,6 +15,17 @@ type ItemComponentProps = {
     layout: number
 }
 
+export function ItemDesc(props: ItemComponentProps & {withValue: boolean}){
+    const {item} = props
+    const res = item as Resource, pt = item as Patent
+    const el = item.type===ItemType.Patent ?
+          LR(`patent_kind_${pt.kind}`)+'/'+LR(`patent_weigth_${pt.weight}`) :
+        item.type===ItemType.Module ?
+          <ItemModuleBoostsCol item={item} layout={null} /> :
+        item.type===ItemType.Resource ?
+          [<ResourceImg res={res} />, LR(`res_kind_${res.kind}`)] : '-'
+}
+
 export function LocationCol(props: ItemComponentProps & {hide_pos?: boolean}) {
     const {location} = props.item
     if (!location)

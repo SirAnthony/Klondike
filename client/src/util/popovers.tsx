@@ -1,8 +1,8 @@
 import React from 'react'
 import * as RB from 'react-bootstrap'
 import {Item, Patent, Order, OwnerMatch, Module} from '../common/entity'
-import {Owner, Loan, InstitutionType} from '../common/entity'
-import {NumberInput, OwnerSelect} from './inputs'
+import {Owner, Loan, InstitutionType, Location} from '../common/entity'
+import {LocationSelect, NumberInput, OwnerSelect} from './inputs'
 import {OrderSelect, PatentSelect} from './inputs'
 import {ModuleSelect} from '../ship/List'
 import L from '../common/locale'
@@ -109,6 +109,31 @@ export function LoanSelectTrigger(props: LoanSelectProps){
     </RB.OverlayTrigger>
 }
 
+type LocationSelectProps = {
+    desc: string
+    location: Location
+    placement?: any
+    onClick: (location: Location)=>Promise<boolean>
+}
+export function LocationSelectTrigger(props: LocationSelectProps){
+    const {desc} = props
+    const [location, setLocation] = React.useState(props.location)
+    const onClick = async ()=>(await props.onClick(location)) && document.body.click()
+    const check = ()=>location?._id && !isNaN(+location?.pos?.col) && !isNaN(+location?.pos?.row)
+    const btn = <RB.Popover>
+      <RB.PopoverBody>
+        <LocationSelect value={location} onChange={setLocation} />
+        <RB.Row className='menu-input-row'>
+          <RB.Button disabled={!check()} onClick={onClick}>{desc}</RB.Button>
+        </RB.Row>
+      </RB.PopoverBody>
+    </RB.Popover>
+    return <RB.OverlayTrigger placement={props.placement||'top'} trigger={'click'}
+      overlay={btn} rootClose={true}>
+      <RB.Button>{desc}</RB.Button>
+    </RB.OverlayTrigger>
+}
+
 type OwnerValueSelectProps = {
     desc: string
     valDesc: string
@@ -145,5 +170,16 @@ export function OwnerValueSelectTrigger(props: OwnerValueSelectProps){
     return <RB.OverlayTrigger placement={props.placement||'top'} trigger={'click'}
       overlay={btn} rootClose={true}>
       <RB.Button>{desc}</RB.Button>
+    </RB.OverlayTrigger>
+}
+
+export function JSONPopoverOverlay(props: {children: React.ReactElement, data: any}){
+    const {children, data} = props
+    const popover = <RB.Popover>
+      <RB.PopoverBody>{JSON.stringify(data)}</RB.PopoverBody>
+    </RB.Popover>
+    return <RB.OverlayTrigger placement='top' trigger={['hover']} rootClose={true}
+      overlay={popover}>
+      <RB.Container>{children}</RB.Container>
     </RB.OverlayTrigger>
 }

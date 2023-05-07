@@ -8,6 +8,7 @@ import {ErrorMessage} from '../util/errors'
 import * as _ from 'lodash'
 import {DataViewerButtons, EditButtons} from '../util/buttons'
 import * as date from '../common/date'
+import { ItemPopover, ItemPopoverOverlay } from '../inventory/Item/Popover'
 
 type RowDescProps = {
     className?: string
@@ -53,7 +54,11 @@ export function LogRow(props: RowProps){
         <RB.Col sm={1}>{entry.points}</RB.Col>
         <RB.Col>{entry.owner?.name}</RB.Col>
         <RB.Col>{entry.info}</RB.Col>
-        <RB.Col>{JSON.stringify(entry.item)}</RB.Col>
+        <RB.Col>
+          <ItemPopoverOverlay item={entry.item} show={true} target={null}>
+            <span>{entry.item?.name}</span>
+          </ItemPopoverOverlay>
+        </RB.Col>
         <RB.Col>{entry.institution?.name}</RB.Col>
         <RB.Col>{JSON.stringify(entry.order)}</RB.Col>
         <RB.Col>{JSON.stringify(entry.flight)}</RB.Col>

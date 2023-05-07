@@ -15,13 +15,14 @@ import {Pos as MPos} from '../common/map'
 import * as util from '../common/util'
 import * as date from '../common/date'
 import * as mutil from '../common/map'
+import { LocationSelectTrigger } from 'src/util/popovers';
 
 export type FlightRowProps = {
     flight: Flight
     user: User
     editRow?: (params: FlightRowProps)=>React.ReactElement
     actionsClass?: (params: FlightRowProps)=>React.ReactElement
-    onAction?: (action: string, flight: Flight)=>void
+    onAction?: (action: string, flight: Flight, location?: Location)=>Promise<boolean>
     onSubmit?: (f: Flight)=>Promise<boolean>
     onDelete?: ()=>void
     onEdit?: ()=>void 
@@ -47,8 +48,17 @@ function FlightLocationCol(params: FlightRowProps){
         hide_pos={true} layout={null} />
 }
 
-function FlightActions(params: FlightRowProps){
-    const {flight, user, onAction} = params
+function FlightButton(props: FlightRowProps & {type: string}){
+    const {type, flight, onAction} = props
+    const desc = L(`act_flight_${type}`)
+    if (type!=='signup')
+        return <RB.Button onClick={()=>onAction(type, flight)}>{desc}</RB.Button>
+    return <LocationSelectTrigger desc={desc} location={flight.location}
+        onClick={location=>onAction(type, {...flight, location} as Flight)} />
+}
+
+function FlightActions(props: FlightRowProps){
+    const {flight, user} = props
     if (flight.owner && flight.arrival)
         return <RB.Col></RB.Col>
     const sp = s=>s.split(' ')
@@ -79,8 +89,7 @@ function FlightActions(params: FlightRowProps){
         .filter(s=>flight.owner ? owner : s==='signup')
         .filter(s=>!types[flight.type]||types[flight.type].includes(s))
         .filter(s=>user_actions.includes(s))
-        .map(t=><RB.Button onClick={()=>onAction(t, flight)}>
-            {L(`act_flight_${t}`)}</RB.Button>)
+        .map(t=><FlightButton {...props} type={t} />)
     return <RB.Col>
       {btns}
     </RB.Col>
