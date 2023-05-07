@@ -36,7 +36,6 @@ export class CorpApiRouter extends BaseRouter {
         return {list, rating}
     }
 
-    @CheckIDParam()
     @CheckRole(UserType.Corporant)
     async post_patent_forward(ctx: RenderContext){
         const {id, requester} = ctx.aparams

@@ -141,7 +141,9 @@ export class Patent extends MultiOwnedItem {
     get ownership(){ 
         return this.fullOwnership ? PatentOwnership.Full : PatentOwnership.Partial }
     get fullOwnership(){ return this.owners.length < 2 }
-    get shares(){ return 1/(this.owners.length||1) }
+    shares(owner: Owner){ 
+        return this.owners.filter(k=>OwnerMatch(k, owner)).length/(this.owners.length||1)
+    }
     static served(p: Patent, owner: Owner){
         return p.served?.some(o=>OwnerMatch(o, owner)) }
 }
