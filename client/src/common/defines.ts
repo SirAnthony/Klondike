@@ -17,7 +17,7 @@ const defaults = {
             hex_fill: '#488',
             hex_mark: '#b11',
             hex_drop: '#4b4',
-            hex_fog: '#ddd',
+            hex_fog: '#bab',
             planet_border: '#f00',
             planet_fill: '#eee',
         },

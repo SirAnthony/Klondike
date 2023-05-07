@@ -53,7 +53,7 @@ class Hexagon extends React.Component<HexagonProps, {}>{
             drop ? color.hex_drop : fog ? color.hex_fog :
             undefined
         const opacity = props.marked ? 0.8 :
-            props.fill || drop ? 0.6 : 0.5
+            props.fill || drop ? 0.6 : 0.7
         return <Group>
           <RegularPolygon sides={6} radius={radius} x={x} y={y} {...props.hover}
             stroke={color.hex_border} fill={fill} opacity={opacity}

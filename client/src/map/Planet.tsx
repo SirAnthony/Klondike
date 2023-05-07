@@ -2,7 +2,7 @@ import React from 'react';
 import * as RB from 'react-bootstrap'
 import * as F from '../Fetcher'
 import {PlanetInfo, PlanetZone, User, Item, Location,
-    Pos as EPos, Ship, PlanetShip} from '../common/entity';
+    Pos as EPos, Ship, PlanetShip, UserTypeIn, UserType, MultiOwnedItem} from '../common/entity';
 import {Layer, Stage, Circle, Image} from 'react-konva'
 import {HexLayer} from './Hex';
 import {UILayer, UIButtonCallbacks} from './UI'
@@ -56,6 +56,18 @@ function reduce_by_location(p, c: {location: Location}){
     return p
 }
 
+function known_tiles(user: User, item: PlanetInfo, entity: Ship){
+    const known = UserTypeIn(user, UserType.Master) ?
+        new Set(...item.ships.map(s=>(s.known||{})[item._id])) :
+        new Set((entity?.known||{})[item._id]);
+    const poses = new Set([...Object.keys(item.pos.items), ...known])
+    if (UserTypeIn(user, UserType.Master)){
+        item.items.filter(i=>!i.owner && !(i as MultiOwnedItem).owners?.length)
+            .forEach(k=>poses.delete(Pos.getKey(k.location.pos)))
+    }
+    return poses
+}
+
 
 type PlanetState = {
     planet?: PlanetInfo
@@ -97,13 +109,12 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
             items: item.items?.reduce(reduce_by_location, {})||{},
             ships: item.ships?.reduce(reduce_by_location, {})||{},
         }
-        const poses = new Set([...Object.keys(item.pos.items),
-            ...((entity?.known||{})[item._id]||[])])
+        const poses = known_tiles(this.props.user, item, entity)
         item.fog = []
         item.drop = []
         for (let zone of item.zones){
             item.fog = mutil.Coordinates.Figures.circle(zone.center, zone.radius)
-                .map(c=>`${c.col}:${c.row}`).filter(f=>!poses.has(f))
+                .map(c=>Pos.getKey(c)).filter(f=>!poses.has(f))
             if (this.props.ship){
                 item.drop = mutil.Coordinates.Figures.circle(zone.center, zone.radius+2,
                     zone.radius).map(c=>`${c.col}:${c.row}`)
@@ -111,11 +122,13 @@ export class PlanetView extends F.Fetcher<PlanetProps, PlanetState> {
         }
         const pship = this.props.ship
         if (pship){
-            const {pos} = pship.location
-            const arr = item.pos.ships[`${pos.col}:${pos.row}`] =
-                item.pos.ships[`${pos.col}:${pos.row}`]||[] as any
+            const {pos} = pship.location, key = Pos.getKey(pos)
+            const arr = item.pos.ships[key] = item.pos.ships[key]||[] as any
             arr.push(pship as PlanetShip)
         }
+        //const known = !UserTypeIn(this.props.user, UserType.Master) ? null :
+        //    new Set(item.ships.map(s=>s.known[item._id]).flat())
+        //item.unknown = !known ? [] : item.fog.filter(f=>!known.has(f))
         const points = item.ships?.reduce((p, s)=>[...p, ...(s.points||[])], [])
         return {item: data, planet: item, entity, points}
     }

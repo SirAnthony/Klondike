@@ -320,6 +320,7 @@ export type PlanetShip = {
     status?: FlightStatus
     location: Location
     points?: Pos[]
+    known?: {[k: string]: string[]}
 } & Owner
 
 export enum PlanetType { Frost = 'frost', FrostSat = 'frostsat',

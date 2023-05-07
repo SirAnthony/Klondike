@@ -15,7 +15,8 @@ export class FlightController extends MakeController(Flight, 'flights') {}
 export class ShipController extends MakeController(Ship, 'ships'){
     static PlanetShip(ship: Ship): PlanetShip {
         return {_id: asID(ship._id), name: ship.name, type: ship.type,
-            kind: ship.kind, img: ship.img, location: ship.location}
+            kind: ship.kind, img: ship.img, location: ship.location,
+            known: ship.known}
     }
 }
 
