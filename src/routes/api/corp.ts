@@ -51,7 +51,7 @@ export class CorpApiRouter extends BaseRouter {
         patent.served = _.uniqBy(patent.served.concat(owner.asOwner), f=>asID(f._id))
         await item.save()
         // Calcluate points
-        await Rating.patent_points(item, owner, served);
+        await Rating.patent_points(item, owner.asOwner, served);
     }
 
     @CheckAuthenticated()
