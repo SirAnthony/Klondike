@@ -78,6 +78,19 @@ export async function buy_item(src: InstitutionController, item: ItemController)
     })
 }
 
+export async function funds_transfer(src: InstitutionController, dst: InstitutionController, value: number){
+        // Do not provide loan between users
+        if (+src.type!=InstitutionType.User && +dst.type!==InstitutionType.User)
+            await provide_loan(src.asOwner, dst.asOwner, value)
+        src.credit = (src.credit|0) - value
+        dst.credit = (dst.credit|0) + value
+        await src.save()
+        await dst.save()
+        await LogController.log({action: LogAction.FundsTransfer,
+            name: 'funds_transfer', info: `${src.name} -> ${dst.name} ${value}`,
+            owner: src.asOwner, institution: dst.asOwner, data: {value}})
+ }
+
 export async function provide_loan(src: Owner, dst: Owner, value: number){
     const reverse = await LoanController.find({filled: {$ne: true},
         'lender._id': asID(dst._id), 'lender.type': +dst.type,

@@ -329,13 +329,7 @@ export class InventoryApiRouter extends BaseRouter {
         const value = amount|0
         if (OwnerMatch(src, dst) || value<=0 || value>src.credit)
             throw 'field_error_invalid'
-        // Do not provide loan between users
-        if (+stype!=InstitutionType.User && +dtype!==InstitutionType.User)
-            await balance.provide_loan(src.asOwner, dst.asOwner, value)
-        src.credit = (src.credit|0) - value
-        dst.credit = (dst.credit|0) + value
-        await src.save()
-        await dst.save()
+        await balance.funds_transfer(src, dst, value)
         return {credit: src.credit}
     }
 
