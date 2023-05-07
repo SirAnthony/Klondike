@@ -20,6 +20,7 @@ export async function pay_with_resource(resource: ItemController,
     target: {resourceCost: ResourceCost[]}, owner: Owner, info: string){
     const res = (resource as unknown) as Resource
     const {value} = res
+    target.resourceCost.forEach(k=>k.provided |= 0)
     for (let k of target.resourceCost){
         if (!res.value)
             break

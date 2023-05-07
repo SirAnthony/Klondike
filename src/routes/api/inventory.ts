@@ -79,7 +79,6 @@ export class InventoryApiRouter extends BaseRouter {
         const order = await OrderController.get(orderid)
         if (!order)
             throw 'No order for corp'
-        order.resourceCost.forEach(k=>k.provided |= 0)
         if (await balance.pay_with_resource(resource, order, corp.asOwner, 'post_order_pay'))
             await order.save()
         await LogController.log({

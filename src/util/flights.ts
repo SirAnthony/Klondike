@@ -319,7 +319,7 @@ export async function researchItem(item: ItemController, ship: ShipController, k
         res.known = true
         if (!item.owner){
             item.owner = ship.asOwner
-            if (kind===FlightKind.Scietific)
+            if (+kind===FlightKind.Scietific)
                 res.value *= 1.05
         }
         await item.save()

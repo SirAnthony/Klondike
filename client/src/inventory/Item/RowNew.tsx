@@ -154,7 +154,7 @@ export class ItemRowNew extends React.Component<ItemRowNewProps, ItemRowNewState
             className='menu-input-row' key='multi_resource_select' />,
           <MultiOwnerSelect value={served} exclude={this.ownerExclude}
             className='menu-input-row' key='multi_owner_select'
-            onChange={servedChange} />,
+            onChange={servedChange} title={L('patent_desc_transferred')} />,
         ]
     }
     // artifact

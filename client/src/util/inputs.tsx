@@ -235,7 +235,7 @@ export function OwnerSelect(props: {value?: Owner, filter?: (val: Owner)=>Boolea
 }
 
 export function MultiOwnerSelect(props: {value?: Owner[], className?: string,
-    exclude?: number[], onChange: (owners: Owner[])=>void}){
+    title?: string, exclude?: number[], onChange: (owners: Owner[])=>void}){
     const [owner, setOwner] = React.useState(null)
     const addOwner = ()=>owner && props.onChange(_.uniqBy([].concat(
         owner, props.value).filter(f=>f?._id&&f.type), f=>f._id))
@@ -246,7 +246,7 @@ export function MultiOwnerSelect(props: {value?: Owner[], className?: string,
     </RB.Container>)
     return <RB.Row className={props.className}>
       <RB.Col sm={4}>
-        <OwnerSelect value={owner} exclude={props.exclude} onChange={setOwner} />
+        <OwnerSelect title={props.title} value={owner} exclude={props.exclude} onChange={setOwner} />
       </RB.Col>
       <RB.Col sm={2}>
         <RB.Button onClick={addOwner}>{L('act_add')}</RB.Button>

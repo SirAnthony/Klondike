@@ -88,6 +88,7 @@ const aliases = {
     'patent_status_0': 'C',
     'patent_status_1': 'R',
     'patent_status_2': 'S',
+    'patent_desc_transferred': 'Передано в метрополию',
     'artifact_desc_kind': 'Тип артефакта',
     'artifact_kind_0': 'Био-медицинский',
     'artifact_kind_1': 'Инженерный',
