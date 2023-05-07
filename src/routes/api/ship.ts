@@ -36,7 +36,7 @@ export class ShipApiRouer extends BaseRouter {
     async get_flights(ctx: RenderContext){
         const d = new Date()
         const flights = await FlightController.all({$or: [
-            {ts: {$gte: +date.add(d, {'min': -30}), $lt: +date.add(d, {'hour': 2})}},
+            {ts: {$gte: +date.add(d, {'hour': -1}), $lt: +date.add(d, {'hour': 3})}},
             {status: {$ne: FlightStatus.Docked}, 'owner._id': {$exists: true}}
         ]})
         const ships = await ShipController.all({'flight._id': {$exists: true}})
