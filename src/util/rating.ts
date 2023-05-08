@@ -1,6 +1,6 @@
 import {CorpController, LogController, OrderController} from "../entity"
 import {ConfigController, ItemController} from '../entity'
-import {InstitutionType, Owner, LogAction, OwnerMatch, PatentOwnership, ItemType, Resource} from '../../client/src/common/entity'
+import {InstitutionType, Owner, LogAction, OwnerMatch, PatentOwnership, ItemType, Resource, ResourceSpecialityType, ResourceType} from '../../client/src/common/entity'
 import {Patent} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
@@ -59,10 +59,10 @@ async function entityPoints(owner: Owner, cycle: number){
     return events.reduce((p, c)=>p+(c.points|0), 0)    
 }
 
-async function leftoversPoints(owner: Owner){
+async function leftoversPoints(owner: Owner, types: ResourceType[]){
     const items = await ItemController.all({'owner._id': asID(owner._id),
         'owner.type': owner.type, 'type': ItemType.Resource, value: {$ne: 0}})
-    return items.length * 3
+    return items.filter(i=>types.includes((i as unknown as Resource).kind)).length * 3
 }
 
 async function calcCycle(cycle: number){
@@ -95,8 +95,9 @@ async function calcLeftovers(cycle: number){
     for (let corp of list)
     {
         const owner = corp.asOwner, name = `cycle_${cycle}`
-        let points = await leftoversPoints(corp.asOwner)
-        const conf = await ConfigController.get()
+        const profile = Object.keys(corp.resourceValue).filter(
+            c=>corp.resourceValue[+c]===ResourceSpecialityType.Profile).map(f=>+f)
+        let points = await leftoversPoints(corp.asOwner, profile)
         const prev = await LogController.find({action: LogAction.ResourceLeftovers,
             'owner._id': asID(owner._id), name})    
         if (prev && prev.points!=points) {
