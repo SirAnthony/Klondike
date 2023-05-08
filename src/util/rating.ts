@@ -62,12 +62,7 @@ async function entityPoints(owner: Owner, cycle: number){
 async function leftoversPoints(owner: Owner){
     const items = await ItemController.all({'owner._id': asID(owner._id),
         'owner.type': owner.type, 'type': ItemType.Resource, value: {$ne: 0}})
-    return items.reduce((p: number, i)=>{
-        const res = i as unknown as Resource
-        let val = 0
-        // Fourmula
-        return p+val
-    }, 0)
+    return items.length * 3
 }
 
 async function calcCycle(cycle: number){
