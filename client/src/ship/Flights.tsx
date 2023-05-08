@@ -29,14 +29,14 @@ export type FlightRowProps = {
     onCancel?: ()=>void
 }
 
-function FlightRowShip(params: FlightRowProps){
+export function FlightShipCol(params: FlightRowProps){
     const {flight} = params
     if (flight.owner)
         return <RB.NavLink href={`/ship/${flight.owner._id}`}>{flight.owner.name}</RB.NavLink>
     return 
 }
 
-function FlightLocationCol(params: FlightRowProps){
+export function FlightLocationCol(params: FlightRowProps){
     const {flight, user} = params
     if (!flight.owner)
         return <RB.Col>-</RB.Col>
@@ -95,7 +95,7 @@ function FlightActions(props: FlightRowProps){
     </RB.Col>
 }
 
-function FlightTypeCol(props: FlightRowProps){
+export function FlightTypeCol(props: FlightRowProps){
     const {flight, user} = props
     const master = UserTypeIn(user, UserType.Master)
     const allowed = master || flight.owner && 
@@ -105,7 +105,7 @@ function FlightTypeCol(props: FlightRowProps){
     return <RB.Col>{type}</RB.Col>
 }
 
-function FlightStatusCol(props: FlightRowProps){
+export function FlightStatusCol(props: FlightRowProps){
     const {flight, user} = props
     const allowed = OwnerMatch(flight.owner, user.relation) ||
         UserTypeIn(user, UserType.Guard | UserType.Master)
@@ -132,7 +132,7 @@ export function FlightRow(props: FlightRowProps) {
         return <props.editRow {...props} onCancel={()=>setEdit(false)} />
     return <RB.Row className="menu-list-row">
       <RB.Col>{date.timeday(flight.ts, {month: 'numeric'})}</RB.Col>
-      <RB.Col><FlightRowShip {...props} /></RB.Col>
+      <RB.Col><FlightShipCol {...props} /></RB.Col>
       <FlightTypeCol {...props} />
       <FlightLocationCol {...props} />
       <FlightStatusCol {...props} />

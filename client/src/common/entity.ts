@@ -401,15 +401,14 @@ export enum LogAction {
 }
 export enum EventGroupType {Resource, Patent, Trade, Order, Money, Flight}
 export const EventGroups = {
-    [EventGroupType.Resource]: [LogAction.ResourceDepletion, LogAction.ResourceUsed,
-        LogAction.LoanProposeItem],
+    [EventGroupType.Resource]: [LogAction.ResourceDepletion, LogAction.ResourceUsed],
     [EventGroupType.Patent]: [LogAction.PatentPaid, LogAction.PatentForwardFull,
         LogAction.PatentForwardPart, LogAction.PatentForwardLeftovers, LogAction.ResourceUsed],
-    [EventGroupType.Trade]: [LogAction.ItemPutSale, LogAction.ItemRemoveSale, LogAction.ItemPurchase],
+    [EventGroupType.Trade]: [LogAction.ItemPutSale, LogAction.ItemRemoveSale, LogAction.ItemPurchase,
+       LogAction.LoanProposeItem, LogAction.LoanProposeReject],
     [EventGroupType.Order]: [LogAction.OrderPay, LogAction.OrderClosed, LogAction.ResourceUsed],
-    [EventGroupType.Money]: [LogAction.LoanPay, LogAction.LoanProvided, LogAction.LoanProposeItem,
-        LogAction.LoanProposeReject, LogAction.FineCycleClose, LogAction.LoanCycleClose,
-        LogAction.CostCycleClose, LogAction.FundsTransfer],
+    [EventGroupType.Money]: [LogAction.LoanPay, LogAction.LoanProvided,LogAction.FineCycleClose,
+        LogAction.LoanCycleClose, LogAction.CostCycleClose, LogAction.FundsTransfer],
     [EventGroupType.Flight]: [LogAction.FlightAction, LogAction.FlightSignup, LogAction.FlightDelist,
         LogAction.FlightBlock, LogAction.FlightUnblock, LogAction.FlightDeparture,
         LogAction.FlightArrival, LogAction.FlightHelp, LogAction.FlightDock,

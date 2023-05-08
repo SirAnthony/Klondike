@@ -151,7 +151,7 @@ export const FlightKindSelect = TypedSelect(FlightKind, 'flight_kind', 'flight_d
 export const FlightStatusSelect = TypedSelect(FlightStatus, 'flight_status', 'flight_desc_status')
 export const PlanetTypeSelect = TypedSelect(PlanetType, '', 'planet_desc_kind')
 export const ModStatSelect = TypedSelect(ModStat, 'ship_stat', 'ship_stats_title')
-export const LogActionSelect = TypedSelect(LogAction, 'log_action', 'log_desc_action')
+export const LogActionSelect = TypedSelect(LogAction, '', 'item_desc_type')
 
 const UserTypeSelectArr = TypedMultiSelect(UserType, 'user_kind', 'user_desc_kind', true)
 export function UserTypeSelect(props: {value?: UserType, disabled?: boolean, optName?: string,

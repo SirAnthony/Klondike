@@ -1,6 +1,6 @@
 import {CorpController, LogController, OrderController} from "../entity"
 import {ConfigController, ItemController} from '../entity'
-import {InstitutionType, Owner, LogAction, OwnerMatch, PatentOwnership} from '../../client/src/common/entity'
+import {InstitutionType, Owner, LogAction, OwnerMatch, PatentOwnership, ItemType, Resource} from '../../client/src/common/entity'
 import {Patent} from '../../client/src/common/entity'
 import {Order} from '../../client/src/common/entity'
 import * as util from '../../client/src/common/util'
@@ -59,6 +59,17 @@ async function entityPoints(owner: Owner, cycle: number){
     return events.reduce((p, c)=>p+(c.points|0), 0)    
 }
 
+async function leftoversPoints(owner: Owner){
+    const items = await ItemController.all({'owner._id': asID(owner._id),
+        'owner.type': owner.type, 'type': ItemType.Resource, value: {$ne: 0}})
+    return items.reduce((p: number, i)=>{
+        const res = i as unknown as Resource
+        let val = 0
+        // Fourmula
+        return p+val
+    }, 0)
+}
+
 async function calcCycle(cycle: number){
     const list = await CorpController.all({type: InstitutionType.Corporation})
     for (let corp of list)
@@ -84,6 +95,29 @@ async function calcCycle(cycle: number){
     }
 }
 
+async function calcLeftovers(cycle: number){
+    const list = await CorpController.all({type: InstitutionType.Corporation})
+    for (let corp of list)
+    {
+        const owner = corp.asOwner, name = `cycle_${cycle}`
+        let points = await leftoversPoints(corp.asOwner)
+        const conf = await ConfigController.get()
+        const prev = await LogController.find({action: LogAction.ResourceLeftovers,
+            'owner._id': asID(owner._id), name})    
+        if (prev && prev.points!=points) {
+            console.error(`Updating points for ${corp.name} `+
+                `cycle ${cycle}: ${prev.points} -> ${points}`);
+            Object.assign(prev, {points})
+            await prev.save()
+        } else {
+            await LogController.log({action: LogAction.ResourceLeftovers, owner,
+                name, info: `points for cycle ${cycle}`, points})
+        }
+        RatingCache.set(cycle, owner, points)
+    }
+
+}
+
 // Calculate rating each cycle
 Time.addCycleEvent(calcCycle)
 
@@ -92,7 +126,8 @@ export const Rating = {
     get: getForAll,
     getCycle: getForCycle,
     calc: calcCycle,
-    entity: entityPoints
+    entity: entityPoints,
+    leftovers: calcLeftovers,
 }
 
 // Need proper calculations

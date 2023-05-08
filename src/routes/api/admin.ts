@@ -3,7 +3,7 @@ import {UserController, CorpController, PlanetController,
     ConfigController, institutionController, FlightController,
     InstitutionController, OrderController, ItemController, LogController} from '../../entity'
 import {UserType, ItemType, InstitutionType,
-    PlanetType, Planet, Owner, Location} from '../../../client/src/common/entity'
+    PlanetType, Planet, Owner, Location, Order, Flight, Item, ID} from '../../../client/src/common/entity'
 import {RenderContext} from '../../middlewares'
 import {ApiError, Codes} from '../../../client/src/common/errors'
 import {IDMatch, asID, isID} from '../../util/server'
@@ -13,18 +13,23 @@ import * as util from '../../../client/src/common/util'
 import * as uutil from '../../util/user'
 import config from '../../config'
 import {promises as fs} from 'fs'
+import { Rating } from '../../util/rating'
 
 type AllControllers = (InstitutionController | ItemController | OrderController |
-    FlightController | PlanetController) & {
+    FlightController | PlanetController | LogController) & {
     owner?: Owner
+    institution?: Owner
     relation?: Owner
     captain?: Owner
     owners?: Owner[]
     served?: Owner[]
     location?: Location
+    order?: Order
+    flight?: ID | Flight
+    item?: Item
 }
 async function process_data(obj: AllControllers, data){
-    const keys = (new obj.class()).keys
+    const keys = (obj as any).class ? (new (obj as any).class()).keys : []
     const fields = Object.keys(data).filter(f=>!keys.includes(f))
     if (fields.length)
         console.error(`sent incorrect fields: ${JSON.stringify(fields)}`)
@@ -32,6 +37,8 @@ async function process_data(obj: AllControllers, data){
         obj[k] = data[k]
     if (data.owner?._id)
         obj.owner = (await institutionController(+data.owner.type).get(data.owner._id)).asOwner
+    if (data.institution?._id)
+        obj.institution = (await institutionController(+data.owner.type).get(data.owner._id)).asOwner
     if (data.location?._id){
         const planet = await PlanetController.get(data.location._id);
         obj.location = PlanetController.location(planet, data.location.pos)
@@ -56,6 +63,12 @@ async function process_data(obj: AllControllers, data){
         const ctrl = institutionController(+data.captain.type);
         obj.captain = (await ctrl.get(data.captain._id)).asOwner
     }
+    if (data.item?._id)
+        obj.item = (await ItemController.get(data.item._id)).asObject
+    if (data.order?._id)
+        obj.order = (await OrderController.get(data.order._id)).asObject
+    if (data.flight?._id && data.flight?.ts)
+        obj.flight = (await FlightController.get(data.flight._id)).asObject
     return obj
 }
 async function process_img(ctx: RenderContext, obj: InstitutionController){
@@ -252,12 +265,26 @@ export class AdminApiRouter extends BaseRouter {
 
     @CheckRole(UserType.Master)
     async post_log(ctx: RenderContext){
-
+        const {id, data} = ctx.aparams
+        const log = await LogController.get(isID(id) ? id : data)
+        await process_data(log, data)
+        log.ts = log.ts||Time.time
+        log.cycle = log.cycle||Time.cycle
+        await log.save()
     }
     
     @CheckRole(UserType.Master)
     async delete_log(ctx: RenderContext){
-        
-    }   
+        const {id} = ctx.aparams
+        const log = await LogController.get(id)
+        // await log.delete()
+    }
+
+    @CheckRole(UserType.Master)
+    async put_calc_leftovers(ctx: RenderContext){
+        if (Time.cycle<5)
+            return 'Too early'
+        await Rating.leftovers(Time.cycle)
+    }
 
 }

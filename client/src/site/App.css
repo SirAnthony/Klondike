@@ -150,12 +150,25 @@ hr.delimeter {
     border-radius: 10px;
 }
 
-div.menu-container-full, div.container-full {
+div.menu-container-full, div.container-full,
+div.menu-container-table {
     max-width: 100%;
 }
 
 div.menu-container-fit, div.container-fit {
     max-width: fit-content;
+}
+
+div.menu-container-table {
+    display: table;
+}
+
+div.menu-container-table div.row {
+    display: table-row;
+}
+
+div.menu-container-table div.col {
+    display: table-cell;
 }
 
 .menu-box {

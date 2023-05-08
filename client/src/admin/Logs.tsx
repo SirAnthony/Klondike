@@ -1,4 +1,5 @@
 import React from 'react'
+import * as RB from 'react-bootstrap'
 import {EventGroupType, EventGroups, LogEntry, User} from '../common/entity'
 import {List as UList} from '../util/controls'
 import {Delimeter} from '../util/components'
@@ -6,10 +7,11 @@ import {default as L} from './locale'
 import * as util from '../common/util'
 import {LogRow, LogRowDesc, LogRowNew} from '../site/Log'
 import {LogActionMultiSelect} from '../util/inputs'
+import * as date from '../common/date'
 
 
 type ListState = {
-    filter: [keyof EventGroupType]
+    filter: EventGroupType[]
 }
 type ListProps = {
     user: User
@@ -48,17 +50,22 @@ class List extends UList<ListProps, ListState> {
         const {filter} = this.state
         return !filter || filter.some(g=>EventGroups[g].includes(k.action))
     }
-    body(){
+    get table(){
         const {list, filter} = this.state
         const rows = list.sort(this.sort.bind(this)).filter(this.filter.bind(this))
-            .map(l=><LogRow entry={l} className='menu-list-row'
+            .map(l=><LogRow entry={l} className='menu-list-row' groups={filter}
             onSubmit={o=>this.onSubmit(o)} onDelete={o=>this.deleteItem(o)}
             onReload={()=>this.fetch()} key={`order_list_${l._id}`} {...this.props} />)
+        return <RB.Container className='menu-container-table'>
+          <LogRowDesc className='menu-list-title' groups={filter} /> 
+          {rows}
+        </RB.Container>
+    }
+    body(){
+        const {filter} = this.state
         return [<LogRowNew onSubmit={o=>this.onSubmit(o)} add={true} />,
           <Delimeter />,
           <LogActionMultiSelect value={filter} onChange={filter=>this.setState({filter})} />,
-          <LogRowDesc className='menu-list-title' />, <Delimeter />, 
-          ...rows]
-        return []
+          this.table]
     }
 }
