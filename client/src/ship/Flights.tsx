@@ -255,7 +255,7 @@ export class List extends BaseList<FlightListProps, FlightListState> {
     retriveForm(list: Flight[]){
         const {user} = this.props
         const drone = list.find(f=>f.type===FlightType.Drone &&
-            OwnerMatch(f.owner, user.relation))
+            OwnerMatch(f.owner, user?.relation))
         if (drone){
             this.updateForm({...drone})
             this.setState({viewHidden: true, points: [...(drone.points||[])]})
