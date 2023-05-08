@@ -13,13 +13,45 @@ import {Navigator as AdminNavigator, QRCodeNavigator} from '../admin'
 import {Navigator as UserProfileNavigator} from '../user/Profile'
 import {ListNavigator as FinesNavigator } from '../user/Fines';
 import {Confirmator} from '../inventory';
+import { Modal } from '../inventory/modal';
 import L from './locale'
 import './App.css';
+import { ConfigFetcher } from './Config';
 
 type ListState = {}
 type ListProps = {user: entity.User}
 class ListNavigator extends Menu<ListProps, ListState> {
     L = L
+}
+
+
+type EndGameProps = {}
+type EndGameState = {
+    endgame: boolean
+    hidden: boolean
+}
+class EndGamePopup extends ConfigFetcher<EndGameProps, EndGameState> {
+    L = L
+    fetchState(data: any){ 
+      // Missing fields
+      data.time = data.time||{}
+      data.time.ship = data.time.ship||{}
+      return {item: data, endgame: data.endgame}
+    }
+    render(){
+      const {endgame, hidden} = this.state
+      if (!endgame)
+          return null
+      return <Modal show={endgame && !hidden} title={L('title_endgame')}
+          onAgree={()=>this.setState({hidden: true})} >
+          <RB.Container>
+            <RB.Row className='endgame-desc'><span>{L('endgame_desc')}</span></RB.Row>
+            <RB.Row className='endgame-desc'><span>{L('endgame_desc2')}</span></RB.Row>
+            <RB.Row className='endgame-comment'><span>{L('endgame_comment')}</span></RB.Row>
+          </RB.Container>
+      </Modal>
+
+    }
 }
 
 function App() {
@@ -30,6 +62,7 @@ function App() {
   <RR.BrowserRouter>
     <RB.Container className="app-head">
       <UserBar onUserUpdate={onUserUpdate} />
+      <EndGamePopup />
     </RB.Container>
     <RR.Routes>
       <RR.Route path='/' element={<ListNavigator user={user} />} />

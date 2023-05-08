@@ -18,6 +18,7 @@ load(mod, {
     'act_save': 'Сохранить',
     'res_create': 'Создать ресурс',
     'res_show': 'Настройки базовых ресурсы',
+    'endgame': 'Конец игры',
     'server_time': 'Текущее время',
     'server_cycle': 'Текущий цикл',
     'server_cycle_length': 'Длина цикла в часах',

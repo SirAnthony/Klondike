@@ -10,6 +10,10 @@ load(mod, {
     'interface_corps': 'Список корпораций',
     'interface_map': 'Космическая карта',
     'interface_planets': 'Список планет',
+    'title_endgame': 'Игра закончилась',
+    'endgame_desc': 'Спасибо Вам за игру',
+    'endgame_desc2': 'Вы клаcсные и красивые',
+    'endgame_comment': 'Если вы все еще не готовы и хотите выиграть корову, то нажмите продтвердить',
 })
 
 export function LR(str: string, ...args): string {

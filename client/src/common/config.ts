@@ -11,6 +11,7 @@ export default Object.assign({
 }, secrets)
 
 export type Config = {
+    endgame: boolean
     time: {market: number, ship: {speed: number, research: number}},
     points: {
         patent: {

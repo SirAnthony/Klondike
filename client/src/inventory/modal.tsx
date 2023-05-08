@@ -10,7 +10,7 @@ type ModalProps = {
     show?: boolean
     err?: ApiError
     onAgree: ()=>void
-    onReject: ()=>void
+    onReject?: ()=>void
 }
 export function Modal(props: ModalProps){
     const {title, children, show, err, onAgree, onReject} = props
@@ -23,7 +23,7 @@ export function Modal(props: ModalProps){
         {children}
       </RB.ModalBody>
       <RB.ModalFooter>
-        <RB.Button onClick={onReject}>{L('act_disagree')}</RB.Button>
+        {onReject && <RB.Button onClick={onReject}>{L('act_disagree')}</RB.Button>}
         <RB.Button disabled={!!err} onClick={onAgree}>{L('act_agree')}</RB.Button>
       </RB.ModalFooter>
     </RB.Modal>

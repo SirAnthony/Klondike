@@ -521,3 +521,13 @@ div.form-floating>label {
     height: 11px;
     width: 11px;
 }
+
+.endgame-desc {
+    font-size: 24pt;
+    text-align: center;
+}
+
+.endgame-comment {
+    font-size: 10pt;
+    text-align: center;
+}

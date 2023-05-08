@@ -169,6 +169,14 @@ function GamePaceChange(props: {conf: Config, onChange: (c: Config)=>void}){
           placeholder={L('time.ship.research')}
           onChange={propChange('time.ship', 'research')} />
       </RB.Col>
+      <RB.Col>
+        <NumberInput value={conf.endgame ? 1 : 0}
+          placeholder={L('endgame')} onChange={val=>{
+            const obj = Object.assign({}, conf)
+            obj.endgame = !!val
+            onChange(obj)
+          }} />
+      </RB.Col>
     </RB.Row>
 }
 
@@ -186,7 +194,7 @@ class ConfigControl extends ConfigFetcher<ConfigControlProps, ConfigControlState
         const {item, err} = this.state
         if (!item)
             return <span>Not found</span>
-        const setConf = conf=>this.setState({conf})
+        const setConf = conf=>this.setState({item: conf})
         return <RB.Container>
           {err && <RB.Row><RB.Col><ErrorMessage field={err} /></RB.Col></RB.Row>}
           <RB.Row className='menu-input-row'>
