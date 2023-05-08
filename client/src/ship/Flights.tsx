@@ -3,7 +3,7 @@ import * as RB from 'react-bootstrap'
 import {
     Item, Flight, User, UserType, FlightStatus, Location,
     UserTypeIn, OwnerMatch, FlightType, Planet, InstitutionType,
-    Pos, PlanetShip, ShipClass,
+    Pos, PlanetShip, ShipClass, Owner,
 } from '../common/entity'
 import {List as UList} from '../util/controls'
 import {LocationCol} from '../inventory/Item/components';
@@ -159,7 +159,7 @@ export class BaseList<P, S> extends UList<FlightListProps & P, FlightListState &
           <RB.Col>{LR('item_desc_target')}</RB.Col>
           <RB.Col>{LR('flight_desc_status')}</RB.Col>
           <RB.Col></RB.Col>
-        </RB.Row>, ...rows, map && this.rowNew, map]
+        </RB.Row>, ...rows, map ? this.rowNew : null, map]
     }
 }
 
@@ -303,13 +303,13 @@ export class List extends BaseList<FlightListProps, FlightListState> {
             this.updateForm({points})
     }
     get mapView(){
-        const {user} = this.props
+        const {user} = this?.props
         const {newForm} = this.state
         const id = newForm?.location?._id
         if (!id || this.state.viewHidden)
             return <></>
         // XXX need img
-        const ship = {...user.relation, location: newForm.location,
+        const ship = {...(user?.relation||{} as Owner), location: newForm.location,
             _id: null, kind: ShipClass.D, img: '1'}
         const points = newForm.points||[]
         return <PlanetView user={user} id={id} markedPoints={points}
