@@ -154,6 +154,8 @@ function GamePaceChange(props: {conf: Config, onChange: (c: Config)=>void}){
         cfg[name] = val
         onChange(obj)
     }
+    const leftovers = async ()=>
+        await util.wget('/api/admin/calc_leftovers', {method: 'PUT'})
     return <RB.Row className='menu-list-row'>
       <RB.Col>
         <NumberInput value={conf.time?.market} placeholder={L('time.market')}
@@ -176,6 +178,9 @@ function GamePaceChange(props: {conf: Config, onChange: (c: Config)=>void}){
             obj.endgame = !!val
             onChange(obj)
           }} />
+      </RB.Col>
+      <RB.Col>
+        <RB.Button onClick={leftovers}>{L('act_leftovers')}</RB.Button>
       </RB.Col>
     </RB.Row>
 }

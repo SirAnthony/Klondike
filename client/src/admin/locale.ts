@@ -38,6 +38,7 @@ load(mod, {
     'res_spec_value_halfclosed': '50% <> 100%',
     'config_setup_prices': 'Настройки цен',
     'act_add_cycle': 'Добавить цикл',
+    'act_leftovers': 'Рассчитать остатки',
 })
 
 export function LR(str: string, ...args): string {

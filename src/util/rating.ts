@@ -82,7 +82,7 @@ async function calcCycle(cycle: number){
                 `cycle ${cycle}: ${prev.points} -> ${points}`);
             Object.assign(prev, {points})
             await prev.save()
-        } else {
+        } else if (!prev) {
             await LogController.log({action: LogAction.CycleRating, owner,
                 name, info: `points for cycle ${cycle}`, points})
         }
@@ -105,7 +105,7 @@ async function calcLeftovers(cycle: number){
                 `cycle ${cycle}: ${prev.points} -> ${points}`);
             Object.assign(prev, {points})
             await prev.save()
-        } else {
+        } else if (!prev) {
             await LogController.log({action: LogAction.ResourceLeftovers, owner,
                 name, info: `points for cycle ${cycle}`, points})
         }
